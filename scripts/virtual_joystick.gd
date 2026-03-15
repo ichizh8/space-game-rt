@@ -16,6 +16,18 @@ func _get_center() -> Vector2:
 	return size / 2.0
 
 
+func _input(event: InputEvent) -> void:
+	# Catch touch releases anywhere on screen — gui_input only fires inside bounds
+	if event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		if not touch.pressed and touch.index == _touch_index:
+			_reset()
+	elif event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if not mb.pressed and _touch_index == 0:
+			_reset()
+
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		_knob_offset = Vector2.ZERO
