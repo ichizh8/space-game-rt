@@ -7,6 +7,7 @@ var quest_id: String = ""
 var _panel: Panel
 var _tab_container: TabContainer
 var _quest_tab: Control
+var _services_tab: ScrollContainer
 var _buildings_tab: Control
 var _storage_tab: Control
 
@@ -304,14 +305,19 @@ func _on_refuel_pressed() -> void:
 
 
 func _build_services_tab() -> void:
-	var scroll := ScrollContainer.new()
-	scroll.name = "Services"
-	_tab_container.add_child(scroll)
+	_services_tab = ScrollContainer.new()
+	_services_tab.name = "Services"
+	_tab_container.add_child(_services_tab)
+	_refresh_services()
+
+
+func _refresh_services() -> void:
+	_clear_tab(_services_tab)
 	var vbox := VBoxContainer.new()
 	vbox.custom_minimum_size.x = 320
-	scroll.add_child(vbox)
+	_services_tab.add_child(vbox)
 
-	# Repair
+	# Repair & Fuel
 	var repair_title := Label.new()
 	repair_title.text = "REPAIR & FUEL"
 	repair_title.add_theme_font_size_override("font_size", 14)
@@ -368,7 +374,7 @@ func _build_services_tab() -> void:
 		row.add_child(sell_btn)
 		vbox.add_child(row)
 
-	# Ship upgrades section
+	# Ship upgrades
 	var sep2 := HSeparator.new()
 	vbox.add_child(sep2)
 	var upgrade_title := Label.new()
@@ -377,88 +383,77 @@ func _build_services_tab() -> void:
 	upgrade_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 	vbox.add_child(upgrade_title)
 
-	# Upgrade definitions: [name, state_var, costs, bonus_var, bonus_amounts, bonus_label_prefix]
-	var upgrades := [
-		{
-			"name": "Weapons",
-			"level_getter": func(): return GameState.weapon_level,
-			"costs": [80, 200, 500],
-			"labels": ["+5 dmg", "+5 dmg", "+10 dmg"],
-			"apply": func(tier: int): GameState.player_damage_bonus += [5.0, 5.0, 10.0][tier],
-			"level_setter": func(): GameState.weapon_level += 1
-		},
-		{
-			"name": "Engines",
-			"level_getter": func(): return GameState.speed_level,
-			"costs": [60, 150, 400],
-			"labels": ["+20 spd", "+20 spd", "+40 spd"],
-			"apply": func(tier: int): GameState.player_speed_bonus += [20.0, 20.0, 40.0][tier],
-			"level_setter": func(): GameState.speed_level += 1
-		},
-		{
-			"name": "Hull Plating",
-			"level_getter": func(): return GameState.shield_level,
-			"costs": [100, 250, 600],
-			"labels": ["+25 max hull", "+25 max hull", "+50 max hull"],
-			"apply": func(tier: int):
-				var bonus := [25.0, 25.0, 50.0][tier]
-				GameState.max_hull += bonus
-				GameState.hull = min(GameState.hull + bonus, GameState.max_hull)
-				GameState.hull_changed.emit(GameState.hull),
-			"level_setter": func(): GameState.shield_level += 1
-		}
-	]
+	_add_upgrade_row(vbox, "Weapons",     0, GameState.weapon_level, [80, 200, 500], ["+5 dmg", "+5 dmg", "+10 dmg"])
+	_add_upgrade_row(vbox, "Engines",     1, GameState.speed_level,  [60, 150, 400], ["+20 spd", "+20 spd", "+40 spd"])
+	_add_upgrade_row(vbox, "Hull Plating",2, GameState.shield_level, [100, 250, 600],["+25 max hp", "+25 max hp", "+50 max hp"])
 
-	for upg in upgrades:
-		var level: int = upg["level_getter"].call()
-		var upg_row := HBoxContainer.new()
-		upg_row.custom_minimum_size.y = 40
-		vbox.add_child(upg_row)
 
-		var upg_name_lbl := Label.new()
-		var level_str := "MAX" if level >= 3 else ("Lv" + str(level))
-		upg_name_lbl.text = upg["name"] + " [" + level_str + "]"
-		upg_name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		upg_name_lbl.add_theme_font_size_override("font_size", 13)
-		upg_row.add_child(upg_name_lbl)
+func _add_upgrade_row(vbox: VBoxContainer, name: String, kind: int, level: int,
+		costs: Array, labels: Array) -> void:
+	var row := HBoxContainer.new()
+	row.custom_minimum_size.y = 40
+	vbox.add_child(row)
 
-		if level < 3:
-			var cost := upg["costs"][level]
-			var bonus_lbl := upg["labels"][level]
-			var upg_btn := Button.new()
-			upg_btn.text = bonus_lbl + " (" + str(cost) + " cr)"
-			upg_btn.custom_minimum_size = Vector2(140, 36)
-			upg_btn.add_theme_font_size_override("font_size", 12)
-			upg_btn.disabled = GameState.credits < cost
-			var cap_level := level  # capture for lambda
-			upg_btn.pressed.connect(func():
-				var cur_level: int = upg["level_getter"].call()
-				if cur_level >= 3:
-					return
-				var upg_cost: int = upg["costs"][cur_level]
-				if GameState.credits >= upg_cost:
-					GameState.credits -= upg_cost
-					GameState.credits_changed.emit(GameState.credits)
-					upg["apply"].call(cur_level)
-					upg["level_setter"].call()
-					SaveManager.save_game()
-					_build_services_tab()
-					_tab_container.current_tab = 1
-			)
-			upg_row.add_child(upg_btn)
-		else:
-			var max_lbl := Label.new()
-			max_lbl.text = "MAXED"
-			max_lbl.add_theme_color_override("font_color", Color.GOLD)
-			max_lbl.add_theme_font_size_override("font_size", 13)
-			upg_row.add_child(max_lbl)
+	var name_lbl := Label.new()
+	var level_str := "MAX" if level >= 3 else ("Lv" + str(level))
+	name_lbl.text = name + " [" + level_str + "]"
+	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_lbl.add_theme_font_size_override("font_size", 13)
+	row.add_child(name_lbl)
+
+	if level < 3:
+		var btn := Button.new()
+		btn.text = labels[level] + " (" + str(costs[level]) + " cr)"
+		btn.custom_minimum_size = Vector2(140, 36)
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.disabled = GameState.credits < costs[level]
+		btn.pressed.connect(_on_upgrade_pressed.bind(kind))
+		row.add_child(btn)
+	else:
+		var max_lbl := Label.new()
+		max_lbl.text = "MAXED"
+		max_lbl.add_theme_color_override("font_color", Color.GOLD)
+		max_lbl.add_theme_font_size_override("font_size", 13)
+		row.add_child(max_lbl)
+
+
+func _on_upgrade_pressed(kind: int) -> void:
+	var costs_w := [80, 200, 500]
+	var costs_e := [60, 150, 400]
+	var costs_s := [100, 250, 600]
+	match kind:
+		0: # Weapons
+			var lvl := GameState.weapon_level
+			if lvl >= 3 or GameState.credits < costs_w[lvl]: return
+			GameState.credits -= costs_w[lvl]
+			GameState.credits_changed.emit(GameState.credits)
+			GameState.player_damage_bonus += [5.0, 5.0, 10.0][lvl]
+			GameState.weapon_level += 1
+		1: # Engines
+			var lvl := GameState.speed_level
+			if lvl >= 3 or GameState.credits < costs_e[lvl]: return
+			GameState.credits -= costs_e[lvl]
+			GameState.credits_changed.emit(GameState.credits)
+			GameState.player_speed_bonus += [20.0, 20.0, 40.0][lvl]
+			GameState.speed_level += 1
+		2: # Hull Plating
+			var lvl := GameState.shield_level
+			if lvl >= 3 or GameState.credits < costs_s[lvl]: return
+			GameState.credits -= costs_s[lvl]
+			GameState.credits_changed.emit(GameState.credits)
+			var bonus: float = ([25.0, 25.0, 50.0] as Array)[lvl]
+			GameState.max_hull += bonus
+			GameState.hull = min(GameState.hull + bonus, GameState.max_hull)
+			GameState.hull_changed.emit(GameState.hull)
+			GameState.shield_level += 1
+	SaveManager.save_game()
+	_refresh_services()
 
 
 func _on_service_repair() -> void:
 	if GameState.remove_resource("scrap", 15):
 		GameState.heal(50.0)
-		_build_services_tab()
-		_tab_container.current_tab = 1
+		_refresh_services()
 
 
 func _on_service_refuel() -> void:
@@ -466,8 +461,7 @@ func _on_service_refuel() -> void:
 		GameState.credits -= 30
 		GameState.credits_changed.emit(GameState.credits)
 		GameState.add_fuel(50.0)
-		_build_services_tab()
-		_tab_container.current_tab = 1
+		_refresh_services()
 
 
 func _on_sell_resource(res: String, price_each: int) -> void:
@@ -476,8 +470,7 @@ func _on_sell_resource(res: String, price_each: int) -> void:
 		GameState.resources[res] = 0
 		GameState.add_credits(amt * price_each)
 		GameState.resources_changed.emit()
-		_build_services_tab()
-		_tab_container.current_tab = 1
+		_refresh_services()
 
 func _build_storage_tab() -> void:
 	_storage_tab = ScrollContainer.new()
