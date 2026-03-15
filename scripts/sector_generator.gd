@@ -10,7 +10,7 @@ const MIN_ENEMIES := 2
 const MAX_ENEMIES := 3
 const MIN_ARTIFACTS := 1
 const MAX_ARTIFACTS := 2
-const CHECK_INTERVAL := 1.0
+const CHECK_INTERVAL := 0.5
 const MIN_STARS := 1
 const MAX_STARS := 2
 const MIN_STATIONS := 1
@@ -195,25 +195,25 @@ func _manage_objects() -> void:
 
 	if asteroid_count < MIN_ASTEROIDS:
 		for i in range(MIN_ASTEROIDS - asteroid_count):
-			_spawn_asteroid(spawn_center + _random_offset(SPAWN_RADIUS))
+			_spawn_asteroid(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 200.0))
 
 	if planet_count < MIN_PLANETS:
 		for i in range(MIN_PLANETS - planet_count):
-			_spawn_planet(spawn_center + _random_offset(SPAWN_RADIUS))
+			_spawn_planet(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 400.0))
 
 	if enemy_count < MIN_ENEMIES:
 		for i in range(MIN_ENEMIES - enemy_count):
-			_spawn_enemy(spawn_center + _random_offset(SPAWN_RADIUS))
+			_spawn_enemy(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 320.0))
 
 	if artifact_count < MIN_ARTIFACTS:
-		_spawn_artifact(spawn_center + _random_offset(SPAWN_RADIUS))
+		_spawn_artifact(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 250.0))
 
 	if star_count < MIN_STARS:
 		for i in range(MIN_STARS - star_count):
-			_spawn_star(spawn_center + _random_offset(SPAWN_RADIUS * 0.7))
+			_spawn_star(_safe_spawn_pos(spawn_center, SPAWN_RADIUS * 0.9, 550.0))
 
 	if station_count < MIN_STATIONS:
-		_spawn_station(spawn_center + _random_offset(SPAWN_RADIUS * 0.5))
+		_spawn_station(_safe_spawn_pos(spawn_center, SPAWN_RADIUS * 0.5, 350.0))
 
 
 func _spawn_asteroid(pos: Vector2) -> void:
@@ -342,8 +342,20 @@ func _on_artifact_collected(data: Dictionary) -> void:
 
 func _random_offset(radius: float) -> Vector2:
 	var angle := randf() * TAU
-	var dist := randf_range(radius * 0.3, radius)
+	var dist := randf_range(radius * 0.5, radius)
 	return Vector2(cos(angle), sin(angle)) * dist
+
+
+func _safe_spawn_pos(center: Vector2, radius: float, min_player_dist: float = 350.0) -> Vector2:
+	var player := _get_player()
+	var player_pos := player.global_position if is_instance_valid(player) else Vector2.ZERO
+	for _i in range(12):  # up to 12 attempts to find a safe spot
+		var pos := center + _random_offset(radius)
+		if pos.distance_to(player_pos) >= min_player_dist:
+			return pos
+	# Fallback: spawn directly behind the player's movement direction
+	var angle := randf() * TAU
+	return player_pos + Vector2(cos(angle), sin(angle)) * (min_player_dist + randf_range(50.0, 150.0))
 
 
 func _spawn_star(pos: Vector2) -> void:
