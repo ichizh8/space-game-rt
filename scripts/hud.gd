@@ -3,8 +3,7 @@ extends CanvasLayer
 var _joystick: Control
 var _fire_button: Control
 var _fire_pressed := false
-var _items_button: Button = null
-var _items_panel: CanvasLayer = null
+
 
 # Action popup
 var _action_button: Button
@@ -34,7 +33,7 @@ func _build_ui() -> void:
 	top_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	top_bar.offset_bottom = 80
 	top_bar.offset_left = 94   # clear COCKPIT button on left
-	top_bar.offset_right = -100  # clear ITEMS button on right
+	top_bar.offset_right = -10
 	top_bar.offset_top = 6
 	add_child(top_bar)
 
@@ -129,27 +128,6 @@ func _build_ui() -> void:
 	_fire_button = fire_btn
 	add_child(_fire_button)
 
-	# Items/inventory button (top-right corner)
-	var items_btn := Button.new()
-	items_btn.text = "ITEMS 0"
-	items_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	items_btn.offset_left = -92
-	items_btn.offset_right = -6
-	items_btn.offset_top = 6
-	items_btn.offset_bottom = 34
-	items_btn.add_theme_font_size_override("font_size", 12)
-	var items_style := StyleBoxFlat.new()
-	items_style.bg_color = Color(0.05, 0.15, 0.35, 0.88)
-	items_style.corner_radius_top_left = 4
-	items_style.corner_radius_top_right = 4
-	items_style.corner_radius_bottom_left = 4
-	items_style.corner_radius_bottom_right = 4
-	items_btn.add_theme_stylebox_override("normal", items_style)
-	items_btn.add_theme_stylebox_override("pressed", items_style)
-	items_btn.add_theme_color_override("font_color", Color.CYAN)
-	items_btn.pressed.connect(_on_items_pressed)
-	add_child(items_btn)
-	_items_button = items_btn
 
 	# Cockpit button (top-left)
 	var cockpit_btn := Button.new()
@@ -219,7 +197,6 @@ func _process(delta: float) -> void:
 
 
 func get_joystick_direction() -> Vector2:
-	_update_items_button()
 	if is_instance_valid(_joystick) and _joystick.has_method("get_direction"):
 		return _joystick.get_direction()
 	return Vector2.ZERO
@@ -354,12 +331,6 @@ func _on_fire_button_draw() -> void:
 	_fire_button.draw_line(center + Vector2(-10, 0), center + Vector2(10, 0), Color.WHITE, 2.0)
 	_fire_button.draw_line(center + Vector2(0, -10), center + Vector2(0, 10), Color.WHITE, 2.0)
 
-func _update_items_button() -> void:
-	if is_instance_valid(_items_button):
-		var count := GameState.artifacts_collected.size()
-		_items_button.text = "ITEMS %d" % count
-
-
 func _on_cockpit_pressed() -> void:
 	var cockpit_scene: PackedScene = load("res://scenes/cockpit.tscn")
 	var cockpit: Node = cockpit_scene.instantiate()
@@ -371,79 +342,4 @@ func _add_cockpit(cockpit: Node) -> void:
 	get_tree().current_scene.add_child(cockpit)
 
 
-func _on_items_pressed() -> void:
-	if is_instance_valid(_items_panel):
-		_items_panel.queue_free()
-		_items_panel = null
-		return
-	_show_items_panel()
 
-
-func _show_items_panel() -> void:
-	var panel_layer := CanvasLayer.new()
-	panel_layer.layer = 10
-	_items_panel = panel_layer
-
-	var bg := ColorRect.new()
-	bg.color = Color(0, 0, 0, 0.7)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	panel_layer.add_child(bg)
-
-	var panel := PanelContainer.new()
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.offset_left = -160
-	panel.offset_right = 160
-	panel.offset_top = -220
-	panel.offset_bottom = 220
-	panel_layer.add_child(panel)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-	panel.add_child(vbox)
-
-	var title := Label.new()
-	title.text = "COLLECTED ARTIFACTS"
-	title.add_theme_font_size_override("font_size", 15)
-	title.add_theme_color_override("font_color", Color.GOLD)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(title)
-
-	var sep := HSeparator.new()
-	vbox.add_child(sep)
-
-	if GameState.artifacts_collected.is_empty():
-		var none_lbl := Label.new()
-		none_lbl.text = "No artifacts found yet.\nExplore to find them!"
-		none_lbl.add_theme_font_size_override("font_size", 13)
-		none_lbl.add_theme_color_override("font_color", Color.GRAY)
-		none_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		vbox.add_child(none_lbl)
-	else:
-		for art_id in GameState.artifacts_collected:
-			var data := WorldData.get_artifact_by_id(art_id)
-			if data.is_empty():
-				continue
-			var row := VBoxContainer.new()
-			var name_lbl := Label.new()
-			name_lbl.text = "★ " + data.get("name", art_id)
-			name_lbl.add_theme_font_size_override("font_size", 13)
-			name_lbl.add_theme_color_override("font_color", Color.YELLOW)
-			row.add_child(name_lbl)
-			var desc_lbl := Label.new()
-			desc_lbl.text = data.get("description", "")
-			desc_lbl.add_theme_font_size_override("font_size", 11)
-			desc_lbl.add_theme_color_override("font_color", Color.LIGHT_GRAY)
-			desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			row.add_child(desc_lbl)
-			vbox.add_child(row)
-
-	var close_btn := Button.new()
-	close_btn.text = "CLOSE"
-	close_btn.custom_minimum_size.y = 40
-	close_btn.pressed.connect(func():
-		if is_instance_valid(_items_panel):
-			_items_panel.queue_free()
-			_items_panel = null)
-	vbox.add_child(close_btn)
-
-	add_child(panel_layer)

@@ -5,6 +5,7 @@ var _captain_tab: ScrollContainer
 var _bridge_tab: ScrollContainer
 var _crafting_tab: ScrollContainer
 var _map_tab: ScrollContainer
+var _inventory_tab: ScrollContainer
 
 
 class MapControl extends Control:
@@ -146,6 +147,7 @@ func _build_ui() -> void:
 	_build_bridge_tab()
 	_build_captain_tab()
 	_build_crafting_tab()
+	_build_inventory_tab()
 	_build_map_tab()
 
 
@@ -416,6 +418,76 @@ func _refresh_crafting() -> void:
 		craft_btn.disabled = not can_craft
 		craft_btn.pressed.connect(_on_craft.bind(recipe["kind"], recipe["cost"], recipe["value"]))
 		inner.add_child(craft_btn)
+
+
+func _build_inventory_tab() -> void:
+	_inventory_tab = ScrollContainer.new()
+	_inventory_tab.name = "Inventory"
+	_tab_container.add_child(_inventory_tab)
+	_refresh_inventory()
+
+
+func _refresh_inventory() -> void:
+	for c in _inventory_tab.get_children():
+		c.queue_free()
+	var vbox := VBoxContainer.new()
+	vbox.custom_minimum_size.x = 330
+	vbox.add_theme_constant_override("separation", 8)
+	_inventory_tab.add_child(vbox)
+
+	var header := _make_section_label("COLLECTED ARTIFACTS  (%d)" % GameState.artifacts_collected.size())
+	vbox.add_child(header)
+
+	if GameState.artifacts_collected.is_empty():
+		var none_lbl := Label.new()
+		none_lbl.text = "No artifacts found yet.\nExplore the sector to discover them."
+		none_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		none_lbl.add_theme_font_size_override("font_size", 13)
+		none_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
+		vbox.add_child(none_lbl)
+	else:
+		for art_id in GameState.artifacts_collected:
+			var data := WorldData.get_artifact_by_id(art_id)
+			if data.is_empty():
+				continue
+			var card := PanelContainer.new()
+			var cstyle := StyleBoxFlat.new()
+			cstyle.bg_color = Color(0.08, 0.1, 0.16, 0.9)
+			cstyle.set_border_width_all(1)
+			cstyle.border_color = Color(0.6, 0.5, 0.1, 0.6)
+			cstyle.content_margin_left = 10
+			cstyle.content_margin_right = 10
+			cstyle.content_margin_top = 8
+			cstyle.content_margin_bottom = 8
+			card.add_theme_stylebox_override("panel", cstyle)
+			vbox.add_child(card)
+
+			var inner := VBoxContainer.new()
+			card.add_child(inner)
+
+			var name_lbl := Label.new()
+			name_lbl.text = "★  " + data.get("name", art_id)
+			name_lbl.add_theme_font_size_override("font_size", 14)
+			name_lbl.add_theme_color_override("font_color", Color.GOLD)
+			inner.add_child(name_lbl)
+
+			var desc_lbl := Label.new()
+			desc_lbl.text = data.get("description", "")
+			desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			desc_lbl.add_theme_font_size_override("font_size", 12)
+			desc_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.8))
+			inner.add_child(desc_lbl)
+
+			var bonus: Dictionary = data.get("bonus", {})
+			if not bonus.is_empty():
+				var bonus_parts: Array[String] = []
+				for key in bonus:
+					bonus_parts.append(key.replace("player_", "").replace("_bonus", "").capitalize() + " +" + str(bonus[key]))
+				var bonus_lbl := Label.new()
+				bonus_lbl.text = "  ".join(bonus_parts)
+				bonus_lbl.add_theme_font_size_override("font_size", 11)
+				bonus_lbl.add_theme_color_override("font_color", Color(0.4, 0.9, 0.5))
+				inner.add_child(bonus_lbl)
 
 
 func _build_map_tab() -> void:
