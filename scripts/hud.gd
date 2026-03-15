@@ -104,9 +104,8 @@ func _build_ui() -> void:
 	add_child(_joystick)
 
 	# Fire button (bottom-right) — styled Button
-	var fire_btn := Button.new()
-	fire_btn.text = "FIRE"
-	fire_btn.add_theme_font_size_override("font_size", 16)
+	var fire_btn := Control.new()
+	fire_btn.set_script(load("res://scripts/fire_button.gd"))
 	fire_btn.anchor_left = 1.0
 	fire_btn.anchor_right = 1.0
 	fire_btn.anchor_top = 1.0
@@ -115,19 +114,11 @@ func _build_ui() -> void:
 	fire_btn.offset_right = -20
 	fire_btn.offset_top = -110
 	fire_btn.offset_bottom = -20
-	var fire_style := StyleBoxFlat.new()
-	fire_style.bg_color = Color(0.7, 0.1, 0.1, 0.6)
-	fire_style.corner_radius_top_left = 45
-	fire_style.corner_radius_top_right = 45
-	fire_style.corner_radius_bottom_left = 45
-	fire_style.corner_radius_bottom_right = 45
-	fire_btn.add_theme_stylebox_override("normal", fire_style)
-	var fire_style_pressed := fire_style.duplicate() as StyleBoxFlat
-	fire_style_pressed.bg_color = Color(1.0, 0.2, 0.2, 0.9)
-	fire_btn.add_theme_stylebox_override("pressed", fire_style_pressed)
-	fire_btn.gui_input.connect(_on_fire_input)
+	fire_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	_fire_button = fire_btn
 	add_child(_fire_button)
+	fire_btn.toggled.connect(func(active: bool):
+		_fire_pressed = active)
 
 
 	# Cockpit button (top-left)
@@ -205,21 +196,7 @@ func get_joystick_direction() -> Vector2:
 	return Vector2.ZERO
 
 
-func _on_fire_input(event: InputEvent) -> void:
-	if _fire_debounce > 0.0:
-		return
-	var did_toggle := false
-	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
-		did_toggle = true
-	elif event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			did_toggle = true
-	if did_toggle:
-		_fire_pressed = not _fire_pressed
-		_fire_debounce = 0.3
-		_fire_button.queue_redraw()
-		get_viewport().set_input_as_handled()
+
 
 
 func _check_nearby_objects() -> void:
@@ -324,8 +301,8 @@ func _on_hull_changed(value: float) -> void:
 		_hull_bar.value = value
 	if value <= 0 and _fire_pressed:
 		_fire_pressed = false
-		if is_instance_valid(_fire_button):
-			_fire_button.queue_redraw()
+		if is_instance_valid(_fire_button) and _fire_button.has_method("set_active"):
+			_fire_button.set_active(false)
 
 
 func _on_fuel_changed(value: float) -> void:
@@ -348,23 +325,7 @@ func _on_resources_changed() -> void:
 
 
 func _draw_fire_button() -> void:
-	pass  # Drawn by child Control
-
-
-# Draw fire button visuals
-func _on_fire_button_draw() -> void:
-	var center := _fire_button.size / 2.0
-	var radius: float = min(center.x, center.y) - 5
-	if _fire_pressed:
-		_fire_button.draw_circle(center, radius, Color(1.0, 0.15, 0.15, 0.85))
-		_fire_button.draw_arc(center, radius, 0, TAU, 32, Color(1.0, 0.5, 0.5, 1.0), 3.5)
-		_fire_button.draw_string(ThemeDB.fallback_font, center + Vector2(-16, 5),
-			"● AUTO", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
-	else:
-		_fire_button.draw_circle(center, radius, Color(0.5, 0.1, 0.1, 0.45))
-		_fire_button.draw_arc(center, radius, 0, TAU, 24, Color(0.8, 0.3, 0.3, 0.6), 2.0)
-		_fire_button.draw_line(center + Vector2(-10, 0), center + Vector2(10, 0), Color.WHITE, 2.0)
-		_fire_button.draw_line(center + Vector2(0, -10), center + Vector2(0, 10), Color.WHITE, 2.0)
+	pass  # Drawn by fire_button.gd
 
 func _on_cockpit_pressed() -> void:
 	var cockpit_scene: PackedScene = load("res://scenes/cockpit.tscn")
