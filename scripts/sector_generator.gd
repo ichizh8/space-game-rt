@@ -199,25 +199,25 @@ func _manage_objects() -> void:
 
 	if asteroid_count < MIN_ASTEROIDS:
 		for i in range(MIN_ASTEROIDS - asteroid_count):
-			_spawn_asteroid(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 200.0))
+			call_deferred("_spawn_asteroid", _safe_spawn_pos(spawn_center, SPAWN_RADIUS, 200.0))
 
 	if planet_count < MIN_PLANETS:
 		for i in range(MIN_PLANETS - planet_count):
-			_spawn_planet(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 400.0))
+			call_deferred("_spawn_planet", _safe_spawn_pos(spawn_center, SPAWN_RADIUS, 400.0))
 
 	if enemy_count < MIN_ENEMIES:
 		for i in range(MIN_ENEMIES - enemy_count):
-			_spawn_enemy(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 320.0))
+			call_deferred("_spawn_enemy", _safe_spawn_pos(spawn_center, SPAWN_RADIUS, 320.0))
 
 	if artifact_count < MIN_ARTIFACTS:
-		_spawn_artifact(_safe_spawn_pos(spawn_center, SPAWN_RADIUS, 250.0))
+		call_deferred("_spawn_artifact", _safe_spawn_pos(spawn_center, SPAWN_RADIUS, 250.0))
 
 	if star_count < MIN_STARS:
 		for i in range(MIN_STARS - star_count):
-			_spawn_star(_safe_spawn_pos(spawn_center, SPAWN_RADIUS * 0.9, 550.0))
+			call_deferred("_spawn_star", _safe_spawn_pos(spawn_center, SPAWN_RADIUS * 0.9, 550.0))
 
 	if station_count < MIN_STATIONS:
-		_spawn_station(_safe_spawn_pos(spawn_center, SPAWN_RADIUS * 0.5, 350.0))
+		call_deferred("_spawn_station", _safe_spawn_pos(spawn_center, SPAWN_RADIUS * 0.5, 350.0))
 
 
 func _spawn_asteroid(pos: Vector2) -> void:

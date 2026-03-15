@@ -84,6 +84,8 @@ func _process(delta: float) -> void:
 signal died()
 
 func _explode() -> void:
+	if is_dead:
+		return
 	is_dead = true
 	GameState.record_kill()
 	var player := _get_player()
