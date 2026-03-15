@@ -1,14 +1,14 @@
-extends Area2D
+extends Node2D
 
 var artifact_data: Dictionary = {}
 var _pulse_timer: float = 0.0
+var _collected := false
 
 signal collected(data: Dictionary)
 
 
 func _ready() -> void:
 	add_to_group("artifacts")
-	body_entered.connect(_on_body_entered)
 	queue_redraw()
 
 
@@ -17,31 +17,33 @@ func setup(data: Dictionary) -> void:
 	queue_redraw()
 
 
-func _physics_process(delta: float) -> void:
-	_pulse_timer += delta
-	queue_redraw()
-
-
-func _on_body_entered(body: Node2D) -> void:
+func try_collect(body: Node2D) -> void:
+	if _collected:
+		return
 	if body.is_in_group("player"):
+		_collected = true
 		GameState.collect_artifact(artifact_data)
 		collected.emit(artifact_data)
-		queue_free()
+		hide()
+		set_process(false)
+
+
+func _process(delta: float) -> void:
+	_pulse_timer += delta
+	queue_redraw()
+	# Auto-collect when ship is close
+	var players := get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		var player := players[0]
+		if is_instance_valid(player) and global_position.distance_to(player.global_position) < 30.0:
+			try_collect(player)
 
 
 func _draw() -> void:
-	# Pulsing glow effect
 	var pulse := (sin(_pulse_timer * 3.0) + 1.0) * 0.5
 	var glow_radius := 12.0 + pulse * 4.0
-	var glow_color := Color(1.0, 0.8, 0.2, 0.2 + pulse * 0.2)
-	draw_circle(Vector2.ZERO, glow_radius, glow_color)
-	# Inner diamond
-	var points := PackedVector2Array([
-		Vector2(0, -8),
-		Vector2(-6, 0),
-		Vector2(0, 8),
-		Vector2(6, 0)
-	])
-	draw_colored_polygon(points, Color(1.0, 0.85, 0.0))
-	# Sparkle
+	draw_circle(Vector2.ZERO, glow_radius, Color(1.0, 0.8, 0.2, 0.2 + pulse * 0.2))
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(0, -8), Vector2(-6, 0), Vector2(0, 8), Vector2(6, 0)
+	]), Color(1.0, 0.85, 0.0))
 	draw_circle(Vector2(0, -4), 2, Color.WHITE)

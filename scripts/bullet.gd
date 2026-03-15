@@ -43,7 +43,7 @@ func _process(delta: float) -> void:
 func _expire() -> void:
 	_hit = true
 	visible = false
-	call_deferred("queue_free")
+	set_process(false)
 
 
 func _draw() -> void:
