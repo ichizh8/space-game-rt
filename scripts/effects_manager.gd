@@ -68,18 +68,18 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	for e in _explosions:
-		var t := 1.0 - (e["life"] / e["max_life"])
-		var radius := e["size"] * 35.0 * t
-		var alpha := e["life"] / e["max_life"]
+		var t: float = 1.0 - (float(e["life"]) / float(e["max_life"]))
+		var radius: float = float(e["size"]) * 35.0 * t
+		var alpha: float = float(e["life"]) / float(e["max_life"])
 		draw_circle(e["pos"], radius, Color(1.0, 0.5, 0.0, alpha * 0.6))
 		draw_circle(e["pos"], radius * 0.5, Color(1.0, 1.0, 0.6, alpha * 0.85))
 	for s in _sparks:
-		var alpha := s["life"] / s["max_life"]
+		var alpha: float = float(s["life"]) / float(s["max_life"])
 		var c: Color = s["color"]
 		c.a = alpha
 		draw_circle(s["pos"], 2.5, c)
 	for f in _floats:
-		var alpha := f["life"] / f["max_life"]
+		var alpha: float = float(f["life"]) / float(f["max_life"])
 		var c: Color = f["color"]
 		c.a = alpha
 		draw_string(ThemeDB.fallback_font, f["pos"], f["text"],

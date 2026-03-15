@@ -83,10 +83,6 @@ func _spawn_initial() -> void:
 	if is_instance_valid(player):
 		center = player.global_position
 
-	# DEBUG: confirm this runs
-	var _hud := get_tree().get_first_node_in_group("hud")
-	if is_instance_valid(_hud) and _hud.has_method("show_notification"):
-		_hud.show_notification("INIT RUNNING")
 
 	# Spawn asteroids
 	var num_asteroids := randi_range(MIN_ASTEROIDS, MAX_ASTEROIDS)
