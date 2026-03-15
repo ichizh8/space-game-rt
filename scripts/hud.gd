@@ -127,13 +127,13 @@ func _build_ui() -> void:
 	_fire_button = fire_btn
 	add_child(_fire_button)
 
-	# Action button (center bottom)
+	# Action button (center of screen, above controls)
 	_action_button = Button.new()
-	_action_button.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_action_button.offset_left = -60
-	_action_button.offset_right = 60
-	_action_button.offset_top = -180
-	_action_button.offset_bottom = -140
+	_action_button.set_anchors_preset(Control.PRESET_CENTER)
+	_action_button.offset_left = -80
+	_action_button.offset_right = 80
+	_action_button.offset_top = 60
+	_action_button.offset_bottom = 110
 	_action_button.add_theme_font_size_override("font_size", 18)
 	_action_button.visible = false
 	_action_button.pressed.connect(_on_action_pressed)
@@ -241,6 +241,9 @@ func _hide_action() -> void:
 func _on_action_pressed() -> void:
 	if not is_instance_valid(_action_target):
 		return
+	# Reset joystick to prevent stuck touch state
+	if is_instance_valid(_joystick) and _joystick.has_method("_reset"):
+		_joystick._reset()
 	match _action_type:
 		"Mine":
 			if _action_target.has_method("mine"):
