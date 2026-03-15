@@ -190,6 +190,38 @@ func _refresh_bridge() -> void:
 	_add_stat_row(vbox, "Engines", "Lv %d" % GameState.speed_level)
 	_add_stat_row(vbox, "Hull Plating", "Lv %d" % GameState.shield_level)
 
+	# Faction standing
+	vbox.add_child(HSeparator.new())
+	var sec4 := _make_section_label("FACTION STANDING")
+	vbox.add_child(sec4)
+	var faction_data := [
+		["Coalition", GameState.faction_rep.get("coalition", 50), Color(0.3, 0.7, 1.0)],
+		["Pirates", GameState.faction_rep.get("pirates", 0), Color(0.9, 0.3, 0.3)],
+	]
+	for fd in faction_data:
+		var f_row := HBoxContainer.new()
+		f_row.custom_minimum_size.y = 24
+		vbox.add_child(f_row)
+		var f_name := Label.new()
+		f_name.text = str(fd[0])
+		f_name.custom_minimum_size.x = 80
+		f_name.add_theme_font_size_override("font_size", 13)
+		f_row.add_child(f_name)
+		var f_bar := ProgressBar.new()
+		f_bar.max_value = 100
+		f_bar.value = int(fd[1])
+		f_bar.custom_minimum_size = Vector2(140, 16)
+		f_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var bar_style := StyleBoxFlat.new()
+		bar_style.bg_color = fd[2]
+		f_bar.add_theme_stylebox_override("fill", bar_style)
+		f_row.add_child(f_bar)
+		var f_val := Label.new()
+		f_val.text = str(int(fd[1]))
+		f_val.add_theme_font_size_override("font_size", 12)
+		f_val.custom_minimum_size.x = 30
+		f_row.add_child(f_val)
+
 	# Note about roguelite
 	vbox.add_child(HSeparator.new())
 	var note := Label.new()

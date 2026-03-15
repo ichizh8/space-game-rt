@@ -82,8 +82,12 @@ func _process(delta: float) -> void:
 	match state:
 		State.PATROL:
 			if dist < AGGRO_RANGE:
-				state = State.CHASE
-				orbit_angle = (global_position - player.global_position).angle()
+				# Pirates ignore players with high pirate rep
+				if enemy_type == EnemyType.PIRATE and GameState.faction_rep.get("pirates", 0) >= 70:
+					pass  # skip aggro
+				else:
+					state = State.CHASE
+					orbit_angle = (global_position - player.global_position).angle()
 		State.CHASE:
 			if dist > DEAGGRO_RANGE:
 				state = State.PATROL

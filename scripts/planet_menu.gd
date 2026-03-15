@@ -671,7 +671,8 @@ func _on_sell_resource(res: String, price_each: int) -> void:
 	var amt: int = GameState.resources.get(res, 0)
 	if amt > 0:
 		GameState.resources[res] = 0
-		var effective_price := int(round(float(price_each) * (1.0 + GameState.captain_sell_bonus)))
+		var faction_mod := 1.0 + (GameState.faction_rep.get("coalition", 50) - 50) * 0.002
+		var effective_price := int(round(float(price_each) * (1.0 + GameState.captain_sell_bonus) * faction_mod))
 		GameState.add_credits(amt * effective_price)
 		GameState.resources_changed.emit()
 		_refresh_services()
