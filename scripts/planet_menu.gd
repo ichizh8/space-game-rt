@@ -66,6 +66,7 @@ func _build_ui() -> void:
 
 	# Build tabs
 	_build_quest_tab()
+	_build_services_tab()
 	_build_buildings_tab()
 	_build_storage_tab()
 
