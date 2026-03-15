@@ -289,15 +289,15 @@ func _on_action_pressed() -> void:
 		"Mine":
 			if _action_target.has_method("mine"):
 				_action_target.mine()
-				_hide_action()
+				call_deferred("_hide_action")
 		"Land":
 			if _action_target.has_method("land"):
 				_action_target.land()
-				_hide_action()
+				call_deferred("_hide_action")
 		"Dock":
 			if _action_target.has_method("dock"):
 				_action_target.dock()
-				_hide_action()
+				call_deferred("_hide_action")
 
 
 func show_notification(text: String, duration: float = 3.0) -> void:

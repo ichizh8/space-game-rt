@@ -182,30 +182,19 @@ func take_damage(amount: float) -> void:
 
 signal died()
 
-func _dbg(msg: String) -> void:
-	var h := get_tree().get_first_node_in_group("hud")
-	if is_instance_valid(h) and h.has_method("show_notification"):
-		h.show_notification(msg, 5.0)
-
 func _die() -> void:
 	is_dead = true
-	_dbg("DIE: record_kill")
 	GameState.record_kill()
-	_dbg("DIE: add_xp")
 	var credit_reward := 20 if enemy_type == EnemyType.PIRATE else 35
 	var xp_reward: int = 15 if enemy_type == EnemyType.PIRATE else 25
 	GameState.add_xp(xp_reward)
-	_dbg("DIE: effects")
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):
 		em.add_explosion(global_position, 1.2 if enemy_type == EnemyType.DRONE else 1.0)
-	_dbg("DIE: spawn_loot")
 	call_deferred("_spawn_loot", credit_reward)
 	_despawn_timer = 1.4
 	queue_redraw()
-	_dbg("DIE: died.emit")
 	died.emit()
-	_dbg("DIE: DONE")
 
 
 func _spawn_loot(cr: int) -> void:
