@@ -129,6 +129,29 @@ func _build_ui() -> void:
 	_fire_button = fire_btn
 	add_child(_fire_button)
 
+	# Items/inventory button (top-right corner)
+	var items_btn := Button.new()
+	items_btn.text = "ITEMS 0"
+	items_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	items_btn.offset_left = -92
+	items_btn.offset_right = -6
+	items_btn.offset_top = 6
+	items_btn.offset_bottom = 34
+	items_btn.add_theme_font_size_override("font_size", 12)
+	var items_style := StyleBoxFlat.new()
+	items_style.bg_color = Color(0.05, 0.15, 0.35, 0.88)
+	items_style.corner_radius_top_left = 4
+	items_style.corner_radius_top_right = 4
+	items_style.corner_radius_bottom_left = 4
+	items_style.corner_radius_bottom_right = 4
+	items_btn.add_theme_stylebox_override("normal", items_style)
+	items_btn.add_theme_stylebox_override("pressed", items_style)
+	items_btn.add_theme_color_override("font_color", Color.CYAN)
+	items_btn.pressed.connect(_on_items_pressed)
+	add_child(items_btn)
+	_items_button = items_btn
+
+
 	# Action button (center of screen, above controls)
 	_action_button = Button.new()
 	_action_button.set_anchors_preset(Control.PRESET_CENTER)
