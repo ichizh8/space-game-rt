@@ -103,8 +103,8 @@ func _build_ui() -> void:
 
 	# Fire button (bottom-right) — styled Button
 	var fire_btn := Button.new()
-	fire_btn.text = "🔥"
-	fire_btn.add_theme_font_size_override("font_size", 32)
+	fire_btn.text = "FIRE"
+	fire_btn.add_theme_font_size_override("font_size", 16)
 	fire_btn.anchor_left = 1.0
 	fire_btn.anchor_right = 1.0
 	fire_btn.anchor_top = 1.0

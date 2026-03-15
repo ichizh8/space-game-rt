@@ -111,12 +111,13 @@ func take_damage(amount: float) -> void:
 
 func _die() -> void:
 	is_dead = true
-	# Drop random resources
+	set_physics_process(false)
+	set_process(false)
 	var drop_types := ["ore", "crystal", "scrap", "fuel"]
 	var drop_type: String = drop_types[randi() % drop_types.size()]
 	var drop_amount: int = randi_range(5, 10)
 	GameState.add_resource(drop_type, drop_amount)
-	queue_free()
+	call_deferred("queue_free")
 
 
 func _get_player() -> Node2D:

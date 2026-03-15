@@ -25,20 +25,20 @@ func _on_body_entered(body: Node2D) -> void:
 	if is_player_bullet and body.is_in_group("enemies"):
 		if body.has_method("take_damage"):
 			body.take_damage(damage)
-		queue_free()
+		call_deferred("queue_free")
 	elif not is_player_bullet and body.is_in_group("player"):
 		GameState.take_damage(damage)
-		queue_free()
+		call_deferred("queue_free")
 
 
 func _on_area_entered(area: Area2D) -> void:
 	if is_player_bullet and area.is_in_group("enemies"):
 		if area.has_method("take_damage"):
 			area.take_damage(damage)
-		queue_free()
+		call_deferred("queue_free")
 	elif not is_player_bullet and area.is_in_group("player"):
 		GameState.take_damage(damage)
-		queue_free()
+		call_deferred("queue_free")
 
 
 func _draw() -> void:
