@@ -169,8 +169,6 @@ func take_damage(amount: float) -> void:
 
 func _die() -> void:
 	is_dead = true
-	set_process(false)
-	hide()
 	var drop_types := ["ore", "crystal", "scrap", "fuel"]
 	GameState.add_resource(drop_types[randi() % drop_types.size()], randi_range(5, 10))
 

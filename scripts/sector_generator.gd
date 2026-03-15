@@ -87,8 +87,7 @@ func _manage_objects() -> void:
 			continue
 		if obj.global_position.distance_to(player_pos) > DESPAWN_DISTANCE:
 			to_remove.append(obj)
-			obj.hide()
-			obj.set_process(false)
+			pass  # node stays in tree, just not counted
 
 	for obj in to_remove:
 		_spawned_objects.erase(obj)

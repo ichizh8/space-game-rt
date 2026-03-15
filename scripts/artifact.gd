@@ -24,8 +24,7 @@ func try_collect(body: Node2D) -> void:
 		_collected = true
 		GameState.collect_artifact(artifact_data)
 		collected.emit(artifact_data)
-		hide()
-		set_process(false)
+
 
 
 func _process(delta: float) -> void:
@@ -40,6 +39,8 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if _collected:
+		return
 	var pulse := (sin(_pulse_timer * 3.0) + 1.0) * 0.5
 	var glow_radius := 12.0 + pulse * 4.0
 	draw_circle(Vector2.ZERO, glow_radius, Color(1.0, 0.8, 0.2, 0.2 + pulse * 0.2))
