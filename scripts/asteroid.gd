@@ -42,6 +42,8 @@ func get_resource_color() -> Color:
 
 
 func _draw() -> void:
+	if is_being_mined:
+		return
 	if _shape_points.is_empty():
 		return
 	draw_colored_polygon(_shape_points, get_resource_color())

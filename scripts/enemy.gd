@@ -181,6 +181,8 @@ func _get_player() -> Node2D:
 
 
 func _draw() -> void:
+	if is_dead:
+		return
 	var base_color := Color.RED if enemy_type == EnemyType.PIRATE else Color.ORANGE
 	match enemy_type:
 		EnemyType.PIRATE:
