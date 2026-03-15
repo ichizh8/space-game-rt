@@ -441,7 +441,8 @@ func _on_upgrade_pressed(kind: int) -> void:
 			if lvl >= 3 or GameState.credits < costs_s[lvl]: return
 			GameState.credits -= costs_s[lvl]
 			GameState.credits_changed.emit(GameState.credits)
-			var bonus: float = ([25.0, 25.0, 50.0] as Array)[lvl]
+			var shield_bonus_table: Array[float] = [25.0, 25.0, 50.0]
+			var bonus: float = shield_bonus_table[lvl]
 			GameState.max_hull += bonus
 			GameState.hull = min(GameState.hull + bonus, GameState.max_hull)
 			GameState.hull_changed.emit(GameState.hull)

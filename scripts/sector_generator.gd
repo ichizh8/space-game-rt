@@ -184,7 +184,11 @@ func _spawn_artifact(pos: Vector2) -> void:
 
 
 func _on_planet_landed(p_planet_id: String, p_planet_name: String, p_quest_id: String) -> void:
-	# Open planet menu
+	# Defer add_child — calling it from inside a signal callback crashes WASM
+	call_deferred("_open_planet_menu", p_planet_id, p_planet_name, p_quest_id)
+
+
+func _open_planet_menu(p_planet_id: String, p_planet_name: String, p_quest_id: String) -> void:
 	var planet_menu_scene := load("res://scenes/planet_menu.tscn")
 	var menu: Node = planet_menu_scene.instantiate()
 	menu.setup(p_planet_id, p_planet_name, p_quest_id)
