@@ -1,0 +1,36 @@
+{
+  "mining_plant": {
+    "name": "Mining Plant",
+    "description": "Extracts raw resources from the planet surface automatically.",
+    "tiers": [
+      {"level": 1, "cost": {"ore": 50, "scrap": 30}, "production": {"ore": 5, "crystal": 2}, "production_interval": 300},
+      {"level": 2, "cost": {"ore": 100, "crystal": 50}, "production": {"ore": 10, "crystal": 5}, "production_interval": 300},
+      {"level": 3, "cost": {"ore": 200, "crystal": 100}, "production": {"ore": 20, "crystal": 10, "fuel": 3}, "production_interval": 300}
+    ]
+  },
+  "manufacturing": {
+    "name": "Manufacturing Facility",
+    "description": "Converts raw resources into useful items over time.",
+    "tiers": [
+      {"level": 1, "cost": {"ore": 40, "scrap": 50}, "production": {"scrap": 3}, "production_interval": 300},
+      {"level": 2, "cost": {"ore": 80, "crystal": 40, "scrap": 60}, "production": {"scrap": 6, "fuel": 2}, "production_interval": 300},
+      {"level": 3, "cost": {"ore": 150, "crystal": 80, "scrap": 100}, "production": {"scrap": 10, "fuel": 5, "crystal": 3}, "production_interval": 300}
+    ]
+  },
+  "storage_depot": {
+    "name": "Storage Depot",
+    "description": "Increases the planet's storage capacity for resources.",
+    "tiers": [
+      {"level": 1, "cost": {"ore": 30, "scrap": 20}, "storage_capacity": 200, "production": {}, "production_interval": 0},
+      {"level": 2, "cost": {"ore": 60, "scrap": 40, "crystal": 20}, "storage_capacity": 500, "production": {}, "production_interval": 0},
+      {"level": 3, "cost": {"ore": 120, "scrap": 80, "crystal": 50}, "storage_capacity": 1000, "production": {}, "production_interval": 0}
+    ]
+  },
+  "shipyard": {
+    "name": "Shipyard",
+    "description": "Repair your ship and purchase upgrades.",
+    "tiers": [
+      {"level": 1, "cost": {"ore": 80, "scrap": 60, "crystal": 30}, "production": {}, "production_interval": 0}
+    ]
+  }
+}

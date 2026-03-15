@@ -1,0 +1,62 @@
+[
+  {
+    "id": "q_derelict",
+    "title": "Derelict Signal",
+    "description": "Your sensors detect a weak signal from an abandoned structure on the planet surface. The signal pattern suggests pre-war technology. Investigate?",
+    "choices": [
+      {"text": "Enter carefully", "outcome": "You navigate the dark corridors and find a cache of supplies left behind by the original crew.", "reward": {"ore": 20, "scrap": 10}},
+      {"text": "Scan from outside", "outcome": "The scan reveals structural instability but nothing of immediate value. At least you know it's safe.", "reward": {"scrap": 5}},
+      {"text": "Ignore it", "outcome": "You fly on. Some mysteries are best left alone.", "reward": {}}
+    ]
+  },
+  {
+    "id": "q_alien_ruins",
+    "title": "Alien Ruins",
+    "description": "Ancient alien structures dot the surface of this planet. Strange energy readings pulse from deep within the largest temple. The markings are unlike anything in your database.",
+    "choices": [
+      {"text": "Explore the temple", "outcome": "Inside, you discover crystalline formations that hum with stored energy. You carefully extract several intact specimens.", "reward": {"crystal": 25, "credits": 100}},
+      {"text": "Study the markings", "outcome": "Your analysis of the markings reveals coordinates to nearby resource deposits. Knowledge is its own reward.", "reward": {"crystal": 10}},
+      {"text": "Leave them undisturbed", "outcome": "Respecting the ancient site, you depart. Perhaps some things should remain untouched.", "reward": {}}
+    ]
+  },
+  {
+    "id": "q_distress",
+    "title": "Distress Call",
+    "description": "A distress beacon activates as you approach. A damaged freighter crew reports they are stranded with failing life support. They beg for assistance.",
+    "choices": [
+      {"text": "Provide emergency supplies", "outcome": "You share fuel and repair materials. The grateful crew rewards you generously from their cargo hold.", "reward": {"credits": 200, "ore": 15}},
+      {"text": "Offer to tow them", "outcome": "You help tow their ship to a safe landing zone. The captain transfers some cargo as thanks.", "reward": {"scrap": 20, "fuel": 10}},
+      {"text": "Report their position and move on", "outcome": "You relay their coordinates to the nearest station. Someone else will handle it.", "reward": {"credits": 50}}
+    ]
+  },
+  {
+    "id": "q_black_market",
+    "title": "Black Market Contact",
+    "description": "A hooded figure approaches your landing pad. They claim to deal in rare goods and offer to trade. Their prices seem unusually good, but something feels off.",
+    "choices": [
+      {"text": "Trade with them", "outcome": "The deal goes smoothly. You acquire valuable crystals at a fraction of the market price. No questions asked.", "reward": {"crystal": 30, "scrap": 15}},
+      {"text": "Ask about their sources", "outcome": "They clam up and offer a smaller deal instead. Still profitable, if less exciting.", "reward": {"crystal": 10}},
+      {"text": "Decline and report them", "outcome": "Local authorities reward you for the tip. The black market dealer vanishes into the crowd.", "reward": {"credits": 150}}
+    ]
+  },
+  {
+    "id": "q_beacon",
+    "title": "Ancient Beacon",
+    "description": "A massive obelisk stands on the planet's highest peak, pulsing with dim light. Your instruments indicate it predates human space travel by millennia. Its purpose is unknown.",
+    "choices": [
+      {"text": "Activate the beacon", "outcome": "The obelisk roars to life, projecting star maps across the sky. You record the data — it reveals rich mining locations nearby.", "reward": {"ore": 30, "crystal": 20, "credits": 100}},
+      {"text": "Extract power cells", "outcome": "You carefully remove several still-functioning power cells from the base. Ancient tech, but still valuable.", "reward": {"crystal": 15, "fuel": 15}},
+      {"text": "Document and leave", "outcome": "You take detailed scans for the science academy. They'll pay for this data.", "reward": {"credits": 100}}
+    ]
+  },
+  {
+    "id": "q_smuggler",
+    "title": "Smuggler's Hideout",
+    "description": "Hidden beneath a rock overhang, you discover a camouflaged storage depot. Crates are stacked high, some with official military markings scratched off. No one seems to be around.",
+    "choices": [
+      {"text": "Take what you can carry", "outcome": "You load up on supplies. Finders keepers in the outer rim. You find fuel, scrap, and some unregistered weapon parts.", "reward": {"fuel": 20, "scrap": 25, "ore": 10}},
+      {"text": "Set up a stakeout", "outcome": "After hours of waiting, the smugglers return. You negotiate a cut for your silence.", "reward": {"credits": 250}},
+      {"text": "Seal the entrance and leave", "outcome": "Not your problem. You seal it up and move on, keeping the coordinates just in case.", "reward": {"scrap": 5}}
+    ]
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "ore": {"name": "Ore", "description": "Common metal ore.", "color": "#aaaaaa"},
+  "crystal": {"name": "Crystal", "description": "Rare energy crystal.", "color": "#88ffff"},
+  "fuel": {"name": "Fuel", "description": "Ship propellant.", "color": "#ffaa00"},
+  "scrap": {"name": "Scrap", "description": "Salvaged metal parts.", "color": "#888844"}
+}

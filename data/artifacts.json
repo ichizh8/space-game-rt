@@ -1,0 +1,38 @@
+[
+  {
+    "id": "nav_core",
+    "name": "Ancient Nav Core",
+    "description": "A navigation computer from a lost civilization. Increases ship speed.",
+    "bonus": {"player_speed_bonus": 20}
+  },
+  {
+    "id": "plasma_lens",
+    "name": "Plasma Lens",
+    "description": "A focusing crystal that amplifies weapon energy. Increases damage.",
+    "bonus": {"player_damage_bonus": 5}
+  },
+  {
+    "id": "mining_drone",
+    "name": "Mining Drone Module",
+    "description": "An automated mining assistant. Increases mining speed.",
+    "bonus": {"player_mining_speed_bonus": 0.3}
+  },
+  {
+    "id": "void_compass",
+    "name": "Void Compass",
+    "description": "Points toward valuable resources. Increases ship speed slightly.",
+    "bonus": {"player_speed_bonus": 10}
+  },
+  {
+    "id": "xeno_battery",
+    "name": "Xeno Battery",
+    "description": "An alien power cell of unknown origin. Boosts damage output.",
+    "bonus": {"player_damage_bonus": 8}
+  },
+  {
+    "id": "echo_scanner",
+    "name": "Echo Scanner",
+    "description": "Resonance-based mineral detector. Greatly improves mining efficiency.",
+    "bonus": {"player_mining_speed_bonus": 0.5}
+  }
+]
