@@ -88,7 +88,7 @@ func _manage_objects() -> void:
 		if obj.global_position.distance_to(player_pos) > DESPAWN_DISTANCE:
 			to_remove.append(obj)
 			obj.hide()
-			obj.set_process_mode(Node.PROCESS_MODE_DISABLED)
+			obj.set_process(false)
 
 	for obj in to_remove:
 		_spawned_objects.erase(obj)

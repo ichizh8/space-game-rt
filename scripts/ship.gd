@@ -39,7 +39,7 @@ func _physics_process(delta: float) -> void:
 func _shoot() -> void:
 	can_shoot = false
 	shoot_timer.start()
-	var bullet := bullet_scene.instantiate() as Area2D
+	var bullet := bullet_scene.instantiate() as Node2D
 	bullet.global_position = gun_point.global_position
 	bullet.rotation = rotation
 	bullet.is_player_bullet = true

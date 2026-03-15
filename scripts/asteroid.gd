@@ -31,7 +31,7 @@ func mine() -> void:
 	is_being_mined = true
 	GameState.add_resource(resource_type, amount)
 	hide()
-	set_process_mode(PROCESS_MODE_DISABLED)
+	set_process(false)
 
 
 func get_resource_color() -> Color:
