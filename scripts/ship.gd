@@ -57,12 +57,16 @@ func _physics_process(delta: float) -> void:
 func _shoot() -> void:
 	can_shoot = false
 	shoot_timer.start()
+	call_deferred("_spawn_bullet", gun_point.global_position, rotation)
+
+
+func _spawn_bullet(pos: Vector2, rot: float) -> void:
 	var bullet := bullet_scene.instantiate() as Node2D
-	bullet.global_position = gun_point.global_position
-	bullet.rotation = rotation
+	bullet.global_position = pos
+	bullet.rotation = rot
 	bullet.is_player_bullet = true
 	bullet.damage = 15.0 + GameState.player_damage_bonus + GameState.captain_damage_bonus
-	get_tree().current_scene.add_child(bullet)
+	get_parent().add_child(bullet)
 
 
 func _on_shoot_timer_timeout() -> void:

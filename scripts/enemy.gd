@@ -146,7 +146,7 @@ func _handle_shooting(delta: float) -> void:
 	shoot_timer += delta
 	if shoot_timer >= shoot_cooldown:
 		shoot_timer = 0.0
-		_shoot()
+		call_deferred("_shoot")
 		burst_count += 1
 		if burst_count >= burst_max:
 			burst_count = 0
@@ -162,7 +162,7 @@ func _shoot() -> void:
 	bullet.rotation = rotation
 	bullet.set("is_player_bullet", false)
 	bullet.set("damage", damage)
-	get_tree().current_scene.add_child(bullet)
+	get_parent().add_child(bullet)
 
 
 func take_damage(amount: float) -> void:
