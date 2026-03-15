@@ -66,6 +66,22 @@ func get_random_artifact() -> Dictionary:
 	return available[randi() % available.size()]
 
 
+func get_board_quests_for(source_type: String) -> Array:
+	var result: Array = []
+	for quest in quests_data:
+		var qtype: String = quest.get("type", "")
+		if qtype == "story":
+			continue
+		if qtype == "":
+			continue  # skip classic text quests (no type field)
+		var qsource: String = quest.get("source_type", "any")
+		if qsource == source_type or qsource == "any" or source_type == "any":
+			if not GameState.is_quest_completed(quest["id"]):
+				result.append(quest)
+	result.shuffle()
+	return result
+
+
 func get_building_data(building_id: String) -> Dictionary:
 	if buildings_data.has(building_id):
 		return buildings_data[building_id]

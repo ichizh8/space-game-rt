@@ -58,5 +58,91 @@
       {"text": "Set up a stakeout", "outcome": "After hours of waiting, the smugglers return. You negotiate a cut for your silence.", "reward": {"credits": 250}},
       {"text": "Seal the entrance and leave", "outcome": "Not your problem. You seal it up and move on, keeping the coordinates just in case.", "reward": {"scrap": 5}}
     ]
+  },
+  {
+    "id": "bq_kill_pirates",
+    "type": "destroy",
+    "title": "Pirate Bounty",
+    "description": "Eliminate 5 pirate ships threatening local trade routes.",
+    "required": 5,
+    "reward": {"credits": 300},
+    "faction_reward": {"coalition": 5},
+    "source_type": "station"
+  },
+  {
+    "id": "bq_kill_drones",
+    "type": "destroy",
+    "title": "Drone Extermination",
+    "description": "A mining consortium is paying for drone clearance in this sector.",
+    "required": 4,
+    "reward": {"credits": 250, "ore": 10},
+    "faction_reward": {"coalition": 4},
+    "source_type": "station"
+  },
+  {
+    "id": "bq_gather_ore",
+    "type": "gather",
+    "resource": "ore",
+    "title": "Ore Shipment",
+    "description": "The colony needs 20 units of ore for construction.",
+    "required": 20,
+    "reward": {"credits": 180, "crystal": 5},
+    "source_type": "planet"
+  },
+  {
+    "id": "bq_gather_crystal",
+    "type": "gather",
+    "resource": "crystal",
+    "title": "Crystal Order",
+    "description": "Scientists require 12 units of crystal for research.",
+    "required": 12,
+    "reward": {"credits": 220, "ore": 8},
+    "source_type": "planet"
+  },
+  {
+    "id": "bq_gather_scrap",
+    "type": "gather",
+    "resource": "scrap",
+    "title": "Salvage Contract",
+    "description": "The repair yards need 15 scrap for hull plating. Premium price offered.",
+    "required": 15,
+    "reward": {"credits": 150},
+    "source_type": "any"
+  },
+  {
+    "id": "bq_kill_battleships",
+    "type": "destroy",
+    "title": "Heavy Threat",
+    "description": "Coalition military: Two battleships have been spotted in this sector. Neutralize them.",
+    "required": 2,
+    "reward": {"credits": 400, "scrap": 15},
+    "faction_reward": {"coalition": 8},
+    "source_type": "station"
+  },
+  {
+    "id": "story_act1",
+    "type": "story",
+    "title": "Distress Signal",
+    "description": "Station comms are picking up an encrypted distress signal from deep space. You will need to travel far from settled space to triangulate the source. Navigate at least 1500 units from the origin.",
+    "required_distance": 1500,
+    "reward": {"credits": 100},
+    "source_type": "station"
+  },
+  {
+    "id": "story_act2",
+    "type": "story",
+    "title": "Signal Source",
+    "description": "The signal originated here. Planet logs reveal a Dominator command ship has been coordinating attack swarms in this sector. Its last known coordinates have been marked on your map.",
+    "reward": {"credits": 200},
+    "source_type": "story_planet"
+  },
+  {
+    "id": "story_act3",
+    "type": "story",
+    "title": "Destroy the Command Ship",
+    "description": "The Dominator Command Ship is in your sector. Find and destroy it to end the attack.",
+    "required": 1,
+    "reward": {"credits": 1000},
+    "source_type": "world"
   }
 ]
