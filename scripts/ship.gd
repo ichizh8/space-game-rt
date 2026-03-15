@@ -6,6 +6,7 @@ const FUEL_DRAIN_RATE := 0.5  # per second while moving
 var is_firing := false
 var can_shoot := true
 var bullet_scene: PackedScene
+var _gravity_accum: Vector2 = Vector2.ZERO
 
 @onready var gun_point: Marker2D = $GunPoint
 @onready var shoot_timer: Timer = $ShootTimer
@@ -31,6 +32,8 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity = Vector2.ZERO
 
+	velocity += _gravity_accum
+	_gravity_accum = Vector2.ZERO
 	move_and_slide()
 
 	if is_firing and can_shoot and GameState.fuel > 0:
@@ -50,6 +53,10 @@ func _shoot() -> void:
 
 func _on_shoot_timer_timeout() -> void:
 	can_shoot = true
+
+
+func apply_gravity(force: Vector2) -> void:
+	_gravity_accum += force
 
 
 func set_firing(value: bool) -> void:

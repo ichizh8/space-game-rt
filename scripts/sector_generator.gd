@@ -11,11 +11,19 @@ const MAX_ENEMIES := 3
 const MIN_ARTIFACTS := 1
 const MAX_ARTIFACTS := 2
 const CHECK_INTERVAL := 1.0
+const MIN_STARS := 1
+const MAX_STARS := 2
+const MIN_STATIONS := 1
+const MAX_STATIONS := 2
+const BLACK_HOLE_CHANCE := 0.4
 
 var asteroid_scene: PackedScene
 var planet_scene: PackedScene
 var enemy_scene: PackedScene
 var artifact_scene: PackedScene
+var star_scene: PackedScene
+var black_hole_scene: PackedScene
+var station_scene: PackedScene
 
 var _spawned_objects: Array[Node2D] = []
 var _check_timer: float = 0.0
@@ -35,6 +43,9 @@ func _ready() -> void:
 	planet_scene = load("res://scenes/planet.tscn")
 	enemy_scene = load("res://scenes/enemy.tscn")
 	artifact_scene = load("res://scenes/artifact.tscn")
+	star_scene = load("res://scenes/star.tscn")
+	black_hole_scene = load("res://scenes/black_hole.tscn")
+	station_scene = load("res://scenes/space_station.tscn")
 	call_deferred("_spawn_initial")
 
 
@@ -73,6 +84,21 @@ func _spawn_initial() -> void:
 	var num_artifacts := randi_range(MIN_ARTIFACTS, MAX_ARTIFACTS)
 	for i in range(num_artifacts):
 		_spawn_artifact(center + _random_offset(SPAWN_RADIUS))
+
+	# Spawn stars (away from spawn center)
+	var num_stars := randi_range(MIN_STARS, MAX_STARS)
+	for i in range(num_stars):
+		_spawn_star(center + _random_offset(SPAWN_RADIUS * 0.8))
+
+	# Spawn black hole (rare)
+	if randf() < BLACK_HOLE_CHANCE:
+		_spawn_black_hole(center + _random_offset(SPAWN_RADIUS))
+
+	# Spawn home station close, additional ones further
+	_spawn_station(center + Vector2(-160, 120))
+	var num_extra_stations := randi_range(0, MAX_STATIONS - 1)
+	for i in range(num_extra_stations):
+		_spawn_station(center + _random_offset(SPAWN_RADIUS))
 
 
 func _manage_objects() -> void:
@@ -113,6 +139,8 @@ func _manage_objects() -> void:
 	var planet_count := 0
 	var enemy_count := 0
 	var artifact_count := 0
+	var star_count := 0
+	var station_count := 0
 	for obj in _spawned_objects:
 		if not is_instance_valid(obj):
 			continue
@@ -126,6 +154,10 @@ func _manage_objects() -> void:
 			enemy_count += 1
 		elif obj.is_in_group("artifacts"):
 			artifact_count += 1
+		elif obj.is_in_group("stars"):
+			star_count += 1
+		elif obj.is_in_group("stations"):
+			station_count += 1
 
 	# Spawn ahead of player movement
 	var move_dir := Vector2.ZERO
@@ -150,6 +182,13 @@ func _manage_objects() -> void:
 
 	if artifact_count < MIN_ARTIFACTS:
 		_spawn_artifact(spawn_center + _random_offset(SPAWN_RADIUS))
+
+	if star_count < MIN_STARS:
+		for i in range(MIN_STARS - star_count):
+			_spawn_star(spawn_center + _random_offset(SPAWN_RADIUS * 0.7))
+
+	if station_count < MIN_STATIONS:
+		_spawn_station(spawn_center + _random_offset(SPAWN_RADIUS * 0.5))
 
 
 func _spawn_asteroid(pos: Vector2) -> void:
@@ -218,6 +257,51 @@ func _random_offset(radius: float) -> Vector2:
 	var angle := randf() * TAU
 	var dist := randf_range(radius * 0.3, radius)
 	return Vector2(cos(angle), sin(angle)) * dist
+
+
+func _spawn_star(pos: Vector2) -> void:
+	var star := star_scene.instantiate() as Node2D
+	star.global_position = pos
+	get_tree().current_scene.add_child(star)
+	_spawned_objects.append(star)
+
+
+func _spawn_black_hole(pos: Vector2) -> void:
+	var bh := black_hole_scene.instantiate() as Node2D
+	bh.global_position = pos
+	get_tree().current_scene.add_child(bh)
+	_spawned_objects.append(bh)
+
+
+var _station_index: int = 0
+const STATION_NAMES: Array[String] = [
+	"Outpost Kepler", "Relay Station Zeta", "Frontier Hub", "Port Orion",
+	"Waypoint Nova", "Station Arcturus", "Crossroads Alpha", "Depot Sirius"
+]
+
+func _spawn_station(pos: Vector2) -> void:
+	var station := station_scene.instantiate() as Node2D
+	station.global_position = pos
+	var s_name := STATION_NAMES[_station_index % STATION_NAMES.size()]
+	_station_index += 1
+	var s_id := s_name.replace(" ", "_") + "_" + str(_station_index)
+	if station.has_method("setup"):
+		station.setup(s_id, s_name)
+	if station.has_signal("docked"):
+		station.docked.connect(_on_station_docked)
+	get_tree().current_scene.add_child(station)
+	_spawned_objects.append(station)
+
+
+func _on_station_docked(s_id: String, s_name: String) -> void:
+	call_deferred("_open_station_menu", s_id, s_name)
+
+
+func _open_station_menu(s_id: String, s_name: String) -> void:
+	var menu_scene := load("res://scenes/station_menu.tscn")
+	var menu: Node = menu_scene.instantiate()
+	menu.setup(s_id, s_name)
+	get_tree().current_scene.add_child(menu)
 
 
 func _get_player() -> Node2D:

@@ -243,6 +243,16 @@ func _check_nearby_objects() -> void:
 			closest_node = planet
 			closest_type = "Land"
 
+	# Check stations
+	for station in get_tree().get_nodes_in_group("stations"):
+		if not is_instance_valid(station):
+			continue
+		var dist: float = ship_pos.distance_to(station.global_position)
+		if dist < 80.0 and dist < closest_dist:
+			closest_dist = dist
+			closest_node = station
+			closest_type = "Dock"
+
 	if is_instance_valid(closest_node):
 		_show_action(closest_type, closest_node)
 	else:
@@ -276,6 +286,10 @@ func _on_action_pressed() -> void:
 		"Land":
 			if _action_target.has_method("land"):
 				_action_target.land()
+				_hide_action()
+		"Dock":
+			if _action_target.has_method("dock"):
+				_action_target.dock()
 				_hide_action()
 
 

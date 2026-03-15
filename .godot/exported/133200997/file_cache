@@ -9,3 +9,7 @@ res://scenes/planet_menu.tscn::05f373ffe150542bae128162de367a68::1773542401::res
 res://scenes/ship.tscn::489e78fab458e11fc20d9948f6906521::1773542401::res://.godot/exported/133200997/export-bf05dba3b1d7e6ded3744c419700a994-ship.scn
 res://scenes/space_world.tscn::b574209c2f92ac11f0d91c48c647247c::1773544072::res://.godot/exported/133200997/export-8620af10a57887ac47f777fac0ab42b4-space_world.scn
 res://scenes/cockpit.tscn::e4b6d83f3f780a95376d7ce14e8e4829::1773548415::res://.godot/exported/133200997/export-01cbd571200d6c4ace21ad88ac73e007-cockpit.scn
+res://scenes/black_hole.tscn::049a1c3555ed16eea3933f0d3cb990ee::1773583082::res://.godot/exported/133200997/export-10e9d540a8412b2f884df45bd08e3b54-black_hole.scn
+res://scenes/space_station.tscn::33b5095e69708740308f94f905762cdb::1773583083::res://.godot/exported/133200997/export-8fc21e3f0f8b3bb03d231f04ef99aeed-space_station.scn
+res://scenes/star.tscn::dd9869020617f998bab8552136baf8d9::1773583081::res://.godot/exported/133200997/export-594aca27bdcecd10c4567c6b9d5d0d2b-star.scn
+res://scenes/station_menu.tscn::9915f2a41484e1f3333f96cfe08b211a::1773583084::res://.godot/exported/133200997/export-7a08377f21695b7a319aa524ff4ce088-station_menu.scn
