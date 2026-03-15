@@ -88,25 +88,43 @@ func _build_ui() -> void:
 	_resource_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(_resource_label)
 
-	# Virtual joystick (bottom-left)
+	# Virtual joystick (center-bottom)
 	_joystick = Control.new()
 	_joystick.set_script(load("res://scripts/virtual_joystick.gd"))
-	_joystick.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_joystick.offset_left = 20
-	_joystick.offset_top = -200
-	_joystick.offset_right = 160
+	_joystick.anchor_left = 0.5
+	_joystick.anchor_right = 0.5
+	_joystick.anchor_top = 1.0
+	_joystick.anchor_bottom = 1.0
+	_joystick.offset_left = -75
+	_joystick.offset_right = 75
+	_joystick.offset_top = -210
 	_joystick.offset_bottom = -60
 	add_child(_joystick)
 
-	# Fire button (bottom-right)
-	_fire_button = Control.new()
-	_fire_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_fire_button.offset_left = -130
-	_fire_button.offset_top = -200
-	_fire_button.offset_right = -20
-	_fire_button.offset_bottom = -60
-	_fire_button.gui_input.connect(_on_fire_input)
-	_fire_button.draw.connect(_on_fire_button_draw)
+	# Fire button (bottom-right) — styled Button
+	var fire_btn := Button.new()
+	fire_btn.text = "🔥"
+	fire_btn.add_theme_font_size_override("font_size", 32)
+	fire_btn.anchor_left = 1.0
+	fire_btn.anchor_right = 1.0
+	fire_btn.anchor_top = 1.0
+	fire_btn.anchor_bottom = 1.0
+	fire_btn.offset_left = -110
+	fire_btn.offset_right = -20
+	fire_btn.offset_top = -110
+	fire_btn.offset_bottom = -20
+	var fire_style := StyleBoxFlat.new()
+	fire_style.bg_color = Color(0.7, 0.1, 0.1, 0.6)
+	fire_style.corner_radius_top_left = 45
+	fire_style.corner_radius_top_right = 45
+	fire_style.corner_radius_bottom_left = 45
+	fire_style.corner_radius_bottom_right = 45
+	fire_btn.add_theme_stylebox_override("normal", fire_style)
+	var fire_style_pressed := fire_style.duplicate() as StyleBoxFlat
+	fire_style_pressed.bg_color = Color(1.0, 0.2, 0.2, 0.9)
+	fire_btn.add_theme_stylebox_override("pressed", fire_style_pressed)
+	fire_btn.gui_input.connect(_on_fire_input)
+	_fire_button = fire_btn
 	add_child(_fire_button)
 
 	# Action button (center bottom)
