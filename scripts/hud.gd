@@ -124,7 +124,7 @@ func _build_ui() -> void:
 	var fire_style_pressed := fire_style.duplicate() as StyleBoxFlat
 	fire_style_pressed.bg_color = Color(1.0, 0.2, 0.2, 0.9)
 	fire_btn.add_theme_stylebox_override("pressed", fire_style_pressed)
-	fire_btn.gui_input.connect(_on_fire_input)
+	fire_btn.pressed.connect(_on_fire_toggled)
 	_fire_button = fire_btn
 	add_child(_fire_button)
 
@@ -202,15 +202,9 @@ func get_joystick_direction() -> Vector2:
 	return Vector2.ZERO
 
 
-func _on_fire_input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		if (event as InputEventScreenTouch).pressed:
-			_fire_pressed = not _fire_pressed
-			_fire_button.queue_redraw()
-	elif event is InputEventMouseButton:
-		if (event as InputEventMouseButton).pressed:
-			_fire_pressed = not _fire_pressed
-			_fire_button.queue_redraw()
+func _on_fire_toggled() -> void:
+	_fire_pressed = not _fire_pressed
+	_fire_button.queue_redraw()
 
 
 func _check_nearby_objects() -> void:
