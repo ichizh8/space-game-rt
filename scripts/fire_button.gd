@@ -1,33 +1,7 @@
 extends Control
-
-signal toggled(active: bool)
+# Visual-only — input is handled by hud.gd _input() position check
 
 var is_active := false
-var _debouncing := false
-
-
-func _gui_input(event: InputEvent) -> void:
-	if _debouncing:
-		get_viewport().set_input_as_handled()
-		return
-	var did_toggle := false
-	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
-		did_toggle = true
-	elif event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			did_toggle = true
-	if did_toggle:
-		_debouncing = true
-		call_deferred("_clear_debounce")
-		is_active = not is_active
-		toggled.emit(is_active)
-		queue_redraw()
-		get_viewport().set_input_as_handled()
-
-
-func _clear_debounce() -> void:
-	_debouncing = false
 
 
 func set_active(value: bool) -> void:

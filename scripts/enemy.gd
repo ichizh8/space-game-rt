@@ -173,7 +173,7 @@ func take_damage(amount: float) -> void:
 	modulate = Color(1.5, 0.3, 0.3, 1.0)
 	queue_redraw()
 	if hp <= 0:
-		_die()
+			call_deferred("_die")
 
 
 func _die() -> void:

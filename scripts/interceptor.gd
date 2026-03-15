@@ -33,7 +33,7 @@ func _setup_sprite() -> void:
 	sprite.texture = tex
 	var scale_factor: float = 44.0 / max(tex.get_size().x, tex.get_size().y)
 	sprite.scale = Vector2(scale_factor, scale_factor)
-	sprite.rotation = PI
+	sprite.rotation = 0.0
 	add_child(sprite)
 
 
@@ -120,7 +120,7 @@ func take_damage(amount: float) -> void:
 	modulate = Color(1.5, 0.3, 0.3, 1.0)
 	queue_redraw()
 	if hp <= 0:
-		_explode()
+		call_deferred("_explode")
 
 
 func _get_player() -> Node2D:

@@ -114,11 +114,9 @@ func _build_ui() -> void:
 	fire_btn.offset_right = -20
 	fire_btn.offset_top = -110
 	fire_btn.offset_bottom = -20
-	fire_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	fire_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fire_button = fire_btn
 	add_child(_fire_button)
-	fire_btn.toggled.connect(func(active: bool):
-		_fire_pressed = active)
 
 
 	# Cockpit button (top-left)
@@ -172,6 +170,25 @@ func _connect_signals() -> void:
 	GameState.fuel_changed.connect(_on_fuel_changed)
 	GameState.credits_changed.connect(_on_credits_changed)
 	GameState.resources_changed.connect(_on_resources_changed)
+
+
+func _input(event: InputEvent) -> void:
+	var vp_size := get_viewport().get_visible_rect().size
+	var tap_pos := Vector2(-1, -1)
+	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+		tap_pos = (event as InputEventScreenTouch).position
+	elif event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			tap_pos = mb.position
+	if tap_pos.x >= 0 and _fire_debounce <= 0.0:
+		# Fire zone: bottom-right 120x120 px
+		if tap_pos.x > vp_size.x - 120 and tap_pos.y > vp_size.y - 120:
+			_fire_pressed = not _fire_pressed
+			_fire_debounce = 0.3
+			if is_instance_valid(_fire_button) and _fire_button.has_method("set_active"):
+				_fire_button.set_active(_fire_pressed)
+			get_viewport().set_input_as_handled()
 
 
 func _process(delta: float) -> void:
