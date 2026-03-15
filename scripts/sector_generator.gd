@@ -159,11 +159,7 @@ func _spawn_planet(pos: Vector2) -> void:
 func _spawn_enemy(pos: Vector2) -> void:
 	var enemy := enemy_scene.instantiate() as Node2D
 	enemy.global_position = pos
-	if randi() % 2 == 0:
-		enemy.enemy_type = 0  # PIRATE
-	else:
-		enemy.enemy_type = 1  # DRONE
-	enemy._ready()  # Re-initialize with correct type
+	enemy.enemy_type = 0 if randi() % 2 == 0 else 1
 	get_tree().current_scene.add_child(enemy)
 	_spawned_objects.append(enemy)
 

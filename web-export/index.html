@@ -5,89 +5,18 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
 		<title>Space Explorer RT</title>
 		<style>
-html, body, #canvas {
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
-
-body {
-	color: white;
-	background-color: #05050f;
-	overflow: hidden;
-	touch-action: none;
-}
-
-#canvas {
-	display: block;
-}
-
-#canvas:focus {
-	outline: none;
-}
-
-#status {
-	position: absolute;
-	left: 0; right: 0; top: 0; bottom: 0;
-	background-color: #05050f;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	gap: 24px;
-	visibility: hidden;
-}
-
+html, body, #canvas { margin: 0; padding: 0; border: 0; }
+body { color: white; background-color: #05050f; overflow: hidden; touch-action: none; }
+#canvas { display: block; }
+#canvas:focus { outline: none; }
+#status { position: absolute; left:0; right:0; top:0; bottom:0; background:#05050f; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:24px; visibility:hidden; }
 #status-splash { display: none; }
-
-#status-title {
-	font-family: monospace;
-	font-size: 22px;
-	letter-spacing: 4px;
-	color: #aad4ff;
-	text-transform: uppercase;
-}
-
-#status-subtitle {
-	font-family: monospace;
-	font-size: 11px;
-	letter-spacing: 2px;
-	color: #4466aa;
-	margin-top: -18px;
-}
-
-#status-bar-wrap {
-	width: 200px;
-	height: 4px;
-	background: #111;
-	border-radius: 2px;
-	overflow: hidden;
-}
-
-#status-bar-fill {
-	height: 100%;
-	width: 0%;
-	background: linear-gradient(90deg, #2266cc, #66aaff);
-	border-radius: 2px;
-	transition: width 0.15s ease;
-}
-
-#status-progress { display: none; }
-
-#status-notice {
-	display: none;
-	background-color: #2a1520;
-	border-radius: 0.5rem;
-	border: 1px solid #661122;
-	color: #e0e0e0;
-	font-family: monospace;
-	font-size: 12px;
-	line-height: 1.4;
-	margin: 0 2rem;
-	padding: 1rem;
-	text-align: center;
-}
-		</style>
+#status-title { font-family:monospace; font-size:22px; letter-spacing:4px; color:#aad4ff; text-transform:uppercase; }
+#status-subtitle { font-family:monospace; font-size:11px; letter-spacing:2px; color:#4466aa; margin-top:-18px; }
+#status-bar-wrap { width:200px; height:4px; background:#111; border-radius:2px; overflow:hidden; }
+#status-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,#2266cc,#66aaff); border-radius:2px; transition:width 0.15s ease; }
+#status-progress, #status-notice { display: none; }
+</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 
@@ -109,10 +38,11 @@ body {
 			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
 		</div>
+		</div>
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":71392,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":71360,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -205,7 +135,7 @@ const engine = new Engine(GODOT_CONFIG);
 		engine.startGame({
 			'onProgress': function (current, total) {
 				if (current > 0 && total > 0) {
-					const pct = Math.round((current / total) * 100);
+					const pct = Math.round((current/total)*100);
 					statusBarFill.style.width = pct + '%';
 					statusSubtitle.textContent = pct < 100 ? 'loading ' + pct + '%' : 'starting...';
 				}

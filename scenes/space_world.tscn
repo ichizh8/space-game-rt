@@ -20,8 +20,10 @@ offset_right = 2000.0
 offset_bottom = 2000.0
 color = Color(0.01, 0.01, 0.05, 1)
 
-[node name="Stars" type="Node2D" parent="."]
-z_index = -5
+[node name="StarLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Stars" type="Node2D" parent="StarLayer"]
 script = ExtResource("2")
 
 [node name="Camera2D" type="Camera2D" parent="."]
