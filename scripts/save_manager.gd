@@ -17,6 +17,9 @@ func save_game() -> void:
 		"player_speed_bonus": GameState.player_speed_bonus,
 		"player_damage_bonus": GameState.player_damage_bonus,
 		"player_mining_speed_bonus": GameState.player_mining_speed_bonus,
+		"weapon_level": GameState.weapon_level,
+		"speed_level": GameState.speed_level,
+		"shield_level": GameState.shield_level,
 		"last_planet_id": GameState.last_planet_id,
 	}
 	var json_string := JSON.stringify(data, "\t")
@@ -53,6 +56,9 @@ func load_game() -> bool:
 	GameState.player_speed_bonus = float(data.get("player_speed_bonus", 0.0))
 	GameState.player_damage_bonus = float(data.get("player_damage_bonus", 0.0))
 	GameState.player_mining_speed_bonus = float(data.get("player_mining_speed_bonus", 0.0))
+	GameState.weapon_level = int(data.get("weapon_level", 0))
+	GameState.speed_level = int(data.get("speed_level", 0))
+	GameState.shield_level = int(data.get("shield_level", 0))
 	GameState.last_planet_id = data.get("last_planet_id", "")
 	return true
 

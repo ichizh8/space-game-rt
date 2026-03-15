@@ -24,6 +24,11 @@ var player_speed_bonus: float = 0.0
 var player_damage_bonus: float = 0.0
 var player_mining_speed_bonus: float = 0.0
 
+# Ship upgrade levels (0-3 each)
+var weapon_level: int = 0
+var speed_level: int = 0
+var shield_level: int = 0
+
 # Last planet the player visited (for respawn)
 var last_planet_id: String = ""
 
@@ -150,4 +155,7 @@ func reset_game() -> void:
 	player_speed_bonus = 0.0
 	player_damage_bonus = 0.0
 	player_mining_speed_bonus = 0.0
+	weapon_level = 0
+	speed_level = 0
+	shield_level = 0
 	last_planet_id = ""

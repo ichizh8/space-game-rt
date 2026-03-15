@@ -30,6 +30,13 @@ func mine() -> void:
 		return
 	is_being_mined = true
 	GameState.add_resource(resource_type, amount)
+	# Floating text effect
+	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
+	if is_instance_valid(em) and em.has_method("add_float"):
+		var res_color := get_resource_color().lightened(0.3)
+		var label := "+" + str(amount) + " " + resource_type.to_upper()
+		em.add_float(label, global_position, res_color)
+	queue_redraw()
 
 
 

@@ -24,6 +24,11 @@ func try_collect(body: Node2D) -> void:
 		_collected = true
 		GameState.collect_artifact(artifact_data)
 		collected.emit(artifact_data)
+		# Floating text
+		var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
+		if is_instance_valid(em) and em.has_method("add_float"):
+			em.add_float("ARTIFACT!", global_position, Color.GOLD)
+		queue_redraw()
 
 
 

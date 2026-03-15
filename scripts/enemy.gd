@@ -169,8 +169,18 @@ func take_damage(amount: float) -> void:
 
 func _die() -> void:
 	is_dead = true
+	# Drop resources
 	var drop_types := ["ore", "crystal", "scrap", "fuel"]
 	GameState.add_resource(drop_types[randi() % drop_types.size()], randi_range(5, 10))
+	# Credit reward
+	var credit_reward := 20 if enemy_type == EnemyType.PIRATE else 35
+	GameState.add_credits(credit_reward)
+	# Visual effects (pure data only - safe from _process context)
+	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
+	if is_instance_valid(em) and em.has_method("add_explosion"):
+		em.add_explosion(global_position, 1.2 if enemy_type == EnemyType.DRONE else 1.0)
+		em.add_float("+" + str(credit_reward) + " cr", global_position + Vector2(0, -30), Color.ORANGE)
+	queue_redraw()
 
 
 func _get_player() -> Node2D:

@@ -368,6 +368,91 @@ func _build_services_tab() -> void:
 		row.add_child(sell_btn)
 		vbox.add_child(row)
 
+	# Ship upgrades section
+	var sep2 := HSeparator.new()
+	vbox.add_child(sep2)
+	var upgrade_title := Label.new()
+	upgrade_title.text = "SHIP UPGRADES"
+	upgrade_title.add_theme_font_size_override("font_size", 14)
+	upgrade_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
+	vbox.add_child(upgrade_title)
+
+	# Upgrade definitions: [name, state_var, costs, bonus_var, bonus_amounts, bonus_label_prefix]
+	var upgrades := [
+		{
+			"name": "Weapons",
+			"level_getter": func(): return GameState.weapon_level,
+			"costs": [80, 200, 500],
+			"labels": ["+5 dmg", "+5 dmg", "+10 dmg"],
+			"apply": func(tier: int): GameState.player_damage_bonus += [5.0, 5.0, 10.0][tier],
+			"level_setter": func(): GameState.weapon_level += 1
+		},
+		{
+			"name": "Engines",
+			"level_getter": func(): return GameState.speed_level,
+			"costs": [60, 150, 400],
+			"labels": ["+20 spd", "+20 spd", "+40 spd"],
+			"apply": func(tier: int): GameState.player_speed_bonus += [20.0, 20.0, 40.0][tier],
+			"level_setter": func(): GameState.speed_level += 1
+		},
+		{
+			"name": "Hull Plating",
+			"level_getter": func(): return GameState.shield_level,
+			"costs": [100, 250, 600],
+			"labels": ["+25 max hull", "+25 max hull", "+50 max hull"],
+			"apply": func(tier: int):
+				var bonus := [25.0, 25.0, 50.0][tier]
+				GameState.max_hull += bonus
+				GameState.hull = min(GameState.hull + bonus, GameState.max_hull)
+				GameState.hull_changed.emit(GameState.hull),
+			"level_setter": func(): GameState.shield_level += 1
+		}
+	]
+
+	for upg in upgrades:
+		var level: int = upg["level_getter"].call()
+		var upg_row := HBoxContainer.new()
+		upg_row.custom_minimum_size.y = 40
+		vbox.add_child(upg_row)
+
+		var upg_name_lbl := Label.new()
+		var level_str := "MAX" if level >= 3 else ("Lv" + str(level))
+		upg_name_lbl.text = upg["name"] + " [" + level_str + "]"
+		upg_name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		upg_name_lbl.add_theme_font_size_override("font_size", 13)
+		upg_row.add_child(upg_name_lbl)
+
+		if level < 3:
+			var cost := upg["costs"][level]
+			var bonus_lbl := upg["labels"][level]
+			var upg_btn := Button.new()
+			upg_btn.text = bonus_lbl + " (" + str(cost) + " cr)"
+			upg_btn.custom_minimum_size = Vector2(140, 36)
+			upg_btn.add_theme_font_size_override("font_size", 12)
+			upg_btn.disabled = GameState.credits < cost
+			var cap_level := level  # capture for lambda
+			upg_btn.pressed.connect(func():
+				var cur_level: int = upg["level_getter"].call()
+				if cur_level >= 3:
+					return
+				var upg_cost: int = upg["costs"][cur_level]
+				if GameState.credits >= upg_cost:
+					GameState.credits -= upg_cost
+					GameState.credits_changed.emit(GameState.credits)
+					upg["apply"].call(cur_level)
+					upg["level_setter"].call()
+					SaveManager.save_game()
+					_build_services_tab()
+					_tab_container.current_tab = 1
+			)
+			upg_row.add_child(upg_btn)
+		else:
+			var max_lbl := Label.new()
+			max_lbl.text = "MAXED"
+			max_lbl.add_theme_color_override("font_color", Color.GOLD)
+			max_lbl.add_theme_font_size_override("font_size", 13)
+			upg_row.add_child(max_lbl)
+
 
 func _on_service_repair() -> void:
 	if GameState.remove_resource("scrap", 15):
