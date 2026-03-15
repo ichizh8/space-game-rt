@@ -26,6 +26,7 @@ var orbit_angle: float = 0.0
 var orbit_direction: int = 1
 
 var _flash_timer: float = 0.0
+var _has_sprite := false
 
 var bullet_scene: PackedScene
 
@@ -48,6 +49,7 @@ func _ready() -> void:
 			shoot_cooldown = 1.5; burst_max = 1
 	orbit_angle = randf() * TAU
 	patrol_direction = Vector2.from_angle(randf() * TAU)
+	_setup_sprite()
 	queue_redraw()
 
 
@@ -195,15 +197,30 @@ func _get_player() -> Node2D:
 	return null
 
 
+func _setup_sprite() -> void:
+	if enemy_type == EnemyType.PIRATE:
+		var sprite := Sprite2D.new()
+		var tex := load("res://assets/2026-03-15-enemy-pirate.png") as Texture2D
+		if is_instance_valid(tex):
+			sprite.texture = tex
+			var target_size := 30.0
+			var tex_size := tex.get_size()
+			var scale_factor: float = target_size / max(tex_size.x, tex_size.y)
+			sprite.scale = Vector2(scale_factor, scale_factor)
+			add_child(sprite)
+			_has_sprite = true
+
+
 func _draw() -> void:
 	if is_dead:
 		return
 	var base_color := Color.RED if enemy_type == EnemyType.PIRATE else Color.ORANGE
 	match enemy_type:
 		EnemyType.PIRATE:
-			draw_colored_polygon(PackedVector2Array([
-				Vector2(0, -12), Vector2(-9, 0), Vector2(0, 12), Vector2(9, 0)
-			]), base_color)
+			if not _has_sprite:
+				draw_colored_polygon(PackedVector2Array([
+					Vector2(0, -12), Vector2(-9, 0), Vector2(0, 12), Vector2(9, 0)
+				]), base_color)
 		EnemyType.DRONE:
 			var pts := PackedVector2Array()
 			for i in range(6):

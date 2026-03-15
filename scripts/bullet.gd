@@ -60,6 +60,12 @@ func _draw() -> void:
 	if _hit:
 		return
 	if is_player_bullet:
-		draw_circle(Vector2.ZERO, 3, Color.YELLOW)
+		# Player bullet: cyan core with glow halo
+		draw_circle(Vector2.ZERO, 5.5, Color(0.3, 0.9, 1.0, 0.2))  # outer glow
+		draw_circle(Vector2.ZERO, 3.5, Color(0.5, 1.0, 1.0, 0.5))  # mid glow
+		draw_circle(Vector2.ZERO, 2.0, Color(1.0, 1.0, 1.0, 0.95)) # bright core
 	else:
-		draw_circle(Vector2.ZERO, 4, Color(1.0, 0.3, 0.1))
+		# Enemy bullet: orange-red with glow
+		draw_circle(Vector2.ZERO, 6.0, Color(1.0, 0.4, 0.1, 0.15)) # outer glow
+		draw_circle(Vector2.ZERO, 4.0, Color(1.0, 0.5, 0.1, 0.4))  # mid glow
+		draw_circle(Vector2.ZERO, 2.5, Color(1.0, 0.85, 0.5, 1.0)) # core

@@ -7,6 +7,8 @@ var is_firing := false
 var can_shoot := true
 var bullet_scene: PackedScene
 var _gravity_accum: Vector2 = Vector2.ZERO
+var _trail_points: Array[Vector2] = []
+var _trail_timer: float = 0.0
 
 @onready var gun_point: Marker2D = $GunPoint
 @onready var shoot_timer: Timer = $ShootTimer
@@ -15,6 +17,7 @@ var _gravity_accum: Vector2 = Vector2.ZERO
 func _ready() -> void:
 	bullet_scene = load("res://scenes/bullet.tscn")
 	shoot_timer.timeout.connect(_on_shoot_timer_timeout)
+	_setup_sprite()
 
 
 func _physics_process(delta: float) -> void:
@@ -35,6 +38,17 @@ func _physics_process(delta: float) -> void:
 	velocity += _gravity_accum
 	_gravity_accum = Vector2.ZERO
 	move_and_slide()
+
+	_trail_timer += delta
+	if _trail_timer > 0.04 and velocity.length() > 10.0:
+		_trail_timer = 0.0
+		_trail_points.push_front(global_position)
+		if _trail_points.size() > 12:
+			_trail_points.resize(12)
+		queue_redraw()
+	elif velocity.length() < 10.0 and not _trail_points.is_empty():
+		_trail_points.clear()
+		queue_redraw()
 
 	if is_firing and can_shoot and GameState.fuel > 0:
 		_shoot()
@@ -63,13 +77,29 @@ func set_firing(value: bool) -> void:
 	is_firing = value
 
 
+func _setup_sprite() -> void:
+	var sprite := Sprite2D.new()
+	sprite.name = "ShipSprite"
+	var tex := load("res://assets/2026-03-15-ship-sprite.png") as Texture2D
+	if is_instance_valid(tex):
+		sprite.texture = tex
+		# Scale to fit: sprite is ~1024px, we want ~36px game size
+		var target_size := 36.0
+		var tex_size := tex.get_size()
+		var scale_factor: float = target_size / max(tex_size.x, tex_size.y)
+		sprite.scale = Vector2(scale_factor, scale_factor)
+	else:
+		# Fallback: keep procedural draw if texture fails
+		return
+	add_child(sprite)
+
+
 func _draw() -> void:
-	# Draw a simple cyan triangle as placeholder ship
-	var points := PackedVector2Array([
-		Vector2(0, -15),
-		Vector2(-10, 15),
-		Vector2(10, 15)
-	])
-	draw_colored_polygon(points, Color.CYAN)
-	# Engine glow
-	draw_circle(Vector2(0, 12), 4, Color(1.0, 0.5, 0.0, 0.6))
+	# Engine exhaust trail
+	for i in range(_trail_points.size()):
+		var world_pt: Vector2 = _trail_points[i]
+		var local_pt: Vector2 = to_local(world_pt)
+		var t: float = 1.0 - float(i) / float(_trail_points.size())
+		var radius: float = 3.5 * t
+		var alpha: float = 0.6 * t
+		draw_circle(local_pt, radius, Color(0.3, 0.7, 1.0, alpha))

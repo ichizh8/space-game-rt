@@ -10,6 +10,13 @@ const TRAUMA_DECAY := 1.5
 
 
 func _ready() -> void:
+	# Add parallax starfield as background
+	var sf_scene := load("res://scenes/starfield.tscn") as PackedScene
+	if is_instance_valid(sf_scene):
+		var sf := sf_scene.instantiate()
+		add_child(sf)
+		move_child(sf, 0)  # ensure it's behind everything
+	camera.add_to_group("camera")
 	GameState.player_died.connect(_on_player_died)
 	GameState.hull_changed.connect(_on_hull_changed)
 	_last_hull = GameState.hull
