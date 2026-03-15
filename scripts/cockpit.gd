@@ -3,6 +3,7 @@ extends CanvasLayer
 var _tab_container: TabContainer
 var _captain_tab: ScrollContainer
 var _bridge_tab: ScrollContainer
+var _quests_tab: ScrollContainer
 var _crafting_tab: ScrollContainer
 var _map_tab: ScrollContainer
 var _inventory_tab: ScrollContainer
@@ -146,6 +147,7 @@ func _build_ui() -> void:
 
 	_build_bridge_tab()
 	_build_captain_tab()
+	_build_quests_tab()
 	_build_crafting_tab()
 	_build_inventory_tab()
 	_build_map_tab()
@@ -298,6 +300,146 @@ func _add_perk_branch(vbox: VBoxContainer, branch_name: String, perks: Array) ->
 			btn.disabled = GameState.get_available_perk_points() <= 0
 			btn.pressed.connect(_on_perk_buy.bind(perk["id"]))
 			row.add_child(btn)
+
+
+func _build_quests_tab() -> void:
+	_quests_tab = ScrollContainer.new()
+	_quests_tab.name = "Quests"
+	_tab_container.add_child(_quests_tab)
+	_refresh_quests()
+
+
+func _refresh_quests() -> void:
+	for c in _quests_tab.get_children():
+		c.queue_free()
+	var vbox := VBoxContainer.new()
+	vbox.custom_minimum_size.x = 330
+	vbox.add_theme_constant_override("separation", 6)
+	_quests_tab.add_child(vbox)
+
+	# Section 1: Active Quests
+	var sec1 := _make_section_label("ACTIVE QUESTS")
+	vbox.add_child(sec1)
+
+	if GameState.active_quests.is_empty():
+		var none := Label.new()
+		none.text = "No active quests. Accept quests at planets and stations."
+		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		none.add_theme_font_size_override("font_size", 13)
+		none.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
+		vbox.add_child(none)
+	else:
+		for q in GameState.active_quests:
+			var card := PanelContainer.new()
+			var cstyle := StyleBoxFlat.new()
+			cstyle.bg_color = Color(0.08, 0.1, 0.18, 0.9)
+			cstyle.set_border_width_all(1)
+			cstyle.border_color = Color(0.5, 0.5, 0.2)
+			cstyle.content_margin_left = 8
+			cstyle.content_margin_right = 8
+			cstyle.content_margin_top = 6
+			cstyle.content_margin_bottom = 6
+			card.add_theme_stylebox_override("panel", cstyle)
+			vbox.add_child(card)
+
+			var row := HBoxContainer.new()
+			card.add_child(row)
+
+			var info := VBoxContainer.new()
+			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(info)
+
+			var title_lbl := Label.new()
+			title_lbl.text = q.get("title", "Quest")
+			title_lbl.add_theme_font_size_override("font_size", 14)
+			title_lbl.add_theme_color_override("font_color", Color.YELLOW)
+			info.add_child(title_lbl)
+
+			var desc_lbl := Label.new()
+			desc_lbl.text = q.get("description", "")
+			desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			desc_lbl.add_theme_font_size_override("font_size", 11)
+			desc_lbl.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6))
+			info.add_child(desc_lbl)
+
+			var prog_lbl := Label.new()
+			var qtype: String = q.get("type", "")
+			match qtype:
+				"destroy":
+					prog_lbl.text = "%d / %d enemies killed" % [q.get("progress", 0), q.get("required", 0)]
+				"gather":
+					var res_name: String = q.get("resource", "")
+					prog_lbl.text = "%d / %d %s" % [GameState.resources.get(res_name, 0), q.get("required", 0), res_name]
+				"story":
+					var qid: String = q.get("id", "")
+					if qid == "story_act1":
+						prog_lbl.text = "Travel 1500 units from origin"
+					elif qid == "story_act3":
+						var killed: int = 0
+						var total: int = 0
+						var v = GameState.get_story_flag("cmd_killed")
+						if v != null:
+							killed = int(v)
+						v = GameState.get_story_flag("cmd_total")
+						if v != null:
+							total = int(v)
+						if total > 0:
+							prog_lbl.text = "%d / %d hostiles destroyed" % [killed, total]
+						else:
+							prog_lbl.text = "Navigate to the marked location"
+					else:
+						prog_lbl.text = "In progress..."
+				_:
+					prog_lbl.text = ""
+			prog_lbl.add_theme_font_size_override("font_size", 12)
+			prog_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
+			info.add_child(prog_lbl)
+
+			var abandon_btn := Button.new()
+			abandon_btn.text = "X"
+			abandon_btn.custom_minimum_size = Vector2(36, 36)
+			abandon_btn.add_theme_font_size_override("font_size", 14)
+			var qid_bind: String = q.get("id", "")
+			abandon_btn.pressed.connect(func():
+				GameState.abandon_quest(qid_bind)
+				_refresh_quests())
+			row.add_child(abandon_btn)
+
+	# Section 2: Storyline
+	vbox.add_child(HSeparator.new())
+	var sec2 := _make_section_label("STORYLINE")
+	vbox.add_child(sec2)
+
+	var acts := [
+		["Act 1: Investigate distress signal", "story_act1", 1],
+		["Act 2: Locate command ship", "story_act2", 2],
+		["Act 3: Destroy command ship", "story_act3", 3],
+	]
+	for act_info in acts:
+		var act_row := HBoxContainer.new()
+		act_row.custom_minimum_size.y = 26
+		vbox.add_child(act_row)
+		var dot := Label.new()
+		var act_label := Label.new()
+		act_label.text = str(act_info[0])
+		act_label.add_theme_font_size_override("font_size", 13)
+		var act_id: String = str(act_info[1])
+		var act_num: int = int(act_info[2])
+		if GameState.is_quest_completed(act_id):
+			dot.text = "  "
+			dot.add_theme_color_override("font_color", Color.GREEN)
+			act_label.add_theme_color_override("font_color", Color.GREEN)
+		elif GameState.story_act == act_num and GameState.is_quest_active(act_id):
+			dot.text = "  "
+			dot.add_theme_color_override("font_color", Color.YELLOW)
+			act_label.add_theme_color_override("font_color", Color.YELLOW)
+		else:
+			dot.text = "  "
+			dot.add_theme_color_override("font_color", Color(0.3, 0.3, 0.4))
+			act_label.add_theme_color_override("font_color", Color(0.3, 0.3, 0.4))
+		dot.add_theme_font_size_override("font_size", 13)
+		act_row.add_child(dot)
+		act_row.add_child(act_label)
 
 
 func _build_crafting_tab() -> void:
