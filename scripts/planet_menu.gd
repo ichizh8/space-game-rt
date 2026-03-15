@@ -131,6 +131,8 @@ func _on_quest_choice(q_id: String, choice: Dictionary) -> void:
 	for key in reward:
 		if key == "credits":
 			GameState.add_credits(int(reward[key]))
+		elif key == "fuel":
+			GameState.add_fuel(float(reward[key]))  # fuel goes to tank, not cargo
 		else:
 			GameState.add_resource(key, int(reward[key]))
 
@@ -161,6 +163,13 @@ func _on_quest_choice(q_id: String, choice: Dictionary) -> void:
 		reward_label.add_theme_font_size_override("font_size", 14)
 		reward_label.add_theme_color_override("font_color", Color.GREEN)
 		vbox.add_child(reward_label)
+
+	var continue_btn := Button.new()
+	continue_btn.text = "Continue"
+	continue_btn.custom_minimum_size.y = 48
+	continue_btn.add_theme_font_size_override("font_size", 15)
+	continue_btn.pressed.connect(func(): call_deferred("queue_free"))
+	vbox.add_child(continue_btn)
 
 	SaveManager.save_game()
 
