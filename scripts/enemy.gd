@@ -180,8 +180,11 @@ func take_damage(amount: float) -> void:
 			call_deferred("_die")
 
 
+signal died()
+
 func _die() -> void:
 	is_dead = true
+	GameState.record_kill()
 	# Credit and XP rewards
 	var credit_reward := 20 if enemy_type == EnemyType.PIRATE else 35
 	var xp_reward: int = 15 if enemy_type == EnemyType.PIRATE else 25
@@ -195,6 +198,7 @@ func _die() -> void:
 	# Despawn after delay
 	_despawn_timer = 1.4
 	queue_redraw()
+	died.emit()
 
 
 func _spawn_loot(cr: int) -> void:

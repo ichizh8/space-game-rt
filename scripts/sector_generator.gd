@@ -61,6 +61,7 @@ func _ready() -> void:
 	battleship_scene = load("res://scenes/battleship.tscn")
 	turret_scene = load("res://scenes/turret.tscn")
 	hazard_asteroid_scene = load("res://scenes/hazard_asteroid.tscn")
+	GameState.player_died.connect(_on_player_died_for_end_screen)
 	call_deferred("_spawn_initial")
 
 
@@ -69,6 +70,7 @@ func _process(delta: float) -> void:
 	if _check_timer >= CHECK_INTERVAL:
 		_check_timer = 0.0
 		_manage_objects()
+		_check_story_triggers()
 	_biome_change_timer += delta
 	if _biome_change_timer >= BIOME_CHANGE_INTERVAL:
 		_biome_change_timer = 0.0
@@ -422,3 +424,129 @@ func _get_player() -> Node2D:
 	if players.size() > 0:
 		return players[0] as Node2D
 	return null
+
+
+func _check_story_triggers() -> void:
+	var player := _get_player()
+	if not is_instance_valid(player):
+		return
+	var player_pos := player.global_position
+	var dist := player_pos.length()
+
+	# Act 1: player traveled far enough with distress quest active
+	if GameState.story_act == 1 and GameState.is_quest_active("story_act1"):
+		if dist >= 1500.0 and not GameState.get_story_flag("distress_found"):
+			GameState.set_story_flag("distress_found", true)
+			call_deferred("_spawn_story_planet_deferred", player_pos + Vector2(300, -150))
+			var hud := get_tree().get_first_node_in_group("hud")
+			if is_instance_valid(hud) and hud.has_method("show_notification"):
+				hud.show_notification("Signal source located! Land on the marked planet.")
+			GameState.complete_quest("story_act1")
+			_apply_reward({"credits": 100})
+			GameState.story_act = 2
+
+	# Act 3: spawn command ship cluster when player is near
+	if GameState.story_act == 3 and not GameState.get_story_flag("command_ship_spawned"):
+		var cx: float = 2500.0
+		var cy: float = 800.0
+		var v = GameState.get_story_flag("command_ship_pos_x")
+		if v != null:
+			cx = float(v)
+		v = GameState.get_story_flag("command_ship_pos_y")
+		if v != null:
+			cy = float(v)
+		var cmd_pos := Vector2(cx, cy)
+		if player_pos.distance_to(cmd_pos) < 600.0:
+			GameState.set_story_flag("command_ship_spawned", true)
+			call_deferred("_spawn_command_ship_cluster", cmd_pos)
+
+	# Act 3: check if command ship cluster destroyed
+	if GameState.story_act == 3 and GameState.get_story_flag("command_ship_spawned"):
+		var total: int = 0
+		var killed: int = 0
+		var vt = GameState.get_story_flag("cmd_total")
+		if vt != null:
+			total = int(vt)
+		var vk = GameState.get_story_flag("cmd_killed")
+		if vk != null:
+			killed = int(vk)
+		if total > 0 and killed >= total and not GameState.get_story_flag("victory_triggered"):
+			GameState.set_story_flag("victory_triggered", true)
+			call_deferred("_trigger_victory")
+
+
+func _spawn_story_planet_deferred(pos: Vector2) -> void:
+	var planet := planet_scene.instantiate() as Node2D
+	planet.global_position = pos
+	if planet.has_method("setup"):
+		planet.setup("Signal Source", "story_signal_planet", "story_act2")
+	if planet.has_signal("landed"):
+		planet.landed.connect(_on_planet_landed)
+	get_tree().current_scene.add_child(planet)
+	_spawned_objects.append(planet)
+	GameState.map_discovered_planets["story_signal_planet"] = {
+		"pos_x": pos.x, "pos_y": pos.y, "name": "Signal Source", "color_h": 0.15
+	}
+
+
+func _spawn_command_ship_cluster(center: Vector2) -> void:
+	var total := 0
+	# 2 battleships + 4 interceptors
+	for i in range(2):
+		var bs := battleship_scene.instantiate() as Node2D
+		bs.global_position = center + Vector2(i * 120 - 60, 0)
+		get_tree().current_scene.add_child(bs)
+		_spawned_objects.append(bs)
+		if bs.has_signal("died"):
+			bs.died.connect(_on_command_ship_enemy_died)
+		total += 1
+	for i in range(4):
+		var ic := interceptor_scene.instantiate() as Node2D
+		ic.global_position = center + Vector2.from_angle(i * TAU / 4) * 80
+		get_tree().current_scene.add_child(ic)
+		_spawned_objects.append(ic)
+		if ic.has_signal("died"):
+			ic.died.connect(_on_command_ship_enemy_died)
+		total += 1
+	GameState.set_story_flag("cmd_total", total)
+	GameState.set_story_flag("cmd_killed", 0)
+	var hud := get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("DOMINATOR COMMAND SHIP DETECTED! Destroy all hostiles!")
+
+
+func _on_command_ship_enemy_died() -> void:
+	var killed: int = 0
+	var v = GameState.get_story_flag("cmd_killed")
+	if v != null:
+		killed = int(v)
+	GameState.set_story_flag("cmd_killed", killed + 1)
+
+
+func _trigger_victory() -> void:
+	GameState.complete_quest("story_act3")
+	_apply_reward({"credits": 1000})
+	call_deferred("_open_end_screen", true)
+
+
+func _apply_reward(reward: Dictionary) -> void:
+	for key in reward:
+		if key == "credits":
+			GameState.add_credits(int(reward[key]))
+		elif key == "fuel":
+			GameState.add_fuel(float(reward[key]))
+		else:
+			GameState.add_resource(key, int(reward[key]))
+
+
+func _open_end_screen(victory: bool) -> void:
+	var end_scene := load("res://scenes/end_screen.tscn")
+	if end_scene:
+		var end := end_scene.instantiate()
+		if end.has_method("setup"):
+			end.setup(victory)
+		get_tree().current_scene.add_child(end)
+
+
+func _on_player_died_for_end_screen() -> void:
+	call_deferred("_open_end_screen", false)

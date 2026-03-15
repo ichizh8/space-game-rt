@@ -131,8 +131,11 @@ func take_damage(amount: float) -> void:
 			call_deferred("_die")
 
 
+signal died()
+
 func _die() -> void:
 	is_dead = true
+	GameState.record_kill()
 	GameState.add_xp(XP_REWARD)
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):
@@ -140,6 +143,7 @@ func _die() -> void:
 	call_deferred("_spawn_loot")
 	_despawn_timer = 2.0
 	queue_redraw()
+	died.emit()
 
 
 func _spawn_loot() -> void:

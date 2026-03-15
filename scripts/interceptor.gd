@@ -81,8 +81,11 @@ func _process(delta: float) -> void:
 				_explode()
 
 
+signal died()
+
 func _explode() -> void:
 	is_dead = true
+	GameState.record_kill()
 	var player := _get_player()
 	if is_instance_valid(player):
 		if global_position.distance_to(player.global_position) < EXPLOSION_RADIUS:
@@ -95,6 +98,7 @@ func _explode() -> void:
 	call_deferred("_spawn_loot")
 	_despawn_timer = 1.0
 	queue_redraw()
+	died.emit()
 
 
 func _spawn_loot() -> void:
