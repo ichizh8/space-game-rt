@@ -57,7 +57,10 @@ func _spawn_initial() -> void:
 		_spawn_asteroid(center + _random_offset(SPAWN_RADIUS))
 
 	# Spawn planets
-	var num_planets := randi_range(MIN_PLANETS, MAX_PLANETS)
+	# Spawn home station nearby
+	_spawn_planet(center + Vector2(150, -80))
+	# Spawn remaining planets farther out
+	var num_planets := randi_range(MIN_PLANETS - 1, MAX_PLANETS - 1)
 	for i in range(num_planets):
 		_spawn_planet(center + _random_offset(SPAWN_RADIUS))
 

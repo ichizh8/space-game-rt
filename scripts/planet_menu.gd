@@ -301,6 +301,98 @@ func _on_refuel_pressed() -> void:
 		_refresh_buildings()
 
 
+
+func _build_services_tab() -> void:
+	var scroll := ScrollContainer.new()
+	scroll.name = "Services"
+	_tab_container.add_child(scroll)
+	var vbox := VBoxContainer.new()
+	vbox.custom_minimum_size.x = 320
+	scroll.add_child(vbox)
+
+	# Repair
+	var repair_title := Label.new()
+	repair_title.text = "REPAIR & FUEL"
+	repair_title.add_theme_font_size_override("font_size", 14)
+	repair_title.add_theme_color_override("font_color", Color.CYAN)
+	vbox.add_child(repair_title)
+
+	var hull_lbl := Label.new()
+	hull_lbl.text = "Hull: %.0f / %.0f" % [GameState.hull, GameState.max_hull]
+	hull_lbl.add_theme_font_size_override("font_size", 13)
+	vbox.add_child(hull_lbl)
+
+	var repair_btn := Button.new()
+	repair_btn.text = "Repair +50 HP  (cost: 15 scrap)"
+	repair_btn.custom_minimum_size.y = 40
+	repair_btn.disabled = not GameState.has_resources({"scrap": 15})
+	repair_btn.pressed.connect(_on_service_repair)
+	vbox.add_child(repair_btn)
+
+	var fuel_lbl := Label.new()
+	fuel_lbl.text = "Fuel: %.0f / %.0f" % [GameState.fuel, GameState.max_fuel]
+	fuel_lbl.add_theme_font_size_override("font_size", 13)
+	vbox.add_child(fuel_lbl)
+
+	var refuel_btn := Button.new()
+	refuel_btn.text = "Refuel +50  (cost: 30 credits)"
+	refuel_btn.custom_minimum_size.y = 40
+	refuel_btn.disabled = GameState.credits < 30
+	refuel_btn.pressed.connect(_on_service_refuel)
+	vbox.add_child(refuel_btn)
+
+	# Sell resources
+	var sep := HSeparator.new()
+	vbox.add_child(sep)
+	var sell_title := Label.new()
+	sell_title.text = "SELL RESOURCES"
+	sell_title.add_theme_font_size_override("font_size", 14)
+	sell_title.add_theme_color_override("font_color", Color.YELLOW)
+	vbox.add_child(sell_title)
+
+	var prices := {"ore": 4, "crystal": 10, "scrap": 2, "fuel": 6}
+	for res in prices:
+		var amt: int = GameState.resources.get(res, 0)
+		var row := HBoxContainer.new()
+		var lbl := Label.new()
+		lbl.text = "%s: %d  (%d cr each)" % [res.capitalize(), amt, prices[res]]
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lbl.add_theme_font_size_override("font_size", 13)
+		row.add_child(lbl)
+		var sell_btn := Button.new()
+		sell_btn.text = "Sell All"
+		sell_btn.custom_minimum_size = Vector2(80, 36)
+		sell_btn.disabled = amt == 0
+		sell_btn.pressed.connect(_on_sell_resource.bind(res, prices[res]))
+		row.add_child(sell_btn)
+		vbox.add_child(row)
+
+
+func _on_service_repair() -> void:
+	if GameState.remove_resource("scrap", 15):
+		GameState.heal(50.0)
+		_build_services_tab()
+		_tab_container.current_tab = 1
+
+
+func _on_service_refuel() -> void:
+	if GameState.credits >= 30:
+		GameState.credits -= 30
+		GameState.credits_changed.emit(GameState.credits)
+		GameState.add_fuel(50.0)
+		_build_services_tab()
+		_tab_container.current_tab = 1
+
+
+func _on_sell_resource(res: String, price_each: int) -> void:
+	var amt: int = GameState.resources.get(res, 0)
+	if amt > 0:
+		GameState.resources[res] = 0
+		GameState.add_credits(amt * price_each)
+		GameState.resources_changed.emit()
+		_build_services_tab()
+		_tab_container.current_tab = 1
+
 func _build_storage_tab() -> void:
 	_storage_tab = ScrollContainer.new()
 	_storage_tab.name = "Storage"
