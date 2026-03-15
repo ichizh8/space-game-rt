@@ -204,9 +204,13 @@ func get_joystick_direction() -> Vector2:
 
 func _on_fire_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
-		_fire_pressed = (event as InputEventScreenTouch).pressed
+		if (event as InputEventScreenTouch).pressed:
+			_fire_pressed = not _fire_pressed
+			_fire_button.queue_redraw()
 	elif event is InputEventMouseButton:
-		_fire_pressed = (event as InputEventMouseButton).pressed
+		if (event as InputEventMouseButton).pressed:
+			_fire_pressed = not _fire_pressed
+			_fire_button.queue_redraw()
 
 
 func _check_nearby_objects() -> void:
@@ -309,6 +313,10 @@ func _update_all() -> void:
 func _on_hull_changed(value: float) -> void:
 	if is_instance_valid(_hull_bar):
 		_hull_bar.value = value
+	if value <= 0 and _fire_pressed:
+		_fire_pressed = false
+		if is_instance_valid(_fire_button):
+			_fire_button.queue_redraw()
 
 
 func _on_fuel_changed(value: float) -> void:
@@ -338,11 +346,16 @@ func _draw_fire_button() -> void:
 func _on_fire_button_draw() -> void:
 	var center := _fire_button.size / 2.0
 	var radius: float = min(center.x, center.y) - 5
-	_fire_button.draw_circle(center, radius, Color(0.8, 0.1, 0.1, 0.5 if not _fire_pressed else 0.8))
-	_fire_button.draw_arc(center, radius, 0, TAU, 24, Color(1, 0.3, 0.3, 0.8), 2.0)
-	# Draw crosshair
-	_fire_button.draw_line(center + Vector2(-10, 0), center + Vector2(10, 0), Color.WHITE, 2.0)
-	_fire_button.draw_line(center + Vector2(0, -10), center + Vector2(0, 10), Color.WHITE, 2.0)
+	if _fire_pressed:
+		_fire_button.draw_circle(center, radius, Color(1.0, 0.15, 0.15, 0.85))
+		_fire_button.draw_arc(center, radius, 0, TAU, 32, Color(1.0, 0.5, 0.5, 1.0), 3.5)
+		_fire_button.draw_string(ThemeDB.fallback_font, center + Vector2(-16, 5),
+			"● AUTO", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+	else:
+		_fire_button.draw_circle(center, radius, Color(0.5, 0.1, 0.1, 0.45))
+		_fire_button.draw_arc(center, radius, 0, TAU, 24, Color(0.8, 0.3, 0.3, 0.6), 2.0)
+		_fire_button.draw_line(center + Vector2(-10, 0), center + Vector2(10, 0), Color.WHITE, 2.0)
+		_fire_button.draw_line(center + Vector2(0, -10), center + Vector2(0, 10), Color.WHITE, 2.0)
 
 func _on_cockpit_pressed() -> void:
 	var cockpit_scene: PackedScene = load("res://scenes/cockpit.tscn")
