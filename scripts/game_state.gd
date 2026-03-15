@@ -2,6 +2,7 @@ extends Node
 
 # Ship stats
 var hull: float = 100.0
+var _dying: bool = false
 var max_hull: float = 100.0
 var fuel: float = 100.0
 var max_fuel: float = 100.0
@@ -97,13 +98,16 @@ func spend_resources(cost: Dictionary) -> bool:
 
 
 func take_damage(amount: float) -> void:
+	if _dying:
+		return
 	if has_perk("last_stand") and hull / max_hull < 0.2:
 		amount *= 0.7
 	hull -= amount
 	hull = max(hull, 0.0)
 	hull_changed.emit(hull)
-	if hull <= 0.0:
-		on_player_death()
+	if hull <= 0.0 and not _dying:
+		_dying = true
+		call_deferred("on_player_death")
 
 
 func heal(amount: float) -> void:
@@ -153,6 +157,7 @@ func get_planet_data(planet_id: String) -> Dictionary:
 
 
 func on_player_death() -> void:
+	_dying = false
 	hull = max_hull
 	fuel = max_fuel
 	# Lose some resources on death

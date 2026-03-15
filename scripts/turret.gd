@@ -69,13 +69,7 @@ func _process(delta: float) -> void:
 	_shoot_timer += delta
 	if _shoot_timer >= SHOOT_COOLDOWN:
 		_shoot_timer = 0.0
-		var bullet := bullet_scene.instantiate() as Node2D
-		var forward := Vector2.UP.rotated(rotation)
-		bullet.global_position = global_position + forward * -20.0
-		bullet.rotation = rotation
-		bullet.set("is_player_bullet", false)
-		bullet.set("damage", BULLET_DAMAGE)
-		get_tree().current_scene.add_child(bullet)
+		call_deferred("_fire")
 
 
 func take_damage(amount: float) -> void:
@@ -87,6 +81,18 @@ func take_damage(amount: float) -> void:
 	queue_redraw()
 	if hp <= 0:
 		_die()
+
+
+func _fire() -> void:
+	if is_dead:
+		return
+	var bullet := bullet_scene.instantiate() as Node2D
+	var forward := Vector2.UP.rotated(rotation)
+	bullet.global_position = global_position + forward * -20.0
+	bullet.rotation = rotation
+	bullet.set("is_player_bullet", false)
+	bullet.set("damage", BULLET_DAMAGE)
+	get_parent().add_child(bullet)
 
 
 func _die() -> void:

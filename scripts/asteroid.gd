@@ -10,7 +10,7 @@ signal mining_complete()
 
 func _ready() -> void:
 	add_to_group("asteroids")
-	var types := ["ore", "ore", "crystal", "scrap", "fuel"]
+	var types := ["ore", "ore", "crystal", "scrap"]
 	resource_type = types[randi() % types.size()]
 	amount = randi_range(5, 20)
 	_generate_shape()
@@ -40,6 +40,7 @@ func mine() -> void:
 		var label := "+" + str(final_amount) + " " + resource_type.to_upper()
 		em.add_float(label, global_position, res_color)
 	queue_redraw()
+	call_deferred("queue_free")
 
 
 

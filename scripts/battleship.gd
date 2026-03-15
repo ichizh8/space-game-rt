@@ -95,7 +95,7 @@ func _process(delta: float) -> void:
 			_shoot_timer += delta
 			if _shoot_timer >= SHOOT_COOLDOWN:
 				_shoot_timer = 0.0
-				_fire_spread()
+				call_deferred("_fire_spread")
 
 
 func _do_patrol(delta: float) -> void:
@@ -117,7 +117,7 @@ func _fire_spread() -> void:
 		bullet.rotation = rotation + a
 		bullet.set("is_player_bullet", false)
 		bullet.set("damage", BULLET_DAMAGE)
-		get_tree().current_scene.add_child(bullet)
+		get_parent().add_child(bullet)
 
 
 func take_damage(amount: float) -> void:
