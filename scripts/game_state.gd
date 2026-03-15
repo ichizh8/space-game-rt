@@ -24,6 +24,17 @@ var player_speed_bonus: float = 0.0
 var player_damage_bonus: float = 0.0
 var player_mining_speed_bonus: float = 0.0
 
+# Captain progression (persistent — never reset on death)
+var captain_xp: int = 0
+var captain_perk_points_earned: int = 0   # total earned = captain_xp // 100
+var captain_perks: Array[String] = []      # list of unlocked perk IDs
+# Captain stat bonuses (from perks, persistent)
+var captain_hull_bonus: float = 0.0
+var captain_damage_bonus: float = 0.0
+var captain_mining_bonus: float = 0.0     # multiplier on top: yield * (1 + captain_mining_bonus)
+var captain_fuel_efficiency: float = 0.0  # reduces fuel drain: drain * (1 - captain_fuel_efficiency)
+var captain_sell_bonus: float = 0.0       # sell price multiplier: price * (1 + captain_sell_bonus)
+
 # Ship upgrade levels (0-3 each)
 var weapon_level: int = 0
 var speed_level: int = 0
@@ -37,6 +48,8 @@ signal fuel_changed(new_value: float)
 signal credits_changed(new_value: int)
 signal resources_changed()
 signal player_died()
+signal xp_gained(new_total: int)
+signal perk_unlocked(perk_id: String)
 
 
 func add_resource(type: String, amount: int) -> void:
@@ -77,6 +90,8 @@ func spend_resources(cost: Dictionary) -> bool:
 
 
 func take_damage(amount: float) -> void:
+	if has_perk("last_stand") and hull / max_hull < 0.2:
+		amount *= 0.7
 	hull -= amount
 	hull = max(hull, 0.0)
 	hull_changed.emit(hull)
@@ -142,20 +157,74 @@ func on_player_death() -> void:
 	player_died.emit()
 
 
+func add_xp(amount: int) -> void:
+	captain_xp += amount
+	var new_earned := captain_xp / 100
+	if new_earned > captain_perk_points_earned:
+		captain_perk_points_earned = new_earned
+	xp_gained.emit(captain_xp)
+
+
+func get_available_perk_points() -> int:
+	return captain_perk_points_earned - captain_perks.size()
+
+
+func has_perk(perk_id: String) -> bool:
+	return perk_id in captain_perks
+
+
+func unlock_perk(perk_id: String) -> bool:
+	if has_perk(perk_id):
+		return false
+	if get_available_perk_points() <= 0:
+		return false
+	captain_perks.append(perk_id)
+	_apply_perk(perk_id)
+	perk_unlocked.emit(perk_id)
+	return true
+
+
+func _apply_perk(perk_id: String) -> void:
+	match perk_id:
+		"iron_will":      captain_hull_bonus += 20.0; max_hull += 20.0; hull = min(hull + 20.0, max_hull); hull_changed.emit(hull)
+		"steady_aim":     captain_damage_bonus += 8.0
+		"last_stand":     pass  # checked at damage time, no stat change
+		"efficient_miner": captain_mining_bonus += 0.5
+		"fuel_saver":     captain_fuel_efficiency += 0.25
+		"salvager":       pass  # checked in enemy die, no stat change
+		"keen_eye":       pass  # checked in hud proximity, no stat change
+		"negotiator":     captain_sell_bonus += 0.25
+		"lucky_find":     pass  # checked in artifact spawn, no stat change
+
+
+func reapply_all_perks() -> void:
+	# Called on load to restore perk stat effects
+	captain_hull_bonus = 0.0
+	captain_damage_bonus = 0.0
+	captain_mining_bonus = 0.0
+	captain_fuel_efficiency = 0.0
+	captain_sell_bonus = 0.0
+	for perk_id in captain_perks:
+		_apply_perk(perk_id)
+	max_hull = 100.0 + captain_hull_bonus
+	hull = min(hull, max_hull)
+
+
 func reset_game() -> void:
-	hull = 100.0
-	max_hull = 100.0
-	fuel = 100.0
+	max_hull = 100.0 + captain_hull_bonus
+	hull = max_hull
 	max_fuel = 100.0
+	fuel = max_fuel
 	credits = 500
 	resources = {"ore": 0, "crystal": 0, "fuel": 0, "scrap": 0}
 	inventory = []
 	artifacts_collected = []
 	planets = {}
-	player_speed_bonus = 0.0
-	player_damage_bonus = 0.0
-	player_mining_speed_bonus = 0.0
+	# do NOT touch: captain_xp, captain_perk_points_earned, captain_perks, captain_* bonuses
 	weapon_level = 0
 	speed_level = 0
 	shield_level = 0
+	player_speed_bonus = 0.0
+	player_damage_bonus = 0.0
+	player_mining_speed_bonus = 0.0
 	last_planet_id = ""

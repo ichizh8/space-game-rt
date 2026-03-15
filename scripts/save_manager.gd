@@ -21,6 +21,9 @@ func save_game() -> void:
 		"speed_level": GameState.speed_level,
 		"shield_level": GameState.shield_level,
 		"last_planet_id": GameState.last_planet_id,
+		"captain_xp": GameState.captain_xp,
+		"captain_perk_points_earned": GameState.captain_perk_points_earned,
+		"captain_perks": GameState.captain_perks.duplicate(),
 	}
 	var json_string := JSON.stringify(data, "\t")
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -60,6 +63,13 @@ func load_game() -> bool:
 	GameState.speed_level = int(data.get("speed_level", 0))
 	GameState.shield_level = int(data.get("shield_level", 0))
 	GameState.last_planet_id = data.get("last_planet_id", "")
+	GameState.captain_xp = int(data.get("captain_xp", 0))
+	GameState.captain_perk_points_earned = int(data.get("captain_perk_points_earned", 0))
+	var loaded_perks = data.get("captain_perks", [])
+	GameState.captain_perks = []
+	for p in loaded_perks:
+		GameState.captain_perks.append(str(p))
+	GameState.reapply_all_perks()
 	return true
 
 

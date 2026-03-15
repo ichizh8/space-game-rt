@@ -26,7 +26,8 @@ func _physics_process(delta: float) -> void:
 		var speed := BASE_SPEED + GameState.player_speed_bonus
 		velocity = direction.normalized() * speed
 		rotation = direction.angle() + PI / 2.0
-		GameState.use_fuel(FUEL_DRAIN_RATE * delta)
+		var drain := FUEL_DRAIN_RATE * (1.0 - GameState.captain_fuel_efficiency)
+		GameState.use_fuel(drain * delta)
 	else:
 		velocity = Vector2.ZERO
 
@@ -43,7 +44,7 @@ func _shoot() -> void:
 	bullet.global_position = gun_point.global_position
 	bullet.rotation = rotation
 	bullet.is_player_bullet = true
-	bullet.damage = 15.0 + GameState.player_damage_bonus
+	bullet.damage = 15.0 + GameState.player_damage_bonus + GameState.captain_damage_bonus
 	get_tree().current_scene.add_child(bullet)
 
 

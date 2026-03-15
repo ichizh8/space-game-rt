@@ -151,6 +151,26 @@ func _build_ui() -> void:
 	add_child(items_btn)
 	_items_button = items_btn
 
+	# Cockpit button (top-left)
+	var cockpit_btn := Button.new()
+	cockpit_btn.text = "COCKPIT"
+	cockpit_btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	cockpit_btn.offset_left = 6
+	cockpit_btn.offset_top = 6
+	cockpit_btn.offset_right = 88
+	cockpit_btn.offset_bottom = 34
+	cockpit_btn.add_theme_font_size_override("font_size", 12)
+	var cockpit_style := StyleBoxFlat.new()
+	cockpit_style.bg_color = Color(0.05, 0.15, 0.35, 0.88)
+	cockpit_style.corner_radius_top_left = 4
+	cockpit_style.corner_radius_top_right = 4
+	cockpit_style.corner_radius_bottom_left = 4
+	cockpit_style.corner_radius_bottom_right = 4
+	cockpit_btn.add_theme_stylebox_override("normal", cockpit_style)
+	cockpit_btn.add_theme_stylebox_override("pressed", cockpit_style)
+	cockpit_btn.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
+	cockpit_btn.pressed.connect(_on_cockpit_pressed)
+	add_child(cockpit_btn)
 
 	# Action button (center of screen, above controls)
 	_action_button = Button.new()
@@ -240,7 +260,8 @@ func _check_nearby_objects() -> void:
 		if not is_instance_valid(planet):
 			continue
 		var dist: float = ship_pos.distance_to(planet.global_position)
-		if dist < 80.0 and dist < closest_dist:
+		var planet_range := 120.0 if GameState.has_perk("keen_eye") else 80.0
+		if dist < planet_range and dist < closest_dist:
 			closest_dist = dist
 			closest_node = planet
 			closest_type = "Land"
@@ -337,6 +358,17 @@ func _update_items_button() -> void:
 	if is_instance_valid(_items_button):
 		var count := GameState.artifacts_collected.size()
 		_items_button.text = "ITEMS %d" % count
+
+
+func _on_cockpit_pressed() -> void:
+	var cockpit_scene: PackedScene = load("res://scenes/cockpit.tscn")
+	var cockpit: Node = cockpit_scene.instantiate()
+	# Use call_deferred for WASM safety
+	call_deferred("_add_cockpit", cockpit)
+
+
+func _add_cockpit(cockpit: Node) -> void:
+	get_tree().current_scene.add_child(cockpit)
 
 
 func _on_items_pressed() -> void:

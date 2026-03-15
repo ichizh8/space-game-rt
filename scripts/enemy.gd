@@ -175,6 +175,11 @@ func _die() -> void:
 	# Credit reward
 	var credit_reward := 20 if enemy_type == EnemyType.PIRATE else 35
 	GameState.add_credits(credit_reward)
+	var xp_reward := 15 if enemy_type == EnemyType.PIRATE else 25
+	GameState.add_xp(xp_reward)
+	# If salvager perk: always drop scrap too
+	if GameState.has_perk("salvager"):
+		GameState.add_resource("scrap", randi_range(3, 6))
 	# Visual effects (pure data only - safe from _process context)
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):

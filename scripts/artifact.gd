@@ -23,6 +23,7 @@ func try_collect(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		_collected = true
 		GameState.collect_artifact(artifact_data)
+		GameState.add_xp(50)
 		collected.emit(artifact_data)
 		# Floating text
 		var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
