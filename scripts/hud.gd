@@ -201,6 +201,8 @@ func _check_nearby_objects() -> void:
 	for asteroid in get_tree().get_nodes_in_group("asteroids"):
 		if not is_instance_valid(asteroid):
 			continue
+		if asteroid.get("is_being_mined") == true:
+			continue
 		var dist: float = ship_pos.distance_to(asteroid.global_position)
 		if dist < 80.0 and dist < closest_dist:
 			closest_dist = dist

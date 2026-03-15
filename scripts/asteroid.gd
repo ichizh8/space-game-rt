@@ -35,9 +35,7 @@ func mine() -> void:
 	var mine_time: float = max(1.0 - GameState.player_mining_speed_bonus, 0.2)
 	var tween: Tween = create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, mine_time)
-	await tween.finished
-	if is_instance_valid(self):
-		_finish_mining()
+	tween.tween_callback(_finish_mining)
 
 
 func _finish_mining() -> void:
