@@ -93,19 +93,20 @@ func _build_ui() -> void:
 	_joystick.set_script(load("res://scripts/virtual_joystick.gd"))
 	_joystick.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_joystick.offset_left = 20
-	_joystick.offset_top = -160
+	_joystick.offset_top = -200
 	_joystick.offset_right = 160
-	_joystick.offset_bottom = -20
+	_joystick.offset_bottom = -60
 	add_child(_joystick)
 
 	# Fire button (bottom-right)
 	_fire_button = Control.new()
 	_fire_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_fire_button.offset_left = -120
-	_fire_button.offset_top = -120
+	_fire_button.offset_left = -130
+	_fire_button.offset_top = -200
 	_fire_button.offset_right = -20
-	_fire_button.offset_bottom = -20
+	_fire_button.offset_bottom = -60
 	_fire_button.gui_input.connect(_on_fire_input)
+	_fire_button.draw.connect(_on_fire_button_draw)
 	add_child(_fire_button)
 
 	# Action button (center bottom)
@@ -180,6 +181,8 @@ func _check_nearby_objects() -> void:
 
 	# Check asteroids
 	for asteroid in get_tree().get_nodes_in_group("asteroids"):
+		if not is_instance_valid(asteroid):
+			continue
 		var dist: float = ship_pos.distance_to(asteroid.global_position)
 		if dist < 80.0 and dist < closest_dist:
 			closest_dist = dist
@@ -188,6 +191,8 @@ func _check_nearby_objects() -> void:
 
 	# Check planets
 	for planet in get_tree().get_nodes_in_group("planets"):
+		if not is_instance_valid(planet):
+			continue
 		var dist: float = ship_pos.distance_to(planet.global_position)
 		if dist < 80.0 and dist < closest_dist:
 			closest_dist = dist
