@@ -63,10 +63,10 @@ func _ready() -> void:
 	battleship_scene = load("res://scenes/battleship.tscn")
 	turret_scene = load("res://scenes/turret.tscn")
 	hazard_asteroid_scene = load("res://scenes/hazard_asteroid.tscn")
-	print("SectorGen scenes loaded, connecting signal")
-	GameState.player_died.connect(_on_player_died_for_end_screen)
-	print("SectorGen signal connected, calling spawn")
+	print("SectorGen scenes loaded")
+	print("SectorGen _ready done, scheduling spawn")
 	call_deferred("_show_debug", "Ready OK")
+	call_deferred("_connect_signals_deferred")
 	call_deferred("_spawn_initial")
 
 
@@ -436,6 +436,11 @@ func _pick_biome() -> void:
 		pool.append(Biome.NEBULA)
 	_current_biome = pool[randi() % pool.size()]
 	GameState.map_note_biome(player.global_position, _current_biome)
+
+
+func _connect_signals_deferred() -> void:
+	if not GameState.player_died.is_connected(_on_player_died_for_end_screen):
+		GameState.player_died.connect(_on_player_died_for_end_screen)
 
 
 func _show_debug(msg: String) -> void:
