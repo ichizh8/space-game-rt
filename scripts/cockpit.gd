@@ -702,9 +702,9 @@ func _on_perk_buy(perk_id: String) -> void:
 
 
 func _on_xp_changed(_total: int) -> void:
-	# Refresh captain tab only if it is visible
+	# Defer to avoid WASM unsafe queue_free/add_child from signal callback
 	if is_instance_valid(_captain_tab) and _tab_container.current_tab == 1:
-		_refresh_captain()
+		call_deferred("_refresh_captain")
 
 
 func _on_perk_unlocked(_perk_id: String) -> void:

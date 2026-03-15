@@ -284,19 +284,18 @@ func update_quest_progress(quest_type: String, amount: int = 1) -> void:
 			if q.get("progress", 0) >= q.get("required", 999):
 				to_complete.append(q["id"])
 	for qid in to_complete:
-		var reward := complete_quest(qid)
+		var reward: Dictionary = complete_quest(qid)
 		for key in reward:
 			if key == "credits":
 				add_credits(int(reward[key]))
 			elif key == "fuel":
 				add_fuel(float(reward[key]))
+			elif key == "faction_coalition":
+				add_faction_rep("coalition", int(reward[key]))
+			elif key == "faction_pirates":
+				add_faction_rep("pirates", int(reward[key]))
 			else:
 				add_resource(key, int(reward[key]))
-		# Apply faction reward from quest data
-		var qdata := WorldData.get_quest_by_id(qid)
-		var fr: Dictionary = qdata.get("faction_reward", {})
-		for faction in fr:
-			add_faction_rep(faction, int(fr[faction]))
 
 
 func complete_quest(quest_id: String) -> Dictionary:
