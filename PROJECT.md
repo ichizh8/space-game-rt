@@ -5,7 +5,7 @@
 **Genre:** Roguelite space exploration / survival
 **Live URL:** https://ichizh8.github.io/space-game-rt/
 **Repo:** https://github.com/ichizh8/space-game-rt
-**Current version:** v52
+**Current version:** v53
 
 ---
 
