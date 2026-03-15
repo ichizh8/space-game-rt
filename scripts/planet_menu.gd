@@ -76,6 +76,11 @@ func _build_quest_tab() -> void:
 	_quest_tab = ScrollContainer.new()
 	_quest_tab.name = "Quests"
 	_tab_container.add_child(_quest_tab)
+	_refresh_quest_tab()
+
+
+func _refresh_quest_tab() -> void:
+	_clear_tab(_quest_tab)
 
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -83,46 +88,232 @@ func _build_quest_tab() -> void:
 
 	var planet_data := GameState.get_planet_data(planet_id)
 
+	# Story act 2 planet — auto-complete on visit
+	if planet_id == "story_signal_planet" and not GameState.is_quest_completed("story_act2"):
+		var sq := WorldData.get_quest_by_id("story_act2")
+		if not sq.is_empty():
+			var story_lbl := Label.new()
+			story_lbl.text = sq.get("title", "Signal Source")
+			story_lbl.add_theme_font_size_override("font_size", 20)
+			story_lbl.add_theme_color_override("font_color", Color.YELLOW)
+			vbox.add_child(story_lbl)
+			var story_desc := Label.new()
+			story_desc.text = "\n" + sq.get("description", "") + "\n"
+			story_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			story_desc.add_theme_font_size_override("font_size", 15)
+			vbox.add_child(story_desc)
+			# Auto-advance storyline
+			GameState.set_story_flag("command_ship_located", true)
+			var cmd_pos := Vector2(2500, 800)
+			GameState.set_story_flag("command_ship_pos_x", cmd_pos.x)
+			GameState.set_story_flag("command_ship_pos_y", cmd_pos.y)
+			GameState.map_discovered_planets["command_ship"] = {
+				"pos_x": cmd_pos.x, "pos_y": cmd_pos.y, "name": "CMD SHIP", "color_h": 0.0
+			}
+			GameState.story_act = 3
+			GameState.complete_quest("story_act2")
+			_apply_quest_reward({"credits": 200})
+			var result_lbl := Label.new()
+			result_lbl.text = "Command ship coordinates uploaded to your map. Destroy it!"
+			result_lbl.add_theme_font_size_override("font_size", 14)
+			result_lbl.add_theme_color_override("font_color", Color.GREEN)
+			result_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			vbox.add_child(result_lbl)
+			# Accept act 3 quest automatically
+			var sq3 := WorldData.get_quest_by_id("story_act3")
+			if not sq3.is_empty():
+				GameState.accept_quest(sq3)
+			SaveManager.save_game()
+			vbox.add_child(HSeparator.new())
+
+	# Classic text quest section
 	if quest_id in planet_data.get("quests_done", []):
 		var done_label := Label.new()
-		done_label.text = "You have already completed this quest.\n\nThe locals have no new tasks for you. Perhaps check back another time, traveler."
+		done_label.text = "You have already completed this planet's quest."
 		done_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		done_label.add_theme_font_size_override("font_size", 16)
+		done_label.add_theme_font_size_override("font_size", 14)
+		done_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
 		vbox.add_child(done_label)
+	else:
+		var quest := WorldData.get_quest_by_id(quest_id)
+		if not quest.is_empty() and quest.get("choices", []).size() > 0:
+			var q_title := Label.new()
+			q_title.text = quest.get("title", "Unknown Quest")
+			q_title.add_theme_font_size_override("font_size", 20)
+			q_title.add_theme_color_override("font_color", Color.YELLOW)
+			vbox.add_child(q_title)
+			var q_desc := Label.new()
+			q_desc.text = "\n" + quest.get("description", "") + "\n"
+			q_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			q_desc.add_theme_font_size_override("font_size", 15)
+			vbox.add_child(q_desc)
+			var choices: Array = quest.get("choices", [])
+			for i in range(choices.size()):
+				var choice: Dictionary = choices[i]
+				var btn := Button.new()
+				btn.text = choice.get("text", "Choice " + str(i + 1))
+				btn.add_theme_font_size_override("font_size", 16)
+				btn.custom_minimum_size.y = 44
+				btn.pressed.connect(_on_quest_choice.bind(quest_id, choice))
+				vbox.add_child(btn)
+
+	# Quest Board section
+	vbox.add_child(HSeparator.new())
+	var board_title := Label.new()
+	board_title.text = "QUEST BOARD"
+	board_title.add_theme_font_size_override("font_size", 14)
+	board_title.add_theme_color_override("font_color", Color.CYAN)
+	vbox.add_child(board_title)
+
+	# Generate board quests on first visit
+	if not planet_data.has("available_quests"):
+		var board_quests := WorldData.get_board_quests_for("planet")
+		var count := mini(board_quests.size(), randi_range(2, 3))
+		var ids: Array = []
+		for i in range(count):
+			ids.append(board_quests[i]["id"])
+		planet_data["available_quests"] = ids
+		SaveManager.save_game()
+
+	var quest_ids: Array = planet_data.get("available_quests", [])
+	if quest_ids.is_empty():
+		var none_lbl := Label.new()
+		none_lbl.text = "No board quests available."
+		none_lbl.add_theme_font_size_override("font_size", 13)
+		none_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
+		vbox.add_child(none_lbl)
+	else:
+		for quest_id_board in quest_ids:
+			var q := WorldData.get_quest_by_id(quest_id_board)
+			if q.is_empty():
+				continue
+			_add_board_quest_row(vbox, q, quest_id_board)
+
+
+func _add_board_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> void:
+	var container := PanelContainer.new()
+	var cstyle := StyleBoxFlat.new()
+	cstyle.bg_color = Color(0.08, 0.1, 0.18, 0.9)
+	cstyle.set_border_width_all(1)
+	cstyle.content_margin_left = 8
+	cstyle.content_margin_right = 8
+	cstyle.content_margin_top = 6
+	cstyle.content_margin_bottom = 6
+
+	if GameState.is_quest_completed(qid):
+		cstyle.border_color = Color(0.3, 0.3, 0.3)
+		container.add_theme_stylebox_override("panel", cstyle)
+		vbox.add_child(container)
+		var lbl := Label.new()
+		lbl.text = q.get("title", qid) + " — Completed"
+		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		container.add_child(lbl)
 		return
 
-	var quest := WorldData.get_quest_by_id(quest_id)
-	if quest.is_empty():
-		var no_quest := Label.new()
-		no_quest.text = "No quests available on this planet."
-		no_quest.add_theme_font_size_override("font_size", 16)
-		vbox.add_child(no_quest)
+	if GameState.is_quest_active(qid):
+		# Check auto-complete for gather quests
+		if q.get("type") == "gather":
+			var resource: String = q.get("resource", "")
+			var required: int = int(q.get("required", 0))
+			var have: int = GameState.resources.get(resource, 0)
+			if have >= required and resource != "":
+				GameState.remove_resource(resource, required)
+				var reward := GameState.complete_quest(qid)
+				_apply_quest_reward(reward)
+				var fr: Dictionary = q.get("faction_reward", {})
+				for faction in fr:
+					GameState.add_faction_rep(faction, int(fr[faction]))
+				SaveManager.save_game()
+				cstyle.border_color = Color(0.3, 0.6, 0.3)
+				container.add_theme_stylebox_override("panel", cstyle)
+				vbox.add_child(container)
+				var inner := VBoxContainer.new()
+				container.add_child(inner)
+				var lbl := Label.new()
+				lbl.text = q.get("title", qid) + " — Quest Complete!"
+				lbl.add_theme_font_size_override("font_size", 14)
+				lbl.add_theme_color_override("font_color", Color.GREEN)
+				inner.add_child(lbl)
+				return
+
+		# Active quest display
+		cstyle.border_color = Color(0.7, 0.7, 0.2)
+		container.add_theme_stylebox_override("panel", cstyle)
+		vbox.add_child(container)
+		var inner := VBoxContainer.new()
+		container.add_child(inner)
+		var title_lbl := Label.new()
+		title_lbl.text = q.get("title", qid)
+		title_lbl.add_theme_font_size_override("font_size", 14)
+		title_lbl.add_theme_color_override("font_color", Color.YELLOW)
+		inner.add_child(title_lbl)
+		var progress_q := GameState.get_quest_progress(qid)
+		var prog_lbl := Label.new()
+		if q.get("type") == "destroy":
+			prog_lbl.text = "%d / %d killed" % [progress_q.get("progress", 0), q.get("required", 0)]
+		elif q.get("type") == "gather":
+			var res_name: String = q.get("resource", "")
+			prog_lbl.text = "%d / %d %s (in cargo)" % [GameState.resources.get(res_name, 0), q.get("required", 0), res_name]
+		prog_lbl.add_theme_font_size_override("font_size", 12)
+		prog_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
+		inner.add_child(prog_lbl)
+		var abandon_btn := Button.new()
+		abandon_btn.text = "Abandon"
+		abandon_btn.custom_minimum_size.y = 30
+		abandon_btn.add_theme_font_size_override("font_size", 12)
+		abandon_btn.pressed.connect(func():
+			GameState.abandon_quest(qid)
+			_refresh_quest_tab())
+		inner.add_child(abandon_btn)
 		return
 
-	# Quest title
-	var q_title := Label.new()
-	q_title.text = quest.get("title", "Unknown Quest")
-	q_title.add_theme_font_size_override("font_size", 20)
-	q_title.add_theme_color_override("font_color", Color.YELLOW)
-	vbox.add_child(q_title)
+	# Available quest
+	cstyle.border_color = Color(0.3, 0.3, 0.5)
+	container.add_theme_stylebox_override("panel", cstyle)
+	vbox.add_child(container)
+	var inner := VBoxContainer.new()
+	container.add_child(inner)
+	var title_lbl := Label.new()
+	title_lbl.text = q.get("title", qid)
+	title_lbl.add_theme_font_size_override("font_size", 14)
+	title_lbl.add_theme_color_override("font_color", Color.WHITE)
+	inner.add_child(title_lbl)
+	var desc_lbl := Label.new()
+	desc_lbl.text = q.get("description", "")
+	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_lbl.add_theme_font_size_override("font_size", 12)
+	desc_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+	inner.add_child(desc_lbl)
+	var reward: Dictionary = q.get("reward", {})
+	if not reward.is_empty():
+		var parts: Array[String] = []
+		for key in reward:
+			parts.append(key.capitalize() + ": " + str(reward[key]))
+		var rew_lbl := Label.new()
+		rew_lbl.text = "Reward: " + ", ".join(parts)
+		rew_lbl.add_theme_font_size_override("font_size", 11)
+		rew_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
+		inner.add_child(rew_lbl)
+	var accept_btn := Button.new()
+	accept_btn.text = "Accept"
+	accept_btn.custom_minimum_size.y = 34
+	accept_btn.add_theme_font_size_override("font_size", 13)
+	accept_btn.pressed.connect(func():
+		GameState.accept_quest(q)
+		SaveManager.save_game()
+		_refresh_quest_tab())
+	inner.add_child(accept_btn)
 
-	# Quest description
-	var q_desc := Label.new()
-	q_desc.text = "\n" + quest.get("description", "") + "\n"
-	q_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	q_desc.add_theme_font_size_override("font_size", 15)
-	vbox.add_child(q_desc)
 
-	# Choices
-	var choices: Array = quest.get("choices", [])
-	for i in range(choices.size()):
-		var choice: Dictionary = choices[i]
-		var btn := Button.new()
-		btn.text = choice.get("text", "Choice " + str(i + 1))
-		btn.add_theme_font_size_override("font_size", 16)
-		btn.custom_minimum_size.y = 44
-		btn.pressed.connect(_on_quest_choice.bind(quest_id, choice))
-		vbox.add_child(btn)
+func _apply_quest_reward(reward: Dictionary) -> void:
+	for key in reward:
+		if key == "credits":
+			GameState.add_credits(int(reward[key]))
+		elif key == "fuel":
+			GameState.add_fuel(float(reward[key]))
+		else:
+			GameState.add_resource(key, int(reward[key]))
 
 
 func _on_quest_choice(q_id: String, choice: Dictionary) -> void:
