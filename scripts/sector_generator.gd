@@ -35,7 +35,7 @@ func _ready() -> void:
 	planet_scene = load("res://scenes/planet.tscn")
 	enemy_scene = load("res://scenes/enemy.tscn")
 	artifact_scene = load("res://scenes/artifact.tscn")
-	_spawn_initial()
+	call_deferred("_spawn_initial")
 
 
 func _process(delta: float) -> void:

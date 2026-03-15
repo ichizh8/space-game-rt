@@ -5,17 +5,17 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
 		<title>Space Explorer RT</title>
 		<style>
-html, body, #canvas { margin: 0; padding: 0; border: 0; }
-body { color: white; background-color: #05050f; overflow: hidden; touch-action: none; }
-#canvas { display: block; }
-#canvas:focus { outline: none; }
-#status { position: absolute; left:0; right:0; top:0; bottom:0; background:#05050f; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:24px; visibility:hidden; }
-#status-splash { display: none; }
+html, body, #canvas { margin:0; padding:0; border:0; }
+body { color:white; background-color:#05050f; overflow:hidden; touch-action:none; }
+#canvas { display:block; }
+#canvas:focus { outline:none; }
+#status { position:absolute; left:0; right:0; top:0; bottom:0; background:#05050f; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:24px; visibility:hidden; }
+#status-splash { display:none !important; width:0 !important; height:0 !important; }
 #status-title { font-family:monospace; font-size:22px; letter-spacing:4px; color:#aad4ff; text-transform:uppercase; }
 #status-subtitle { font-family:monospace; font-size:11px; letter-spacing:2px; color:#4466aa; margin-top:-18px; }
 #status-bar-wrap { width:200px; height:4px; background:#111; border-radius:2px; overflow:hidden; }
 #status-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,#2266cc,#66aaff); border-radius:2px; transition:width 0.15s ease; }
-#status-progress, #status-notice { display: none; }
+#status-progress, #status-notice { display:none; }
 </style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
@@ -31,7 +31,7 @@ body { color: white; background-color: #05050f; overflow: hidden; touch-action: 
 		</noscript>
 
 		<div id="status">
-			<img id="status-splash" src="" alt="" style="display:none">
+			<img id="status-splash" src="" alt="">
 			<div id="status-title">Space Explorer</div>
 			<div id="status-subtitle">initializing</div>
 			<div id="status-bar-wrap"><div id="status-bar-fill"></div></div>
@@ -42,7 +42,7 @@ body { color: white; background-color: #05050f; overflow: hidden; touch-action: 
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":71360,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":71248,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -134,10 +134,13 @@ const engine = new Engine(GODOT_CONFIG);
 		setStatusMode('progress');
 		engine.startGame({
 			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) { const p = Math.round(current/total*100); if(statusBarFill) statusBarFill.style.width=p+'%'; if(statusSubtitle) statusSubtitle.textContent='loading '+p+'%'; }
 				if (current > 0 && total > 0) {
-					const pct = Math.round((current/total)*100);
-					statusBarFill.style.width = pct + '%';
-					statusSubtitle.textContent = pct < 100 ? 'loading ' + pct + '%' : 'starting...';
+					statusProgress.value = current;
+					statusProgress.max = total;
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
 				}
 			},
 		}).then(() => {
