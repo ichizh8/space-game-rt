@@ -18,6 +18,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if is_instance_valid(ship):
 		camera.global_position = ship.global_position
+		GameState.map_record_position(ship.global_position)
 	# Screen shake
 	if _trauma > 0:
 		var shake := _trauma * _trauma

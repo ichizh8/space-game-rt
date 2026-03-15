@@ -4,6 +4,7 @@ var planet_id: String = ""
 var planet_name: String = "Unknown"
 var quest_id: String = ""
 var planet_color: Color = Color.GREEN
+var _color_h: float = 0.3
 var planet_radius: float = 30.0
 
 signal landed(p_planet_id: String, p_planet_name: String, p_quest_id: String)
@@ -20,11 +21,8 @@ func setup(p_name: String, p_id: String, p_quest_id: String) -> void:
 	quest_id = p_quest_id
 	# Generate a color based on name hash
 	var hash_val := planet_name.hash()
-	planet_color = Color.from_hsv(
-		fmod(abs(float(hash_val)) / 1000.0, 1.0),
-		0.5,
-		0.8
-	)
+	_color_h = fmod(abs(float(hash_val)) / 1000.0, 1.0)
+	planet_color = Color.from_hsv(_color_h, 0.5, 0.8)
 	planet_radius = randf_range(25.0, 40.0)
 	queue_redraw()
 

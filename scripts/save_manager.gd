@@ -24,6 +24,7 @@ func save_game() -> void:
 		"captain_xp": GameState.captain_xp,
 		"captain_perk_points_earned": GameState.captain_perk_points_earned,
 		"captain_perks": GameState.captain_perks.duplicate(),
+		"map_discovered_planets": GameState.map_discovered_planets.duplicate(true),
 	}
 	var json_string := JSON.stringify(data, "\t")
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -70,6 +71,16 @@ func load_game() -> bool:
 	for p in loaded_perks:
 		GameState.captain_perks.append(str(p))
 	GameState.reapply_all_perks()
+	var loaded_map: Dictionary = data.get("map_discovered_planets", {})
+	GameState.map_discovered_planets = {}
+	for pid in loaded_map:
+		var entry: Dictionary = loaded_map[pid]
+		GameState.map_discovered_planets[str(pid)] = {
+			"pos_x": float(entry.get("pos_x", 0)),
+			"pos_y": float(entry.get("pos_y", 0)),
+			"name": str(entry.get("name", "")),
+			"color_h": float(entry.get("color_h", 0.3))
+		}
 	return true
 
 

@@ -4,6 +4,98 @@ var _tab_container: TabContainer
 var _captain_tab: ScrollContainer
 var _bridge_tab: ScrollContainer
 var _crafting_tab: ScrollContainer
+var _map_tab: ScrollContainer
+
+
+class MapControl extends Control:
+	const MAP_SCALE := 0.09
+	const FOG_RADIUS := 18.0
+	const PLANET_RADIUS := 5.0
+	const GRID_WORLD := 500.0
+
+	var _player_pos: Vector2 = Vector2.ZERO
+	var _poll_timer: float = 0.0
+
+	func _process(delta: float) -> void:
+		_poll_timer += delta
+		if _poll_timer >= 0.25:
+			_poll_timer = 0.0
+			var players := get_tree().get_nodes_in_group("player")
+			if players.size() > 0 and is_instance_valid(players[0]):
+				_player_pos = (players[0] as Node2D).global_position
+			queue_redraw()
+
+	func _draw() -> void:
+		var w := size.x
+		var h := size.y
+		var center := size / 2.0
+
+		# Background
+		draw_rect(Rect2(0, 0, w, h), Color(0.02, 0.04, 0.08))
+
+		# Grid
+		var grid_px := GRID_WORLD * MAP_SCALE
+		var ox := fmod(_player_pos.x * MAP_SCALE, grid_px)
+		var oy := fmod(_player_pos.y * MAP_SCALE, grid_px)
+		var gc := Color(0.06, 0.11, 0.17)
+		var gx := center.x - ox
+		while gx < w:
+			draw_line(Vector2(gx, 0), Vector2(gx, h), gc, 1.0)
+			gx += grid_px
+		gx = center.x - ox - grid_px
+		while gx >= 0:
+			draw_line(Vector2(gx, 0), Vector2(gx, h), gc, 1.0)
+			gx -= grid_px
+		var gy := center.y - oy
+		while gy < h:
+			draw_line(Vector2(0, gy), Vector2(w, gy), gc, 1.0)
+			gy += grid_px
+		gy = center.y - oy - grid_px
+		while gy >= 0:
+			draw_line(Vector2(0, gy), Vector2(w, gy), gc, 1.0)
+			gy -= grid_px
+
+		# Fog of war — revealed trail circles
+		var fog_col := Color(0.08, 0.14, 0.22)
+		for trail_pos in GameState.map_visited_trail:
+			var mp := center + (trail_pos - _player_pos) * MAP_SCALE
+			if mp.x > -FOG_RADIUS and mp.x < w + FOG_RADIUS and mp.y > -FOG_RADIUS and mp.y < h + FOG_RADIUS:
+				draw_circle(mp, FOG_RADIUS, fog_col)
+
+		# Origin marker
+		var origin_mp := center + (Vector2.ZERO - _player_pos) * MAP_SCALE
+		if origin_mp.x > -20 and origin_mp.x < w + 20 and origin_mp.y > -20 and origin_mp.y < h + 20:
+			draw_circle(origin_mp, 4.0, Color(0.3, 0.8, 1.0, 0.7))
+			draw_arc(origin_mp, 8.0, 0.0, TAU, 16, Color(0.3, 0.8, 1.0, 0.35), 1.5)
+			draw_string(ThemeDB.fallback_font, origin_mp + Vector2(10, 4), "ORIGIN",
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.3, 0.8, 1.0, 0.8))
+
+		# Discovered planets
+		for planet_id in GameState.map_discovered_planets:
+			var entry: Dictionary = GameState.map_discovered_planets[planet_id]
+			var world_pos := Vector2(float(entry.get("pos_x", 0)), float(entry.get("pos_y", 0)))
+			var mp := center + (world_pos - _player_pos) * MAP_SCALE
+			if mp.x < -20 or mp.x > w + 20 or mp.y < -20 or mp.y > h + 20:
+				continue
+			var ch := float(entry.get("color_h", 0.3))
+			var pcol := Color.from_hsv(ch, 0.7, 0.9)
+			draw_circle(mp, PLANET_RADIUS, pcol)
+			draw_arc(mp, PLANET_RADIUS + 2.5, 0.0, TAU, 16, Color(pcol.r, pcol.g, pcol.b, 0.4), 1.0)
+			var pname := str(entry.get("name", "?"))
+			draw_string(ThemeDB.fallback_font, mp + Vector2(9, 4), pname,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.85, 0.9, 0.9))
+
+		# Player dot
+		draw_circle(center, 4.0, Color.CYAN)
+		draw_arc(center, 7.0, 0.0, TAU, 16, Color(0.0, 1.0, 1.0, 0.4), 1.5)
+
+		# Border
+		draw_rect(Rect2(0, 0, w, h), Color(0.15, 0.35, 0.55), false, 1.5)
+
+		# Coords
+		draw_string(ThemeDB.fallback_font, Vector2(6, h - 6),
+			"%.0f, %.0f" % [_player_pos.x, _player_pos.y],
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.4, 0.6, 0.8, 0.8))
 
 
 func _ready() -> void:
@@ -54,6 +146,7 @@ func _build_ui() -> void:
 	_build_bridge_tab()
 	_build_captain_tab()
 	_build_crafting_tab()
+	_build_map_tab()
 
 
 func _build_bridge_tab() -> void:
@@ -323,6 +416,26 @@ func _refresh_crafting() -> void:
 		craft_btn.disabled = not can_craft
 		craft_btn.pressed.connect(_on_craft.bind(recipe["kind"], recipe["cost"], recipe["value"]))
 		inner.add_child(craft_btn)
+
+
+func _build_map_tab() -> void:
+	_map_tab = ScrollContainer.new()
+	_map_tab.name = "Map"
+	_tab_container.add_child(_map_tab)
+
+	var vbox := VBoxContainer.new()
+	_map_tab.add_child(vbox)
+
+	var legend := Label.new()
+	legend.text = "Cyan = you   Colored dots = planets   Blue = origin   Dark = unexplored"
+	legend.add_theme_font_size_override("font_size", 10)
+	legend.add_theme_color_override("font_color", Color(0.45, 0.55, 0.65))
+	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(legend)
+
+	var map_ctrl := MapControl.new()
+	map_ctrl.custom_minimum_size = Vector2(320, 370)
+	vbox.add_child(map_ctrl)
 
 
 func _on_craft(kind: String, cost: Dictionary, value: float) -> void:

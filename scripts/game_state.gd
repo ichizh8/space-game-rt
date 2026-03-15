@@ -35,6 +35,10 @@ var captain_mining_bonus: float = 0.0     # multiplier on top: yield * (1 + capt
 var captain_fuel_efficiency: float = 0.0  # reduces fuel drain: drain * (1 - captain_fuel_efficiency)
 var captain_sell_bonus: float = 0.0       # sell price multiplier: price * (1 + captain_sell_bonus)
 
+# Map state
+var map_visited_trail: Array[Vector2] = []   # session-only
+var map_discovered_planets: Dictionary = {}   # persistent: planet_id -> {pos_x, pos_y, name, color_h}
+
 # Ship upgrade levels (0-3 each)
 var weapon_level: int = 0
 var speed_level: int = 0
@@ -210,6 +214,23 @@ func reapply_all_perks() -> void:
 	hull = min(hull, max_hull)
 
 
+func map_record_position(player_pos: Vector2) -> void:
+	const SPACING := 80.0
+	const MAX_POINTS := 600
+	if map_visited_trail.is_empty() or player_pos.distance_to(map_visited_trail[-1]) > SPACING:
+		map_visited_trail.append(player_pos)
+		if map_visited_trail.size() > MAX_POINTS:
+			map_visited_trail.remove_at(0)
+
+
+func map_discover_planet(planet_id: String, pos: Vector2, p_name: String, color_h: float) -> void:
+	if not map_discovered_planets.has(planet_id):
+		map_discovered_planets[planet_id] = {
+			"pos_x": pos.x, "pos_y": pos.y,
+			"name": p_name, "color_h": color_h
+		}
+
+
 func reset_game() -> void:
 	max_hull = 100.0 + captain_hull_bonus
 	hull = max_hull
@@ -228,3 +249,5 @@ func reset_game() -> void:
 	player_damage_bonus = 0.0
 	player_mining_speed_bonus = 0.0
 	last_planet_id = ""
+	map_visited_trail = []
+	# do NOT reset map_discovered_planets

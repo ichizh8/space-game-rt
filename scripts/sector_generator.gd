@@ -95,6 +95,19 @@ func _manage_objects() -> void:
 	for obj in to_remove:
 		_spawned_objects.erase(obj)
 
+	# Discover nearby planets for the map
+	for obj in _spawned_objects:
+		if not is_instance_valid(obj):
+			continue
+		if not obj.is_in_group("planets"):
+			continue
+		if obj.global_position.distance_to(player_pos) < 350.0:
+			var pid: String = str(obj.get("planet_id") if obj.get("planet_id") != null else "")
+			var pname: String = str(obj.get("planet_name") if obj.get("planet_name") != null else "")
+			var pcol: float = float(obj.get("_color_h") if obj.get("_color_h") != null else 0.3)
+			if pid != "":
+				GameState.map_discover_planet(pid, obj.global_position, pname, pcol)
+
 	# Count current objects by type
 	var asteroid_count := 0
 	var planet_count := 0
