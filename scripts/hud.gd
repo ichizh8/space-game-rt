@@ -323,11 +323,10 @@ func _on_credits_changed(value: int) -> void:
 
 func _on_resources_changed() -> void:
 	if is_instance_valid(_resource_label):
-		_resource_label.text = "Ore: %d\nCrystal: %d\nFuel: %d\nScrap: %d" % [
-			GameState.resources["ore"],
-			GameState.resources["crystal"],
-			GameState.resources["fuel"],
-			GameState.resources["scrap"]
+		_resource_label.text = "Ore: %d\nCrystal: %d\nScrap: %d" % [
+			GameState.resources.get("ore", 0),
+			GameState.resources.get("crystal", 0),
+			GameState.resources.get("scrap", 0)
 		]
 
 

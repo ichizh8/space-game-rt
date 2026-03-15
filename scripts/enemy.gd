@@ -199,7 +199,8 @@ func _spawn_loot(cr: int) -> void:
 		GameState.add_credits(cr)
 		return
 	var loot := loot_scene.instantiate() as Node2D
-	loot.global_position = global_position
+	var spawn_pos := global_position + Vector2.from_angle(randf() * TAU) * 30.0
+	loot.global_position = spawn_pos
 	var res: Dictionary = {}
 	var drop_types: Array[String] = ["ore", "crystal", "scrap"]
 	var drop_type: String = drop_types[randi() % 3]
@@ -209,7 +210,7 @@ func _spawn_loot(cr: int) -> void:
 		res["scrap"] = res.get("scrap", 0) + randi_range(3, 6)
 	if loot.has_method("setup"):
 		loot.setup(cr, res)
-	get_tree().current_scene.add_child(loot)
+	get_parent().add_child(loot)
 
 
 func _get_player() -> Node2D:

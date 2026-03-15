@@ -96,7 +96,7 @@ func _spawn_loot() -> void:
 		res["scrap"] = randi_range(1, 3)
 	if loot.has_method("setup"):
 		loot.setup(CREDIT_REWARD, res)
-	get_tree().current_scene.add_child(loot)
+	get_parent().add_child(loot)
 
 
 func take_damage(amount: float) -> void:

@@ -97,7 +97,7 @@ func _spawn_loot() -> void:
 	var res: Dictionary = {"scrap": randi_range(4, 8)}
 	if loot.has_method("setup"):
 		loot.setup(CREDIT_REWARD, res)
-	get_tree().current_scene.add_child(loot)
+	get_parent().add_child(loot)
 
 
 func _get_player() -> Node2D:

@@ -6,6 +6,8 @@ var _anim_time: float = 0.0
 var _lifetime: float = 0.0
 var _collected := false
 var _check_timer: float = 0.0
+var _grace_timer: float = 0.0
+const GRACE_PERIOD := 0.5  # seconds before loot can be collected
 
 const PICKUP_RANGE := 40.0
 const MAX_LIFETIME := 18.0
@@ -37,8 +39,12 @@ func _process(delta: float) -> void:
 		call_deferred("queue_free")
 		return
 
+	_grace_timer += delta
+
 	_check_timer += delta
-	if _check_timer >= 0.15:
+	if _grace_timer < GRACE_PERIOD:
+		pass
+	if _grace_timer >= GRACE_PERIOD and _check_timer >= 0.15:
 		_check_timer = 0.0
 		var players := get_tree().get_nodes_in_group("player")
 		if not players.is_empty():
