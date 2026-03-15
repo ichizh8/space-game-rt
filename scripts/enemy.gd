@@ -229,6 +229,7 @@ func _setup_sprite() -> void:
 			var tex_size := tex.get_size()
 			var scale_factor: float = target_size / max(tex_size.x, tex_size.y)
 			sprite.scale = Vector2(scale_factor, scale_factor)
+			sprite.rotation = PI  # sprite faces down, game uses UP as forward
 			add_child(sprite)
 			_has_sprite = true
 

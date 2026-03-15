@@ -1,7 +1,14 @@
 extends Node2D
 
 var star_radius: float = 45.0
+var star_name: String = ""
 var _anim_time: float = 0.0
+
+const STAR_NAMES: Array[String] = [
+	"Sol Proxima", "Kepler-422", "Vega Prime", "Arcturus B", "Sirius Minor",
+	"Deneb IV", "Rigel Alpha", "Altair Sun", "Fomalhaut", "Pollux Star",
+	"Castor Yellow", "Aldebaran", "Betelgeuse Jr", "Tau Ceti", "Epsilon Eridani"
+]
 var _damage_timer: float = 0.0
 const WARNING_RANGE := 200.0
 const DANGER_RANGE := 110.0
@@ -13,6 +20,7 @@ const DAMAGE_INTERVAL := 0.4
 func _ready() -> void:
 	add_to_group("stars")
 	star_radius = randf_range(38.0, 55.0)
+	star_name = STAR_NAMES[randi() % STAR_NAMES.size()]
 	queue_redraw()
 
 
@@ -62,3 +70,7 @@ func _draw() -> void:
 	# Surface shimmer
 	draw_circle(Vector2.ZERO, star_radius * 0.75, Color(1.0, 1.0, 0.8, 0.6))
 	draw_circle(Vector2.ZERO, star_radius * 0.4, Color(1.0, 1.0, 1.0, 0.4))
+	# Name label
+	var nw: float = star_name.length() * 6.0
+	draw_string(ThemeDB.fallback_font, Vector2(-nw * 0.5, star_radius + 14.0),
+		star_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1.0, 0.9, 0.5, 0.85))

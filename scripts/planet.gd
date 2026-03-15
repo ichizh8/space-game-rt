@@ -48,3 +48,7 @@ func _draw() -> void:
 		Vector2(planet_radius * 0.5, -planet_radius * 0.3),
 		planet_color.darkened(0.2), 1.5
 	)
+	# Name label
+	var name_width: float = planet_name.length() * 6.0
+	draw_string(ThemeDB.fallback_font, Vector2(-name_width * 0.5, planet_radius + 14.0),
+		planet_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.95, 1.0, 0.9))

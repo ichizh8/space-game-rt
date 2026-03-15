@@ -5,12 +5,20 @@ const PULL_RANGE := 400.0
 const PULL_STRENGTH := 28000.0
 const TELEPORT_DAMAGE := 20.0
 
+const BLACK_HOLE_NAMES: Array[String] = [
+	"Sagittarius A*", "Cygnus X-1", "Messier 87", "NGC 1277", "TON 618",
+	"Abell 85", "Holmberg 15A", "Phoenix A", "IC 1101 Core", "Markarian 501",
+	"The Maw", "Void Omega", "Null Point", "Event Zero", "The Abyss"
+]
+
+var hole_name: String = ""
 var _anim_time: float = 0.0
 var _teleporting := false
 
 
 func _ready() -> void:
 	add_to_group("black_holes")
+	hole_name = BLACK_HOLE_NAMES[randi() % BLACK_HOLE_NAMES.size()]
 	queue_redraw()
 
 
@@ -82,3 +90,7 @@ func _draw() -> void:
 	# Inner singularity glow
 	draw_arc(Vector2.ZERO, EVENT_HORIZON, 0.0, TAU, 32, Color(0.5, 0.0, 1.0, 0.7), 2.5)
 	draw_arc(Vector2.ZERO, EVENT_HORIZON * 0.6, 0.0, TAU, 24, Color(0.8, 0.2, 1.0, 0.4), 1.5)
+	# Name label
+	var nw: float = hole_name.length() * 6.0
+	draw_string(ThemeDB.fallback_font, Vector2(-nw * 0.5, EVENT_HORIZON + 70.0 + 14.0),
+		hole_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.7, 0.4, 1.0, 0.85))
