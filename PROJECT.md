@@ -5,7 +5,7 @@
 **Genre:** Roguelite space exploration / survival
 **Live URL:** https://ichizh8.github.io/space-game-rt/
 **Repo:** https://github.com/ichizh8/space-game-rt
-**Current version:** v46
+**Current version:** v52
 
 ---
 
@@ -246,6 +246,17 @@ All enemies drop world loot orbs on death. Orbs drift, blink, auto-collect at 40
 - Use explicit types on variables assigned from array indexing: `var x: Type = arr[i]` not `var x := arr[i]`
 - All bullet spawning uses `call_deferred("_spawn_bullet", ...)` → `get_parent().add_child(bullet)`
 - Death triggers via `call_deferred("on_player_death")` with `_dying` guard flag to prevent multi-hit death loops
+- Enemy `take_damage()` is called from `bullet.gd` `_process()` — always use `call_deferred("_die")` / `call_deferred("_explode")`, never call directly
+- Asteroid `mine()` must call `call_deferred("queue_free")` — otherwise Mine button stays visible permanently
+
+### Mobile WebGL Input Rules
+> Control/Button input is unreliable on mobile WebGL. Always use scene-level `_input()`:
+- **Never** use `Button.pressed` signal for game controls — doesn't reliably fire on mobile WebGL
+- **Never** use `Control._gui_input` override or `gui_input` signal for HUD game buttons — both `InputEventScreenTouch` AND `InputEventMouseButton` fire on a single tap, causing double-toggle
+- **Always** handle game input in `_input()` at the Node/CanvasLayer level with position-based detection
+- Fire zone pattern: `tap_pos.x > vp_size.x - 120 and tap_pos.y > vp_size.y - 120`
+- Use a `_debounce: float` timer (0.3s) decremented in `_process()` to block duplicate events
+- Exception: `virtual_joystick.gd` works with `_gui_input` because it tracks a `_touch_index` and only acts on the first press — same debounce logic manually
 
 ---
 
