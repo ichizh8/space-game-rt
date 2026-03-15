@@ -87,7 +87,8 @@ func _manage_objects() -> void:
 			continue
 		if obj.global_position.distance_to(player_pos) > DESPAWN_DISTANCE:
 			to_remove.append(obj)
-			obj.queue_free()
+			obj.hide()
+			obj.set_process_mode(Node.PROCESS_MODE_DISABLED)
 
 	for obj in to_remove:
 		_spawned_objects.erase(obj)
@@ -99,6 +100,8 @@ func _manage_objects() -> void:
 	var artifact_count := 0
 	for obj in _spawned_objects:
 		if not is_instance_valid(obj):
+			continue
+		if not obj.visible:
 			continue
 		if obj.is_in_group("asteroids"):
 			asteroid_count += 1

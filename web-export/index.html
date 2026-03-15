@@ -15,6 +15,7 @@ body{color:white;background:#05050f;overflow:hidden;touch-action:none}
 #status-bar-wrap{width:200px;height:4px;background:#111;border-radius:2px;overflow:hidden}
 #status-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#2266cc,#66aaff);border-radius:2px;transition:width .15s}
 #status-progress,#status-notice{display:none}
+#err-log{display:none;position:fixed;bottom:0;left:0;right:0;max-height:35vh;overflow:auto;background:rgba(180,0,0,0.92);color:#fff;font-family:monospace;font-size:10px;padding:6px;z-index:9999;white-space:pre-wrap;word-break:break-all}
 </style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
@@ -37,11 +38,12 @@ body{color:white;background:#05050f;overflow:hidden;touch-action:none}
 			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
 		</div>
+		<div id="err-log"></div>
 		</div>
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":73120,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":73232,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -147,6 +149,22 @@ const engine = new Engine(GODOT_CONFIG);
 	}
 }());
 		</script>
-	</body>
+	
+<script>
+(function(){
+  var el=document.getElementById('err-log');
+  function log(s){el.textContent+=s+'\n';el.style.display='block';}
+  window.addEventListener('error',function(e){log('ERR: '+e.message+' ('+e.filename+':'+e.lineno+')');});
+  window.addEventListener('unhandledrejection',function(e){log('PROMISE: '+String(e.reason));});
+  var oe=console.error;console.error=function(){log('E: '+Array.from(arguments).join(' '));oe.apply(console,arguments);};
+  var ow=console.warn;console.warn=function(){log('W: '+Array.from(arguments).join(' '));ow.apply(console,arguments);};
+  // freeze watchdog
+  var last=Date.now();
+  function tick(){last=Date.now();requestAnimationFrame(tick);}
+  requestAnimationFrame(tick);
+  setInterval(function(){if(Date.now()-last>3000){log('FREEZE: no rAF for '+(Date.now()-last)+'ms');}},1000);
+})();
+</script>
+</body>
 </html>
 
