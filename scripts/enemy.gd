@@ -6,6 +6,7 @@ enum EnemyType { PIRATE, DRONE }
 @export var enemy_type: EnemyType = EnemyType.PIRATE
 
 var hp: float = 30.0
+var is_dead := false
 var damage: float = 10.0
 var speed: float = 180.0
 var state: State = State.PATROL
@@ -101,12 +102,15 @@ func _shoot() -> void:
 
 
 func take_damage(amount: float) -> void:
+	if is_dead:
+		return
 	hp -= amount
 	if hp <= 0:
 		_die()
 
 
 func _die() -> void:
+	is_dead = true
 	# Drop random resources
 	var drop_types := ["ore", "crystal", "scrap", "fuel"]
 	var drop_type: String = drop_types[randi() % drop_types.size()]

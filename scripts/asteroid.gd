@@ -5,7 +5,6 @@ var amount: int = 10
 var is_being_mined := false
 var _shape_points: PackedVector2Array
 
-signal mining_started()
 signal mining_complete()
 
 
@@ -20,9 +19,8 @@ func _ready() -> void:
 
 func _generate_shape() -> void:
 	_shape_points = PackedVector2Array()
-	var num_points: int = 7
-	for i in range(num_points):
-		var angle: float = i * TAU / num_points
+	for i in range(7):
+		var angle: float = i * TAU / 7.0
 		var radius: float = randf_range(9.0, 14.0)
 		_shape_points.append(Vector2(cos(angle), sin(angle)) * radius)
 
@@ -31,14 +29,6 @@ func mine() -> void:
 	if is_being_mined:
 		return
 	is_being_mined = true
-	mining_started.emit()
-	var mine_time: float = max(1.0 - GameState.player_mining_speed_bonus, 0.2)
-	var tween: Tween = create_tween()
-	tween.tween_property(self, "modulate:a", 0.0, mine_time)
-	tween.tween_callback(_finish_mining)
-
-
-func _finish_mining() -> void:
 	GameState.add_resource(resource_type, amount)
 	mining_complete.emit()
 	queue_free()
@@ -55,6 +45,5 @@ func get_resource_color() -> Color:
 func _draw() -> void:
 	if _shape_points.is_empty():
 		return
-	var color: Color = get_resource_color()
-	draw_colored_polygon(_shape_points, color)
-	draw_circle(Vector2.ZERO, 3, color.lightened(0.4))
+	draw_colored_polygon(_shape_points, get_resource_color())
+	draw_circle(Vector2.ZERO, 3, get_resource_color().lightened(0.4))
