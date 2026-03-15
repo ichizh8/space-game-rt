@@ -50,9 +50,7 @@ const PLANET_NAMES: Array[String] = [
 
 
 func _ready() -> void:
-	print("SectorGen _ready START")
 	asteroid_scene = load("res://scenes/asteroid.tscn")
-	print("SectorGen loaded asteroid")
 	planet_scene = load("res://scenes/planet.tscn")
 	enemy_scene = load("res://scenes/enemy.tscn")
 	artifact_scene = load("res://scenes/artifact.tscn")
@@ -63,9 +61,6 @@ func _ready() -> void:
 	battleship_scene = load("res://scenes/battleship.tscn")
 	turret_scene = load("res://scenes/turret.tscn")
 	hazard_asteroid_scene = load("res://scenes/hazard_asteroid.tscn")
-	print("SectorGen scenes loaded")
-	print("SectorGen _ready done, scheduling spawn")
-	call_deferred("_show_debug", "Ready OK")
 	call_deferred("_connect_signals_deferred")
 	call_deferred("_spawn_initial")
 
@@ -88,8 +83,6 @@ func _spawn_initial() -> void:
 	if is_instance_valid(player):
 		center = player.global_position
 
-	print("DEBUG: _spawn_initial START, center=", center, " parent=", get_parent())
-	_show_debug("Spawning...")
 
 	# Spawn asteroids
 	var num_asteroids := randi_range(MIN_ASTEROIDS, MAX_ASTEROIDS)
@@ -133,10 +126,6 @@ func _spawn_initial() -> void:
 	for i in range(randi_range(1, 2)):
 		_spawn_hazard_belt(center + _random_offset(SPAWN_RADIUS * 0.6))
 
-	print("DEBUG: _spawn_initial END, spawned=", _spawned_objects.size())
-	var hud := get_tree().get_first_node_in_group("hud")
-	if is_instance_valid(hud) and hud.has_method("show_notification"):
-		hud.show_notification("Spawned: " + str(_spawned_objects.size()) + " objects")
 
 
 func _manage_objects() -> void:
@@ -233,11 +222,9 @@ func _manage_objects() -> void:
 
 func _spawn_asteroid(pos: Vector2) -> void:
 	if asteroid_scene == null:
-		print("ERROR: asteroid_scene is null!")
 		return
 	var asteroid := asteroid_scene.instantiate() as Node2D
 	if asteroid == null:
-		print("ERROR: asteroid instantiate failed!")
 		return
 	asteroid.global_position = pos
 	get_parent().add_child(asteroid)
@@ -443,10 +430,6 @@ func _connect_signals_deferred() -> void:
 		GameState.player_died.connect(_on_player_died_for_end_screen)
 
 
-func _show_debug(msg: String) -> void:
-	var hud := get_tree().get_first_node_in_group("hud")
-	if is_instance_valid(hud) and hud.has_method("show_notification"):
-		hud.show_notification(msg)
 
 
 func _get_player() -> Node2D:
@@ -570,9 +553,9 @@ func _apply_reward(reward: Dictionary) -> void:
 
 
 func _open_end_screen(victory: bool) -> void:
-	var end_scene := load("res://scenes/end_screen.tscn")
+	var end_scene := load("res://scenes/end_screen.tscn") as PackedScene
 	if end_scene:
-		var end := end_scene.instantiate()
+		var end: Node = end_scene.instantiate()
 		if end.has_method("setup"):
 			end.setup(victory)
 		get_parent().add_child(end)
