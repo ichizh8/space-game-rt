@@ -8,7 +8,7 @@ var max_fuel: float = 100.0
 var credits: int = 500
 
 # Resources
-var resources: Dictionary = {"ore": 0, "crystal": 0, "fuel": 0, "scrap": 0}
+var resources: Dictionary = {"ore": 0, "crystal": 0, "scrap": 0}
 
 # Inventory (item IDs)
 var inventory: Array = []
@@ -57,6 +57,9 @@ signal perk_unlocked(perk_id: String)
 
 
 func add_resource(type: String, amount: int) -> void:
+	if type == "fuel":
+		add_fuel(float(amount) * 10.0)  # 1 fuel canister = +10 ship fuel
+		return
 	if resources.has(type):
 		resources[type] += amount
 		resources_changed.emit()
@@ -142,7 +145,7 @@ func get_planet_data(planet_id: String) -> Dictionary:
 	if not planets.has(planet_id):
 		planets[planet_id] = {
 			"buildings": {},
-			"storage": {"ore": 0, "crystal": 0, "fuel": 0, "scrap": 0},
+			"storage": {"ore": 0, "crystal": 0, "scrap": 0},
 			"quests_done": [],
 			"last_visit_time": Time.get_unix_time_from_system()
 		}
@@ -241,7 +244,7 @@ func reset_game() -> void:
 	max_fuel = 100.0
 	fuel = max_fuel
 	credits = 500
-	resources = {"ore": 0, "crystal": 0, "fuel": 0, "scrap": 0}
+	resources = {"ore": 0, "crystal": 0, "scrap": 0}
 	inventory = []
 	artifacts_collected = []
 	planets = {}

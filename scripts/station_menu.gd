@@ -131,7 +131,7 @@ func _fill_services(vbox: VBoxContainer) -> void:
 	s_title.add_theme_color_override("font_color", Color.YELLOW)
 	vbox.add_child(s_title)
 
-	var prices := {"ore": 4, "crystal": 10, "scrap": 2, "fuel": 6}
+	var prices := {"ore": 4, "crystal": 10, "scrap": 2}
 	for res in prices:
 		var amt: int = GameState.resources.get(res, 0)
 		var row := HBoxContainer.new()

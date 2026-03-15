@@ -248,7 +248,7 @@ func _refresh_buildings() -> void:
 			inner_vbox.add_child(repair_btn)
 
 			var refuel_btn := Button.new()
-			refuel_btn.text = "Refuel (10 fuel resource)"
+			refuel_btn.text = "Refuel +50 fuel  (20 credits)"
 			refuel_btn.add_theme_font_size_override("font_size", 14)
 			refuel_btn.custom_minimum_size.y = 36
 			refuel_btn.pressed.connect(_on_refuel_pressed)
@@ -298,7 +298,9 @@ func _on_repair_pressed() -> void:
 
 
 func _on_refuel_pressed() -> void:
-	if GameState.remove_resource("fuel", 10):
+	if GameState.credits >= 20:
+		GameState.credits -= 20
+		GameState.credits_changed.emit(GameState.credits)
 		GameState.add_fuel(50.0)
 		_refresh_buildings()
 
@@ -357,7 +359,7 @@ func _refresh_services() -> void:
 	sell_title.add_theme_color_override("font_color", Color.YELLOW)
 	vbox.add_child(sell_title)
 
-	var prices := {"ore": 4, "crystal": 10, "scrap": 2, "fuel": 6}
+	var prices := {"ore": 4, "crystal": 10, "scrap": 2}
 	for res in prices:
 		var amt: int = GameState.resources.get(res, 0)
 		var row := HBoxContainer.new()
@@ -490,7 +492,7 @@ func _refresh_storage() -> void:
 	_storage_tab.add_child(vbox)
 
 	var planet_data := GameState.get_planet_data(planet_id)
-	var storage: Dictionary = planet_data.get("storage", {"ore": 0, "crystal": 0, "fuel": 0, "scrap": 0})
+	var storage: Dictionary = planet_data.get("storage", {"ore": 0, "crystal": 0, "scrap": 0})
 
 	var title := Label.new()
 	title.text = "Planet Storage"
@@ -498,7 +500,7 @@ func _refresh_storage() -> void:
 	title.add_theme_color_override("font_color", Color(0.8, 0.8, 1.0))
 	vbox.add_child(title)
 
-	var resource_types := ["ore", "crystal", "fuel", "scrap"]
+	var resource_types := ["ore", "crystal", "scrap"]
 	for res_type in resource_types:
 		var container := HBoxContainer.new()
 		container.custom_minimum_size.y = 40
@@ -535,7 +537,7 @@ func _on_deposit(res_type: String) -> void:
 	GameState.remove_resource(res_type, amount)
 	var planet_data := GameState.get_planet_data(planet_id)
 	if not planet_data.has("storage"):
-		planet_data["storage"] = {"ore": 0, "crystal": 0, "fuel": 0, "scrap": 0}
+		planet_data["storage"] = {"ore": 0, "crystal": 0, "scrap": 0}
 	planet_data["storage"][res_type] = planet_data["storage"].get(res_type, 0) + amount
 	_refresh_storage()
 	SaveManager.save_game()
@@ -579,7 +581,7 @@ func _collect_building_production() -> void:
 		var cycles := int(elapsed / interval)
 		if cycles > 0:
 			if not planet_data.has("storage"):
-				planet_data["storage"] = {"ore": 0, "crystal": 0, "fuel": 0, "scrap": 0}
+				planet_data["storage"] = {"ore": 0, "crystal": 0, "scrap": 0}
 			for res_key in production:
 				var produced: int = int(production[res_key]) * cycles
 				planet_data["storage"][res_key] = planet_data["storage"].get(res_key, 0) + produced
