@@ -221,18 +221,26 @@ func _get_player() -> Node2D:
 
 
 func _setup_sprite() -> void:
-	if enemy_type == EnemyType.PIRATE:
-		var sprite := Sprite2D.new()
-		var tex := load("res://assets/2026-03-15-enemy-pirate.png") as Texture2D
-		if is_instance_valid(tex):
-			sprite.texture = tex
-			var target_size := 30.0
-			var tex_size := tex.get_size()
-			var scale_factor: float = target_size / max(tex_size.x, tex_size.y)
-			sprite.scale = Vector2(scale_factor, scale_factor)
-			sprite.rotation = PI  # sprite faces down, game uses UP as forward
-			add_child(sprite)
-			_has_sprite = true
+	var tex_path := ""
+	var target_size := 60.0
+	match enemy_type:
+		EnemyType.PIRATE:
+			tex_path = "res://assets/2026-03-15-enemy-pirate.png"
+		EnemyType.DRONE:
+			tex_path = "res://assets/2026-03-15-drone.png"
+			target_size = 52.0
+	if tex_path.is_empty():
+		return
+	var sprite := Sprite2D.new()
+	var tex := load(tex_path) as Texture2D
+	if is_instance_valid(tex):
+		sprite.texture = tex
+		var tex_size := tex.get_size()
+		var scale_factor: float = target_size / max(tex_size.x, tex_size.y)
+		sprite.scale = Vector2(scale_factor, scale_factor)
+		sprite.rotation = PI  # sprites face down, game uses UP as forward
+		add_child(sprite)
+		_has_sprite = true
 
 
 func _draw() -> void:

@@ -28,7 +28,20 @@ func _ready() -> void:
 	add_to_group("enemies")
 	bullet_scene = load("res://scenes/bullet.tscn")
 	_patrol_dir = Vector2.from_angle(randf() * TAU)
+	_setup_sprite()
 	queue_redraw()
+
+
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-15-battleship.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	var scale_factor: float = 90.0 / max(tex.get_size().x, tex.get_size().y)
+	sprite.scale = Vector2(scale_factor, scale_factor)
+	sprite.rotation = PI
+	add_child(sprite)
 
 
 func _process(delta: float) -> void:

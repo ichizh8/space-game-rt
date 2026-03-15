@@ -20,7 +20,20 @@ var bullet_scene: PackedScene
 func _ready() -> void:
 	add_to_group("enemies")
 	bullet_scene = load("res://scenes/bullet.tscn")
+	_setup_sprite()
 	queue_redraw()
+
+
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-15-turret.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	var scale_factor: float = 56.0 / max(tex.get_size().x, tex.get_size().y)
+	sprite.scale = Vector2(scale_factor, scale_factor)
+	# Turret rotates with the node so no flip needed
+	add_child(sprite)
 
 
 func _process(delta: float) -> void:

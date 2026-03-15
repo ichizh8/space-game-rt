@@ -84,7 +84,7 @@ func _setup_sprite() -> void:
 	if is_instance_valid(tex):
 		sprite.texture = tex
 		# Scale to fit: sprite is ~1024px, we want ~36px game size
-		var target_size := 36.0
+		var target_size := 72.0
 		var tex_size := tex.get_size()
 		var scale_factor: float = target_size / max(tex_size.x, tex_size.y)
 		sprite.scale = Vector2(scale_factor, scale_factor)
