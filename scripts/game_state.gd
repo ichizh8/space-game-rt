@@ -40,6 +40,21 @@ var captain_sell_bonus: float = 0.0       # sell price multiplier: price * (1 + 
 var map_visited_trail: Array[Vector2] = []   # session-only
 var map_discovered_planets: Dictionary = {}   # persistent: planet_id -> {pos_x, pos_y, name, color_h}
 
+# Faction reputation (0–100)
+var faction_rep: Dictionary = {"coalition": 50, "pirates": 0}
+
+# Quest system
+var active_quests: Array = []
+var completed_quests: Array = []
+
+# Session stats
+var session_kills: int = 0
+var session_artifacts: int = 0
+
+# Storyline
+var story_act: int = 1
+var story_flags: Dictionary = {}
+
 # Ship upgrade levels (0-3 each)
 var weapon_level: int = 0
 var speed_level: int = 0
@@ -243,6 +258,82 @@ func map_note_biome(_pos: Vector2, _biome_id: int) -> void:
 	pass  # future: visualize biomes on cockpit map
 
 
+func add_faction_rep(faction: String, amount: int) -> void:
+	if faction_rep.has(faction):
+		faction_rep[faction] = clamp(faction_rep[faction] + amount, 0, 100)
+
+
+func accept_quest(quest_data: Dictionary) -> bool:
+	if active_quests.size() >= 3:
+		return false
+	for q in active_quests:
+		if q["id"] == quest_data["id"]:
+			return false
+	active_quests.append(quest_data.duplicate(true))
+	return true
+
+
+func update_quest_progress(quest_type: String, amount: int = 1) -> void:
+	for q in active_quests:
+		if q.get("type") == quest_type:
+			q["progress"] = q.get("progress", 0) + amount
+
+
+func complete_quest(quest_id: String) -> Dictionary:
+	for i in range(active_quests.size()):
+		if active_quests[i]["id"] == quest_id:
+			var q = active_quests[i]
+			active_quests.remove_at(i)
+			if quest_id not in completed_quests:
+				completed_quests.append(quest_id)
+			return q.get("reward", {})
+	return {}
+
+
+func abandon_quest(quest_id: String) -> void:
+	for i in range(active_quests.size()):
+		if active_quests[i]["id"] == quest_id:
+			active_quests.remove_at(i)
+			return
+
+
+func get_quest_progress(quest_id: String) -> Dictionary:
+	for q in active_quests:
+		if q["id"] == quest_id:
+			return q
+	return {}
+
+
+func is_quest_active(quest_id: String) -> bool:
+	return not get_quest_progress(quest_id).is_empty()
+
+
+func is_quest_completed(quest_id: String) -> bool:
+	return quest_id in completed_quests
+
+
+func record_kill() -> void:
+	session_kills += 1
+	add_faction_rep("coalition", 1)
+	update_quest_progress("destroy")
+
+
+func record_artifact() -> void:
+	session_artifacts += 1
+
+
+func get_session_score() -> int:
+	return credits + session_kills * 15 + session_artifacts * 150
+
+
+func set_story_flag(flag: String, value: Variant = true) -> void:
+	story_flags[flag] = value
+
+
+func get_story_flag(flag: String) -> Variant:
+	return story_flags.get(flag, null)
+
+
 func reset_game() -> void:
 	max_hull = 100.0 + captain_hull_bonus
 	hull = max_hull
@@ -263,3 +354,10 @@ func reset_game() -> void:
 	last_planet_id = ""
 	map_visited_trail = []
 	# do NOT reset map_discovered_planets
+	session_kills = 0
+	session_artifacts = 0
+	story_act = 1
+	story_flags = {}
+	active_quests = []
+	faction_rep = {"coalition": 50, "pirates": 0}
+	# completed_quests is NOT reset (persistent history)

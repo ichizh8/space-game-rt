@@ -25,6 +25,13 @@ func save_game() -> void:
 		"captain_perk_points_earned": GameState.captain_perk_points_earned,
 		"captain_perks": GameState.captain_perks.duplicate(),
 		"map_discovered_planets": GameState.map_discovered_planets.duplicate(true),
+		"faction_rep": GameState.faction_rep.duplicate(),
+		"active_quests": GameState.active_quests.duplicate(true),
+		"completed_quests": GameState.completed_quests.duplicate(),
+		"session_kills": GameState.session_kills,
+		"session_artifacts": GameState.session_artifacts,
+		"story_act": GameState.story_act,
+		"story_flags": GameState.story_flags.duplicate(),
 	}
 	var json_string := JSON.stringify(data, "\t")
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -71,6 +78,13 @@ func load_game() -> bool:
 	for p in loaded_perks:
 		GameState.captain_perks.append(str(p))
 	GameState.reapply_all_perks()
+	GameState.faction_rep = data.get("faction_rep", {"coalition": 50, "pirates": 0})
+	GameState.active_quests = data.get("active_quests", [])
+	GameState.completed_quests = data.get("completed_quests", [])
+	GameState.session_kills = int(data.get("session_kills", 0))
+	GameState.session_artifacts = int(data.get("session_artifacts", 0))
+	GameState.story_act = int(data.get("story_act", 1))
+	GameState.story_flags = data.get("story_flags", {})
 	var loaded_map: Dictionary = data.get("map_discovered_planets", {})
 	GameState.map_discovered_planets = {}
 	for pid in loaded_map:
