@@ -13,3 +13,7 @@ res://scenes/black_hole.tscn::049a1c3555ed16eea3933f0d3cb990ee::1773583082::res:
 res://scenes/space_station.tscn::33b5095e69708740308f94f905762cdb::1773583083::res://.godot/exported/133200997/export-8fc21e3f0f8b3bb03d231f04ef99aeed-space_station.scn
 res://scenes/star.tscn::dd9869020617f998bab8552136baf8d9::1773583081::res://.godot/exported/133200997/export-594aca27bdcecd10c4567c6b9d5d0d2b-star.scn
 res://scenes/station_menu.tscn::9915f2a41484e1f3333f96cfe08b211a::1773583084::res://.godot/exported/133200997/export-7a08377f21695b7a319aa524ff4ce088-station_menu.scn
+res://scenes/battleship.tscn::8fa93c4e8663e7f4e1a22ef41697acb5::1773583657::res://.godot/exported/133200997/export-2b212d329fe7a08b2876e5214d32f057-battleship.scn
+res://scenes/hazard_asteroid.tscn::6b0b95222d9ccb077cd013349a895544::1773583659::res://.godot/exported/133200997/export-e78261878edaba2bba2d71373a445c56-hazard_asteroid.scn
+res://scenes/interceptor.tscn::ef8749aef7d644bd86bf6c193064dace::1773583656::res://.godot/exported/133200997/export-36cb6fc21044efd77768ebb19d235aac-interceptor.scn
+res://scenes/turret.tscn::354319cd21674fe31e9e42b667e8cce2::1773583658::res://.godot/exported/133200997/export-39a5d02370b65c0577139fa32878e6d6-turret.scn

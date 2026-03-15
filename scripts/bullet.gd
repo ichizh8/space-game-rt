@@ -34,6 +34,18 @@ func _process(delta: float) -> void:
 				_hit = true
 				queue_redraw()
 				return
+		# Check hazard asteroids
+		for haz in get_tree().get_nodes_in_group("hazard_asteroids"):
+			if not is_instance_valid(haz):
+				continue
+			if haz.get("_hit") == true:
+				continue
+			if global_position.distance_to(haz.global_position) < 16.0:
+				if haz.has_method("take_damage"):
+					haz.take_damage(damage)
+				_hit = true
+				queue_redraw()
+				return
 	else:
 		var players := get_tree().get_nodes_in_group("player")
 		if players.size() > 0:

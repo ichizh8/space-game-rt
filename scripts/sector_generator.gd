@@ -17,6 +17,10 @@ const MIN_STATIONS := 1
 const MAX_STATIONS := 2
 const BLACK_HOLE_CHANCE := 0.4
 
+enum Biome { MIXED, ASTEROID_BELT, DEBRIS_FIELD, DEEP_SPACE, NEBULA }
+
+const BIOME_NAMES: Array[String] = ["Mixed", "Asteroid Belt", "Debris Field", "Deep Space", "Nebula"]
+
 var asteroid_scene: PackedScene
 var planet_scene: PackedScene
 var enemy_scene: PackedScene
@@ -24,11 +28,18 @@ var artifact_scene: PackedScene
 var star_scene: PackedScene
 var black_hole_scene: PackedScene
 var station_scene: PackedScene
+var interceptor_scene: PackedScene
+var battleship_scene: PackedScene
+var turret_scene: PackedScene
+var hazard_asteroid_scene: PackedScene
 
 var _spawned_objects: Array[Node2D] = []
 var _check_timer: float = 0.0
 var _planet_index: int = 0
 var _used_artifact_positions: Array[Vector2] = []
+var _current_biome: Biome = Biome.MIXED
+var _biome_change_timer: float = 0.0
+const BIOME_CHANGE_INTERVAL := 45.0
 
 const PLANET_NAMES: Array[String] = [
 	"Nexara", "Vorthen", "Kaelis", "Zyphora", "Meridax",
@@ -46,6 +57,10 @@ func _ready() -> void:
 	star_scene = load("res://scenes/star.tscn")
 	black_hole_scene = load("res://scenes/black_hole.tscn")
 	station_scene = load("res://scenes/space_station.tscn")
+	interceptor_scene = load("res://scenes/interceptor.tscn")
+	battleship_scene = load("res://scenes/battleship.tscn")
+	turret_scene = load("res://scenes/turret.tscn")
+	hazard_asteroid_scene = load("res://scenes/hazard_asteroid.tscn")
 	call_deferred("_spawn_initial")
 
 
@@ -54,6 +69,10 @@ func _process(delta: float) -> void:
 	if _check_timer >= CHECK_INTERVAL:
 		_check_timer = 0.0
 		_manage_objects()
+	_biome_change_timer += delta
+	if _biome_change_timer >= BIOME_CHANGE_INTERVAL:
+		_biome_change_timer = 0.0
+		_pick_biome()
 
 
 func _spawn_initial() -> void:
@@ -99,6 +118,10 @@ func _spawn_initial() -> void:
 	var num_extra_stations := randi_range(0, MAX_STATIONS - 1)
 	for i in range(num_extra_stations):
 		_spawn_station(center + _random_offset(SPAWN_RADIUS))
+
+	# Spawn 1-2 hazard belts
+	for i in range(randi_range(1, 2)):
+		_spawn_hazard_belt(center + _random_offset(SPAWN_RADIUS * 0.6))
 
 
 func _manage_objects() -> void:
@@ -158,6 +181,8 @@ func _manage_objects() -> void:
 			star_count += 1
 		elif obj.is_in_group("stations"):
 			station_count += 1
+		elif obj.is_in_group("hazard_asteroids"):
+			pass  # tracked by group, not refilled
 
 	# Spawn ahead of player movement
 	var move_dir := Vector2.ZERO
@@ -214,11 +239,73 @@ func _spawn_planet(pos: Vector2) -> void:
 
 
 func _spawn_enemy(pos: Vector2) -> void:
-	var enemy := enemy_scene.instantiate() as Node2D
+	var enemy: Node2D
+	match _current_biome:
+		Biome.ASTEROID_BELT:
+			# Pirates and interceptor packs
+			if randf() < 0.5:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.enemy_type = 0  # pirate
+			else:
+				_spawn_interceptor_pack(pos)
+				return
+		Biome.DEBRIS_FIELD:
+			# Drones, turrets, occasional battleship
+			var r := randf()
+			if r < 0.4:
+				enemy = turret_scene.instantiate() as Node2D
+			elif r < 0.65:
+				enemy = battleship_scene.instantiate() as Node2D
+			else:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.enemy_type = 1  # drone
+		Biome.DEEP_SPACE:
+			# Battleships and drones only
+			if randf() < 0.3:
+				enemy = battleship_scene.instantiate() as Node2D
+			else:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.enemy_type = 1
+		Biome.NEBULA:
+			# Light opposition
+			enemy = enemy_scene.instantiate() as Node2D
+			enemy.enemy_type = 0 if randf() < 0.7 else 1
+		_:  # MIXED
+			var r := randf()
+			if r < 0.35:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.enemy_type = 0
+			elif r < 0.6:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.enemy_type = 1
+			elif r < 0.75:
+				_spawn_interceptor_pack(pos)
+				return
+			else:
+				enemy = turret_scene.instantiate() as Node2D
 	enemy.global_position = pos
-	enemy.enemy_type = 0 if randi() % 2 == 0 else 1
 	get_tree().current_scene.add_child(enemy)
 	_spawned_objects.append(enemy)
+
+
+func _spawn_interceptor_pack(center: Vector2) -> void:
+	var count := randi_range(2, 4)
+	for i in range(count):
+		var offset := Vector2.from_angle(i * TAU / count) * randf_range(30.0, 60.0)
+		var interceptor := interceptor_scene.instantiate() as Node2D
+		interceptor.global_position = center + offset
+		get_tree().current_scene.add_child(interceptor)
+		_spawned_objects.append(interceptor)
+
+
+func _spawn_hazard_belt(center: Vector2) -> void:
+	var count := randi_range(8, 14)
+	for i in range(count):
+		var offset := Vector2.from_angle(randf() * TAU) * randf_range(40.0, 120.0)
+		var haz := hazard_asteroid_scene.instantiate() as Node2D
+		haz.global_position = center + offset
+		get_tree().current_scene.add_child(haz)
+		_spawned_objects.append(haz)
 
 
 func _spawn_artifact(pos: Vector2) -> void:
@@ -302,6 +389,20 @@ func _open_station_menu(s_id: String, s_name: String) -> void:
 	var menu: Node = menu_scene.instantiate()
 	menu.setup(s_id, s_name)
 	get_tree().current_scene.add_child(menu)
+
+
+func _pick_biome() -> void:
+	var player := _get_player()
+	if not is_instance_valid(player):
+		return
+	var dist_from_origin := player.global_position.length()
+	# Deep space and nebula only appear far from origin
+	var pool: Array[Biome] = [Biome.MIXED, Biome.ASTEROID_BELT, Biome.DEBRIS_FIELD]
+	if dist_from_origin > 1200.0:
+		pool.append(Biome.DEEP_SPACE)
+		pool.append(Biome.NEBULA)
+	_current_biome = pool[randi() % pool.size()]
+	GameState.map_note_biome(player.global_position, _current_biome)
 
 
 func _get_player() -> Node2D:

@@ -231,6 +231,10 @@ func map_discover_planet(planet_id: String, pos: Vector2, p_name: String, color_
 		}
 
 
+func map_note_biome(_pos: Vector2, _biome_id: int) -> void:
+	pass  # future: visualize biomes on cockpit map
+
+
 func reset_game() -> void:
 	max_hull = 100.0 + captain_hull_bonus
 	hull = max_hull
