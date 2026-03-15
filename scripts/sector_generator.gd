@@ -221,7 +221,7 @@ func _manage_objects() -> void:
 func _spawn_asteroid(pos: Vector2) -> void:
 	var asteroid := asteroid_scene.instantiate() as Node2D
 	asteroid.global_position = pos
-	get_tree().current_scene.add_child(asteroid)
+	get_parent().add_child(asteroid)
 	_spawned_objects.append(asteroid)
 
 
@@ -236,7 +236,7 @@ func _spawn_planet(pos: Vector2) -> void:
 		planet.setup(p_name, p_id, p_quest)
 	if planet.has_signal("landed"):
 		planet.landed.connect(_on_planet_landed)
-	get_tree().current_scene.add_child(planet)
+	get_parent().add_child(planet)
 	_spawned_objects.append(planet)
 
 
@@ -286,7 +286,7 @@ func _spawn_enemy(pos: Vector2) -> void:
 			else:
 				enemy = turret_scene.instantiate() as Node2D
 	enemy.global_position = pos
-	get_tree().current_scene.add_child(enemy)
+	get_parent().add_child(enemy)
 	_spawned_objects.append(enemy)
 
 
@@ -296,7 +296,7 @@ func _spawn_interceptor_pack(center: Vector2) -> void:
 		var offset := Vector2.from_angle(i * TAU / count) * randf_range(30.0, 60.0)
 		var interceptor := interceptor_scene.instantiate() as Node2D
 		interceptor.global_position = center + offset
-		get_tree().current_scene.add_child(interceptor)
+		get_parent().add_child(interceptor)
 		_spawned_objects.append(interceptor)
 
 
@@ -306,7 +306,7 @@ func _spawn_hazard_belt(center: Vector2) -> void:
 		var offset := Vector2.from_angle(randf() * TAU) * randf_range(40.0, 120.0)
 		var haz := hazard_asteroid_scene.instantiate() as Node2D
 		haz.global_position = center + offset
-		get_tree().current_scene.add_child(haz)
+		get_parent().add_child(haz)
 		_spawned_objects.append(haz)
 
 
@@ -320,7 +320,7 @@ func _spawn_artifact(pos: Vector2) -> void:
 		artifact.setup(art_data)
 	if artifact.has_signal("collected"):
 		artifact.collected.connect(_on_artifact_collected)
-	get_tree().current_scene.add_child(artifact)
+	get_parent().add_child(artifact)
 	_spawned_objects.append(artifact)
 
 
@@ -333,7 +333,7 @@ func _open_planet_menu(p_planet_id: String, p_planet_name: String, p_quest_id: S
 	var planet_menu_scene := load("res://scenes/planet_menu.tscn")
 	var menu: Node = planet_menu_scene.instantiate()
 	menu.setup(p_planet_id, p_planet_name, p_quest_id)
-	get_tree().current_scene.add_child(menu)
+	get_parent().add_child(menu)
 
 
 func _on_artifact_collected(data: Dictionary) -> void:
@@ -363,14 +363,14 @@ func _safe_spawn_pos(center: Vector2, radius: float, min_player_dist: float = 35
 func _spawn_star(pos: Vector2) -> void:
 	var star := star_scene.instantiate() as Node2D
 	star.global_position = pos
-	get_tree().current_scene.add_child(star)
+	get_parent().add_child(star)
 	_spawned_objects.append(star)
 
 
 func _spawn_black_hole(pos: Vector2) -> void:
 	var bh := black_hole_scene.instantiate() as Node2D
 	bh.global_position = pos
-	get_tree().current_scene.add_child(bh)
+	get_parent().add_child(bh)
 	_spawned_objects.append(bh)
 
 
@@ -390,7 +390,7 @@ func _spawn_station(pos: Vector2) -> void:
 		station.setup(s_id, s_name)
 	if station.has_signal("docked"):
 		station.docked.connect(_on_station_docked)
-	get_tree().current_scene.add_child(station)
+	get_parent().add_child(station)
 	_spawned_objects.append(station)
 
 
@@ -402,7 +402,7 @@ func _open_station_menu(s_id: String, s_name: String) -> void:
 	var menu_scene := load("res://scenes/station_menu.tscn")
 	var menu: Node = menu_scene.instantiate()
 	menu.setup(s_id, s_name)
-	get_tree().current_scene.add_child(menu)
+	get_parent().add_child(menu)
 
 
 func _pick_biome() -> void:
@@ -482,7 +482,7 @@ func _spawn_story_planet_deferred(pos: Vector2) -> void:
 		planet.setup("Signal Source", "story_signal_planet", "story_act2")
 	if planet.has_signal("landed"):
 		planet.landed.connect(_on_planet_landed)
-	get_tree().current_scene.add_child(planet)
+	get_parent().add_child(planet)
 	_spawned_objects.append(planet)
 	GameState.map_discovered_planets["story_signal_planet"] = {
 		"pos_x": pos.x, "pos_y": pos.y, "name": "Signal Source", "color_h": 0.15
@@ -495,7 +495,7 @@ func _spawn_command_ship_cluster(center: Vector2) -> void:
 	for i in range(2):
 		var bs := battleship_scene.instantiate() as Node2D
 		bs.global_position = center + Vector2(i * 120 - 60, 0)
-		get_tree().current_scene.add_child(bs)
+		get_parent().add_child(bs)
 		_spawned_objects.append(bs)
 		if bs.has_signal("died"):
 			bs.died.connect(_on_command_ship_enemy_died)
@@ -503,7 +503,7 @@ func _spawn_command_ship_cluster(center: Vector2) -> void:
 	for i in range(4):
 		var ic := interceptor_scene.instantiate() as Node2D
 		ic.global_position = center + Vector2.from_angle(i * TAU / 4) * 80
-		get_tree().current_scene.add_child(ic)
+		get_parent().add_child(ic)
 		_spawned_objects.append(ic)
 		if ic.has_signal("died"):
 			ic.died.connect(_on_command_ship_enemy_died)
@@ -545,7 +545,7 @@ func _open_end_screen(victory: bool) -> void:
 		var end := end_scene.instantiate()
 		if end.has_method("setup"):
 			end.setup(victory)
-		get_tree().current_scene.add_child(end)
+		get_parent().add_child(end)
 
 
 func _on_player_died_for_end_screen() -> void:

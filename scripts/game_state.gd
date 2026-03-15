@@ -346,11 +346,11 @@ func get_session_score() -> int:
 	return credits + session_kills * 15 + session_artifacts * 150
 
 
-func set_story_flag(flag: String, value: Variant = true) -> void:
+func set_story_flag(flag: String, value = true) -> void:
 	story_flags[flag] = value
 
 
-func get_story_flag(flag: String) -> Variant:
+func get_story_flag(flag: String):
 	return story_flags.get(flag, null)
 
 
