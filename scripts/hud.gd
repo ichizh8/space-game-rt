@@ -33,9 +33,9 @@ func _build_ui() -> void:
 	var top_bar := VBoxContainer.new()
 	top_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	top_bar.offset_bottom = 80
-	top_bar.offset_left = 10
-	top_bar.offset_right = -10
-	top_bar.offset_top = 10
+	top_bar.offset_left = 94   # clear COCKPIT button on left
+	top_bar.offset_right = -100  # clear ITEMS button on right
+	top_bar.offset_top = 6
 	add_child(top_bar)
 
 	# Hull bar
