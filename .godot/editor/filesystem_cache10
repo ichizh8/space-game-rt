@@ -48,7 +48,7 @@ effects_manager.gd::GDScript/GDScript::116975078305468455::1773544061::0::1::::<
 end_screen.gd::GDScript/GDScript::930197457372939919::1773610416::0::1::::<>CanvasLayer<><>0<>0<><>::
 enemy.gd::GDScript/GDScript::3527565857773294411::1773610356::0::1::::<>Node2D<><>0<>0<><>::
 fire_button.gd::GDScript/GDScript::6690902213180807401::1773604432::0::1::::<>Control<><>0<>0<><>::
-game_state.gd::GDScript::4936583656168493480::1773611849::0::1::::<>Node<><>0<>0<><>::
+game_state.gd::GDScript/GDScript::4936583656168493480::1773611849::0::1::::<>Node<><>0<>0<><>::
 hazard_asteroid.gd::GDScript/GDScript::140940104441337328::1773583655::0::1::::<>Node2D<><>0<>0<><>::
 hud.gd::GDScript/GDScript::1858420113232689031::1773604446::0::1::::<>CanvasLayer<><>0<>0<><>::
 interceptor.gd::GDScript/GDScript::3019466697555462762::1773610384::0::1::::<>Node2D<><>0<>0<><>::
@@ -57,7 +57,7 @@ main_menu.gd::GDScript/GDScript::1764982572082152261::1773542401::0::1::::<>Cont
 planet.gd::GDScript/GDScript::4693907266427328966::1773590911::0::1::::<>Node2D<><>0<>0<><>::
 planet_menu.gd::GDScript/GDScript::5271842473902023664::1773610323::0::1::::<>CanvasLayer<><>0<>0<><>::
 save_manager.gd::GDScript/GDScript::7650306163663500790::1773609995::0::1::::<>Node<><>0<>0<><>::
-sector_generator.gd::GDScript::7122586594381657071::1773611839::0::1::::<>Node2D<><>0<>0<><>::
+sector_generator.gd::GDScript::7122586594381657071::1773612331::0::1::::<>Node2D<><>0<>0<><>::
 ship.gd::GDScript/GDScript::5629838719633451787::1773599518::0::1::::<>CharacterBody2D<><>0<>0<><>::
 space_station.gd::GDScript/GDScript::7841865305012411993::1773583041::0::1::::<>Node2D<><>0<>0<><>::
 space_world.gd::GDScript/GDScript::113990473700440012::1773589518::0::1::::<>Node2D<><>0<>0<><>::
@@ -68,7 +68,7 @@ station_menu.gd::GDScript/GDScript::1486852535772250751::1773610232::0::1::::<>C
 turret.gd::GDScript/GDScript::7631576253312281239::1773610374::0::1::::<>Node2D<><>0<>0<><>::
 virtual_joystick.gd::GDScript/GDScript::1020178028105329822::1773542401::0::1::::<>Control<><>0<>0<><>::
 world_data.gd::GDScript/GDScript::3340492155267611818::1773610046::0::1::::<>Node<><>0<>0<><>::
-::res://web-export/::1773611480
-index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773611480::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
-index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773611480::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
-index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773611480::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::
+::res://web-export/::1773611855
+index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773611855::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
+index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773611855::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
+index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773611889::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::

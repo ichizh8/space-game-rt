@@ -83,6 +83,8 @@ func _spawn_initial() -> void:
 	if is_instance_valid(player):
 		center = player.global_position
 
+	print("DEBUG: _spawn_initial START, center=", center, " parent=", get_parent())
+
 	# Spawn asteroids
 	var num_asteroids := randi_range(MIN_ASTEROIDS, MAX_ASTEROIDS)
 	for i in range(num_asteroids):
@@ -124,6 +126,11 @@ func _spawn_initial() -> void:
 	# Spawn 1-2 hazard belts
 	for i in range(randi_range(1, 2)):
 		_spawn_hazard_belt(center + _random_offset(SPAWN_RADIUS * 0.6))
+
+	print("DEBUG: _spawn_initial END, spawned=", _spawned_objects.size())
+	var hud := get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("Spawned: " + str(_spawned_objects.size()) + " objects")
 
 
 func _manage_objects() -> void:
@@ -219,7 +226,13 @@ func _manage_objects() -> void:
 
 
 func _spawn_asteroid(pos: Vector2) -> void:
+	if asteroid_scene == null:
+		print("ERROR: asteroid_scene is null!")
+		return
 	var asteroid := asteroid_scene.instantiate() as Node2D
+	if asteroid == null:
+		print("ERROR: asteroid instantiate failed!")
+		return
 	asteroid.global_position = pos
 	get_parent().add_child(asteroid)
 	_spawned_objects.append(asteroid)
