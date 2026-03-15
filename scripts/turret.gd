@@ -97,17 +97,27 @@ func _fire() -> void:
 
 signal died()
 
+func _dbg(msg: String) -> void:
+	var h := get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(h) and h.has_method("show_notification"):
+		h.show_notification(msg, 5.0)
+
 func _die() -> void:
 	is_dead = true
+	_dbg("TURRET: record_kill")
 	GameState.record_kill()
+	_dbg("TURRET: add_xp")
 	GameState.add_xp(XP_REWARD)
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):
 		em.add_explosion(global_position, 0.9)
+	_dbg("TURRET: spawn_loot")
 	call_deferred("_spawn_loot")
 	_despawn_timer = 1.2
 	queue_redraw()
+	_dbg("TURRET: died.emit")
 	died.emit()
+	_dbg("TURRET: DONE")
 
 
 func _spawn_loot() -> void:

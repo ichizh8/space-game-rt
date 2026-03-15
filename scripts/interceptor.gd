@@ -83,8 +83,14 @@ func _process(delta: float) -> void:
 
 signal died()
 
+func _dbg(msg: String) -> void:
+	var h := get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(h) and h.has_method("show_notification"):
+		h.show_notification(msg, 5.0)
+
 func _explode() -> void:
 	is_dead = true
+	_dbg("INTCPT: record_kill")
 	GameState.record_kill()
 	var player := _get_player()
 	if is_instance_valid(player):
@@ -95,10 +101,13 @@ func _explode() -> void:
 	if is_instance_valid(em) and em.has_method("add_explosion"):
 		em.add_explosion(global_position, 1.4)
 		em.add_float("BOOM!", global_position + Vector2(0, -25), Color.RED)
+	_dbg("INTCPT: spawn_loot")
 	call_deferred("_spawn_loot")
 	_despawn_timer = 1.0
 	queue_redraw()
+	_dbg("INTCPT: died.emit")
 	died.emit()
+	_dbg("INTCPT: DONE")
 
 
 func _spawn_loot() -> void:
