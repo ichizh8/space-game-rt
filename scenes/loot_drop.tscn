@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://lootdrop001"]
+
+[ext_resource type="Script" path="res://scripts/loot_drop.gd" id="1"]
+
+[node name="LootDrop" type="Node2D"]
+script = ExtResource("1")

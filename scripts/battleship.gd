@@ -9,6 +9,7 @@ var speed: float = 55.0
 var state: State = State.PATROL
 var _flash_timer: float = 0.0
 var _shoot_timer: float = 0.0
+var _despawn_timer: float = -1.0
 var _patrol_timer: float = 0.0
 var _patrol_dir: Vector2 = Vector2.RIGHT
 
@@ -31,6 +32,12 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _despawn_timer > 0.0:
+		_despawn_timer -= delta
+		if _despawn_timer <= 0.0:
+			call_deferred("queue_free")
+			return
+
 	if is_dead:
 		return
 
@@ -113,15 +120,26 @@ func take_damage(amount: float) -> void:
 
 func _die() -> void:
 	is_dead = true
-	GameState.add_resource("scrap", randi_range(8, 15))
-	GameState.add_resource("ore", randi_range(5, 10))
-	GameState.add_credits(CREDIT_REWARD)
 	GameState.add_xp(XP_REWARD)
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):
 		em.add_explosion(global_position, 2.5)
-		em.add_float("+" + str(CREDIT_REWARD) + " cr", global_position + Vector2(0, -35), Color.ORANGE)
+	call_deferred("_spawn_loot")
+	_despawn_timer = 2.0
 	queue_redraw()
+
+
+func _spawn_loot() -> void:
+	var loot_scene := load("res://scenes/loot_drop.tscn") as PackedScene
+	if not is_instance_valid(loot_scene):
+		GameState.add_credits(CREDIT_REWARD)
+		return
+	var loot := loot_scene.instantiate() as Node2D
+	loot.global_position = global_position
+	var res: Dictionary = {"scrap": randi_range(8, 15), "ore": randi_range(5, 10)}
+	if loot.has_method("setup"):
+		loot.setup(CREDIT_REWARD, res)
+	get_tree().current_scene.add_child(loot)
 
 
 func _get_player() -> Node2D:

@@ -27,6 +27,7 @@ var orbit_direction: int = 1
 
 var _flash_timer: float = 0.0
 var _has_sprite := false
+var _despawn_timer: float = -1.0
 
 var bullet_scene: PackedScene
 
@@ -54,6 +55,12 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _despawn_timer > 0.0:
+		_despawn_timer -= delta
+		if _despawn_timer <= 0.0:
+			call_deferred("queue_free")
+			return
+
 	if is_dead:
 		return
 
@@ -171,23 +178,38 @@ func take_damage(amount: float) -> void:
 
 func _die() -> void:
 	is_dead = true
-	# Drop resources
-	var drop_types := ["ore", "crystal", "scrap", "fuel"]
-	GameState.add_resource(drop_types[randi() % drop_types.size()], randi_range(5, 10))
-	# Credit reward
+	# Credit and XP rewards
 	var credit_reward := 20 if enemy_type == EnemyType.PIRATE else 35
-	GameState.add_credits(credit_reward)
-	var xp_reward := 15 if enemy_type == EnemyType.PIRATE else 25
+	var xp_reward: int = 15 if enemy_type == EnemyType.PIRATE else 25
 	GameState.add_xp(xp_reward)
-	# If salvager perk: always drop scrap too
-	if GameState.has_perk("salvager"):
-		GameState.add_resource("scrap", randi_range(3, 6))
-	# Visual effects (pure data only - safe from _process context)
+	# Visual effects
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):
 		em.add_explosion(global_position, 1.2 if enemy_type == EnemyType.DRONE else 1.0)
-		em.add_float("+" + str(credit_reward) + " cr", global_position + Vector2(0, -30), Color.ORANGE)
+	# Spawn loot drop
+	call_deferred("_spawn_loot", credit_reward)
+	# Despawn after delay
+	_despawn_timer = 1.4
 	queue_redraw()
+
+
+func _spawn_loot(cr: int) -> void:
+	var loot_scene := load("res://scenes/loot_drop.tscn") as PackedScene
+	if not is_instance_valid(loot_scene):
+		GameState.add_credits(cr)
+		return
+	var loot := loot_scene.instantiate() as Node2D
+	loot.global_position = global_position
+	var res: Dictionary = {}
+	var drop_types: Array[String] = ["ore", "crystal", "scrap"]
+	var drop_type: String = drop_types[randi() % 3]
+	var drop_amt: int = randi_range(3, 8)
+	res[drop_type] = drop_amt
+	if GameState.has_perk("salvager"):
+		res["scrap"] = res.get("scrap", 0) + randi_range(3, 6)
+	if loot.has_method("setup"):
+		loot.setup(cr, res)
+	get_tree().current_scene.add_child(loot)
 
 
 func _get_player() -> Node2D:
