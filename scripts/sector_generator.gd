@@ -50,7 +50,9 @@ const PLANET_NAMES: Array[String] = [
 
 
 func _ready() -> void:
+	print("SectorGen _ready START")
 	asteroid_scene = load("res://scenes/asteroid.tscn")
+	print("SectorGen loaded asteroid")
 	planet_scene = load("res://scenes/planet.tscn")
 	enemy_scene = load("res://scenes/enemy.tscn")
 	artifact_scene = load("res://scenes/artifact.tscn")
@@ -61,7 +63,10 @@ func _ready() -> void:
 	battleship_scene = load("res://scenes/battleship.tscn")
 	turret_scene = load("res://scenes/turret.tscn")
 	hazard_asteroid_scene = load("res://scenes/hazard_asteroid.tscn")
+	print("SectorGen scenes loaded, connecting signal")
 	GameState.player_died.connect(_on_player_died_for_end_screen)
+	print("SectorGen signal connected, calling spawn")
+	call_deferred("_show_debug", "Ready OK")
 	call_deferred("_spawn_initial")
 
 
@@ -84,6 +89,7 @@ func _spawn_initial() -> void:
 		center = player.global_position
 
 	print("DEBUG: _spawn_initial START, center=", center, " parent=", get_parent())
+	_show_debug("Spawning...")
 
 	# Spawn asteroids
 	var num_asteroids := randi_range(MIN_ASTEROIDS, MAX_ASTEROIDS)
@@ -430,6 +436,12 @@ func _pick_biome() -> void:
 		pool.append(Biome.NEBULA)
 	_current_biome = pool[randi() % pool.size()]
 	GameState.map_note_biome(player.global_position, _current_biome)
+
+
+func _show_debug(msg: String) -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification(msg)
 
 
 func _get_player() -> Node2D:
