@@ -43,7 +43,7 @@ body{color:white;background:#05050f;overflow:hidden;touch-action:none}
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":73248,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":73152,"index.wasm":43682606},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -157,7 +157,6 @@ const engine = new Engine(GODOT_CONFIG);
   window.addEventListener('error',function(e){log('ERR: '+e.message+' ('+e.filename+':'+e.lineno+')');});
   window.addEventListener('unhandledrejection',function(e){log('PROMISE: '+String(e.reason));});
   var oe=console.error;console.error=function(){log('E: '+Array.from(arguments).join(' '));oe.apply(console,arguments);};
-  var ow=console.warn;console.warn=function(){log('W: '+Array.from(arguments).join(' '));ow.apply(console,arguments);};
   var last=Date.now();
   function tick(){last=Date.now();requestAnimationFrame(tick);}
   requestAnimationFrame(tick);
