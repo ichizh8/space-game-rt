@@ -19,6 +19,7 @@ func _process(delta: float) -> void:
 	_timer += delta
 	if _timer >= LIFETIME:
 		_hit = true
+		queue_redraw()
 		return
 	queue_redraw()
 	if is_player_bullet:
@@ -31,6 +32,7 @@ func _process(delta: float) -> void:
 				if enemy.has_method("take_damage"):
 					enemy.take_damage(damage)
 				_hit = true
+				queue_redraw()
 				return
 	else:
 		var players := get_tree().get_nodes_in_group("player")
@@ -39,6 +41,7 @@ func _process(delta: float) -> void:
 			if is_instance_valid(player) and global_position.distance_to(player.global_position) < HIT_RADIUS_PLAYER:
 				GameState.take_damage(damage)
 				_hit = true
+				queue_redraw()
 
 
 func _draw() -> void:
