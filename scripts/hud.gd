@@ -3,6 +3,7 @@ extends CanvasLayer
 var _joystick: Control
 var _fire_button: Control
 var _fire_pressed := false
+var _fire_debounce: float = 0.0
 
 
 # Action popup
@@ -183,6 +184,8 @@ func _connect_signals() -> void:
 
 
 func _process(delta: float) -> void:
+	if _fire_debounce > 0.0:
+		_fire_debounce -= delta
 	_check_nearby_objects()
 
 	if _notification_timer > 0:
@@ -203,13 +206,20 @@ func get_joystick_direction() -> Vector2:
 
 
 func _on_fire_input(event: InputEvent) -> void:
-	# On WebGL, touches arrive as MouseButton events only — handle one type to avoid double-toggle
-	if event is InputEventMouseButton:
+	if _fire_debounce > 0.0:
+		return
+	var did_toggle := false
+	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+		did_toggle = true
+	elif event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			_fire_pressed = not _fire_pressed
-			_fire_button.queue_redraw()
-			get_viewport().set_input_as_handled()
+			did_toggle = true
+	if did_toggle:
+		_fire_pressed = not _fire_pressed
+		_fire_debounce = 0.3
+		_fire_button.queue_redraw()
+		get_viewport().set_input_as_handled()
 
 
 func _check_nearby_objects() -> void:
