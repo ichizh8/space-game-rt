@@ -1,4 +1,4 @@
-extends Area2D
+extends Node2D
 
 var resource_type: String = "ore"
 var amount: int = 10
