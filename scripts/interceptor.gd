@@ -78,7 +78,7 @@ func _process(delta: float) -> void:
 			position += dir * 30.0 * delta
 			_arm_timer += delta
 			if _arm_timer >= ARM_TIME:
-				_explode()
+				call_deferred("_explode")
 
 
 signal died()
