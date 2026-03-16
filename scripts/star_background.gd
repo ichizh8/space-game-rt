@@ -11,11 +11,13 @@ func _ready() -> void:
 
 
 func _init_stars() -> void:
-	var vp := get_viewport_rect().size
-	if vp.x <= 0:
-		vp = Vector2(390, 844)
-	for i in range(200):
-		_stars.append(Vector2(randf_range(0, vp.x), randf_range(0, vp.y)))
+	# Use design resolution to ensure full coverage regardless of when viewport reports size
+	var vp := Vector2(390, 844)
+	_stars.clear()
+	_star_sizes.clear()
+	_star_colors.clear()
+	for i in range(220):
+		_stars.append(Vector2(randf_range(-20, vp.x + 20), randf_range(-20, vp.y + 20)))
 		_star_sizes.append(randf_range(0.8, 2.0))
 		var brightness := randf_range(0.5, 1.0)
 		_star_colors.append(Color(brightness, brightness, brightness + 0.05, 1.0))
@@ -24,7 +26,7 @@ func _init_stars() -> void:
 
 
 func _process(_delta: float) -> void:
-	queue_redraw()
+	pass  # Stars are static — no redraw needed every frame
 
 
 func _draw() -> void:
