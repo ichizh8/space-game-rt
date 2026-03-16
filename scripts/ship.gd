@@ -31,26 +31,18 @@ func _physics_process(delta: float) -> void:
 	if hud_node and hud_node.has_method("get_joystick_direction"):
 		direction = hud_node.get_joystick_direction()
 
-	# Rotation from joystick X axis
-	if abs(direction.x) > 0.1:
-		rotation += direction.x * ROTATION_SPEED * delta
-
-	# Thrust from joystick Y axis (push up = forward, push down = reverse)
-	var throttle: float = clamp(-direction.y, 0.0, 1.0)
-	var reverse: float = clamp(direction.y, 0.0, 1.0)
-
-	if throttle > 0.01 and GameState.fuel > 0:
-		var forward := Vector2.UP.rotated(rotation)
-		var speed_cap: float = MAX_SPEED + GameState.player_speed_bonus
-		_velocity_smooth += forward * THRUST_FORCE * throttle * delta
+	# Direct movement: joystick direction = ship movement direction
+	# Ship rotates to face movement direction
+	var speed_cap: float = MAX_SPEED + GameState.player_speed_bonus
+	if direction.length() > 0.1 and GameState.fuel > 0:
+		var target_vel := direction * THRUST_FORCE * delta
+		_velocity_smooth += target_vel
 		if _velocity_smooth.length() > speed_cap:
 			_velocity_smooth = _velocity_smooth.normalized() * speed_cap
-		var drain := FUEL_DRAIN_RATE * throttle * (1.0 - GameState.captain_fuel_efficiency)
-		GameState.use_fuel(drain * delta)
-	elif reverse > 0.01 and GameState.fuel > 0:
-		var forward := Vector2.UP.rotated(rotation)
-		_velocity_smooth -= forward * THRUST_FORCE * REVERSE_MULT * reverse * delta
-		var drain := FUEL_DRAIN_RATE * reverse * 0.5 * (1.0 - GameState.captain_fuel_efficiency)
+		# Rotate ship to face movement direction
+		var target_angle: float = _velocity_smooth.angle() + PI / 2.0
+		rotation = lerp_angle(rotation, target_angle, 10.0 * delta)
+		var drain := FUEL_DRAIN_RATE * direction.length() * (1.0 - GameState.captain_fuel_efficiency)
 		GameState.use_fuel(drain * delta)
 
 	# Space drag (always)
