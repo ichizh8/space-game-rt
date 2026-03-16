@@ -1,9 +1,11 @@
 extends CharacterBody2D
 
-const BASE_SPEED := 200.0
-const FUEL_DRAIN_RATE := 0.15  # per second while moving
-const ACCEL_LERP := 4.0       # how fast ship accelerates toward target velocity
-const DECEL_LERP := 2.5       # how fast ship decelerates (drift feel)
+const ROTATION_SPEED := 2.8    # radians per second
+const THRUST_FORCE := 320.0    # pixels/s² acceleration
+const MAX_SPEED := 280.0       # hard cap (before bonus)
+const DRAG := 0.92             # velocity multiplier per frame at 60fps
+const REVERSE_MULT := 0.35     # reverse thrust multiplier
+const FUEL_DRAIN_RATE := 0.15  # per second while thrusting
 
 var is_firing := false
 var can_shoot := true
@@ -29,15 +31,32 @@ func _physics_process(delta: float) -> void:
 	if hud_node and hud_node.has_method("get_joystick_direction"):
 		direction = hud_node.get_joystick_direction()
 
-	if direction.length() > 0.1 and GameState.fuel > 0:
-		var speed := BASE_SPEED + GameState.player_speed_bonus
-		var target_vel: Vector2 = direction.normalized() * speed
-		_velocity_smooth = _velocity_smooth.lerp(target_vel, delta * ACCEL_LERP)
-		rotation = _velocity_smooth.angle() + PI / 2.0
+	# Rotation from X axis
+	if abs(direction.x) > 0.1:
+		rotation += direction.x * ROTATION_SPEED * delta
+
+	# Thrust from Y axis (joystick up = negative Y = forward)
+	var thrust := 0.0
+	if direction.y < -0.1 and GameState.fuel > 0:
+		thrust = -direction.y * THRUST_FORCE  # forward
 		var drain := FUEL_DRAIN_RATE * (1.0 - GameState.captain_fuel_efficiency)
 		GameState.use_fuel(drain * delta)
-	else:
-		_velocity_smooth = _velocity_smooth.lerp(Vector2.ZERO, delta * DECEL_LERP)
+	elif direction.y > 0.1 and GameState.fuel > 0:
+		thrust = -direction.y * THRUST_FORCE * REVERSE_MULT  # gentle reverse
+		var drain := FUEL_DRAIN_RATE * 0.3 * (1.0 - GameState.captain_fuel_efficiency)
+		GameState.use_fuel(drain * delta)
+
+	# Apply thrust in facing direction
+	var forward := Vector2.UP.rotated(rotation)
+	_velocity_smooth += forward * thrust * delta
+
+	# Frame-rate independent drag
+	_velocity_smooth *= pow(DRAG, delta * 60.0)
+
+	# Cap speed
+	var max_spd := MAX_SPEED + GameState.player_speed_bonus
+	if _velocity_smooth.length() > max_spd:
+		_velocity_smooth = _velocity_smooth.normalized() * max_spd
 
 	velocity = _velocity_smooth + _gravity_accum
 	_gravity_accum = Vector2.ZERO
