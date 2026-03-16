@@ -32,6 +32,10 @@ var interceptor_scene: PackedScene
 var battleship_scene: PackedScene
 var turret_scene: PackedScene
 var hazard_asteroid_scene: PackedScene
+var sniper_scene: PackedScene
+var minelayer_scene: PackedScene
+var carrier_scene: PackedScene
+var void_sentinel_scene: PackedScene
 
 var _spawned_objects: Array[Node2D] = []
 var _check_timer: float = 0.0
@@ -61,6 +65,10 @@ func _ready() -> void:
 	battleship_scene = load("res://scenes/battleship.tscn")
 	turret_scene = load("res://scenes/turret.tscn")
 	hazard_asteroid_scene = load("res://scenes/hazard_asteroid.tscn")
+	sniper_scene = load("res://scenes/sniper.tscn")
+	minelayer_scene = load("res://scenes/minelayer.tscn")
+	carrier_scene = load("res://scenes/carrier.tscn")
+	void_sentinel_scene = load("res://scenes/void_sentinel.tscn")
 	call_deferred("_connect_signals_deferred")
 	call_deferred("_spawn_initial")
 
@@ -246,62 +254,96 @@ func _spawn_planet(pos: Vector2) -> void:
 	_spawned_objects.append(planet)
 
 
+func _get_zone_difficulty() -> float:
+	var player := _get_player()
+	if not is_instance_valid(player):
+		return 1.0
+	var dist := player.global_position.length()
+	var zone := min(floor(dist / 1500.0), 5.0)
+	return 1.0 + zone * 0.35
+
+func _apply_difficulty(enemy: Node2D, diff: float) -> void:
+	if enemy.has_method("setup"):
+		enemy.setup(diff)
+
 func _spawn_enemy(pos: Vector2) -> void:
+	var diff := _get_zone_difficulty()
 	var enemy: Node2D
+	var r := randf()
 	match _current_biome:
 		Biome.ASTEROID_BELT:
-			# Pirates and interceptor packs
-			if randf() < 0.5:
+			if r < 0.40:
 				enemy = enemy_scene.instantiate() as Node2D
-				enemy.enemy_type = 0  # pirate
+				enemy.set("enemy_type", 0)  # pirate
+			elif r < 0.65:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.set("enemy_type", 1)  # drone
+			elif r < 0.85:
+				enemy = carrier_scene.instantiate() as Node2D
 			else:
 				_spawn_interceptor_pack(pos)
 				return
 		Biome.DEBRIS_FIELD:
-			# Drones, turrets, occasional battleship
-			var r := randf()
-			if r < 0.4:
-				enemy = turret_scene.instantiate() as Node2D
-			elif r < 0.65:
-				enemy = battleship_scene.instantiate() as Node2D
-			else:
-				enemy = enemy_scene.instantiate() as Node2D
-				enemy.enemy_type = 1  # drone
-		Biome.DEEP_SPACE:
-			# Battleships and drones only
-			if randf() < 0.3:
-				enemy = battleship_scene.instantiate() as Node2D
-			else:
-				enemy = enemy_scene.instantiate() as Node2D
-				enemy.enemy_type = 1
-		Biome.NEBULA:
-			# Light opposition
-			enemy = enemy_scene.instantiate() as Node2D
-			enemy.enemy_type = 0 if randf() < 0.7 else 1
-		_:  # MIXED
-			var r := randf()
 			if r < 0.35:
+				_spawn_interceptor_pack(pos)
+				return
+			elif r < 0.65:
+				enemy = minelayer_scene.instantiate() as Node2D
+			elif r < 0.80:
+				enemy = turret_scene.instantiate() as Node2D
+			else:
 				enemy = enemy_scene.instantiate() as Node2D
-				enemy.enemy_type = 0
-			elif r < 0.6:
+				enemy.set("enemy_type", 0)
+		Biome.DEEP_SPACE:
+			if r < 0.35:
+				enemy = void_sentinel_scene.instantiate() as Node2D
+			elif r < 0.65:
+				enemy = sniper_scene.instantiate() as Node2D
+			elif r < 0.80:
+				enemy = battleship_scene.instantiate() as Node2D
+			else:
 				enemy = enemy_scene.instantiate() as Node2D
-				enemy.enemy_type = 1
+				enemy.set("enemy_type", 0)
+		Biome.NEBULA:
+			if r < 0.45:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.set("enemy_type", 1)  # drone
 			elif r < 0.75:
 				_spawn_interceptor_pack(pos)
 				return
 			else:
-				enemy = turret_scene.instantiate() as Node2D
+				enemy = sniper_scene.instantiate() as Node2D
+		_:  # MIXED
+			if r < 0.28:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.set("enemy_type", 0)
+			elif r < 0.50:
+				enemy = enemy_scene.instantiate() as Node2D
+				enemy.set("enemy_type", 1)
+			elif r < 0.65:
+				_spawn_interceptor_pack(pos)
+				return
+			elif r < 0.78:
+				enemy = sniper_scene.instantiate() as Node2D
+			elif r < 0.88:
+				enemy = minelayer_scene.instantiate() as Node2D
+			else:
+				enemy = carrier_scene.instantiate() as Node2D
 	enemy.global_position = pos
+	_apply_difficulty(enemy, diff)
 	get_parent().add_child(enemy)
 	_spawned_objects.append(enemy)
 
 
 func _spawn_interceptor_pack(center: Vector2) -> void:
+	var diff := _get_zone_difficulty()
 	var count := randi_range(2, 4)
 	for i in range(count):
 		var offset := Vector2.from_angle(i * TAU / count) * randf_range(30.0, 60.0)
 		var interceptor := interceptor_scene.instantiate() as Node2D
 		interceptor.global_position = center + offset
+		if interceptor.has_method("setup"):
+			interceptor.setup(diff)
 		get_parent().add_child(interceptor)
 		_spawned_objects.append(interceptor)
 

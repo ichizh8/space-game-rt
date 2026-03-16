@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://5mez1ehn0nt2n6sb"]
+
+[ext_resource type="Script" path="res://scripts/sniper.gd" id="1"]
+
+[node name="Sniper" type="Node2D"]
+script = ExtResource("1")

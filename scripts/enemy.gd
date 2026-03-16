@@ -37,6 +37,17 @@ const RETREAT_RANGE := 50.0
 const DEAGGRO_RANGE := 400.0
 
 
+var difficulty_mult: float = 1.0
+
+func setup(diff_mult: float) -> void:
+	difficulty_mult = diff_mult
+
+func _apply_difficulty() -> void:
+	hp = hp * difficulty_mult
+	max_hp = hp
+	damage = damage * difficulty_mult
+	speed = speed * (1.0 + (difficulty_mult - 1.0) * 0.4)
+
 func _ready() -> void:
 	add_to_group("enemies")
 	bullet_scene = load("res://scenes/bullet.tscn")
@@ -50,6 +61,7 @@ func _ready() -> void:
 			shoot_cooldown = 1.5; burst_max = 1
 	orbit_angle = randf() * TAU
 	patrol_direction = Vector2.from_angle(randf() * TAU)
+	_apply_difficulty()
 	_setup_sprite()
 	queue_redraw()
 

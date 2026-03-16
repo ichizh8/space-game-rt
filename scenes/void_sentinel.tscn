@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://m8efrpujusatrbox"]
+
+[ext_resource type="Script" path="res://scripts/void_sentinel.gd" id="1"]
+
+[node name="VoidSentinel" type="Node2D"]
+script = ExtResource("1")

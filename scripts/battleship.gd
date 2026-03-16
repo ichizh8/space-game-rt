@@ -21,6 +21,13 @@ const BULLET_DAMAGE := 14.0
 const XP_REWARD := 60
 const CREDIT_REWARD := 80
 
+var difficulty_mult: float = 1.0
+
+func setup(diff_mult: float) -> void:
+	difficulty_mult = diff_mult
+	hp = 120.0 * difficulty_mult
+	max_hp = hp
+
 var bullet_scene: PackedScene
 
 

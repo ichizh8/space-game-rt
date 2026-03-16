@@ -20,3 +20,8 @@ res://scenes/turret.tscn::354319cd21674fe31e9e42b667e8cce2::1773583658::res://.g
 res://scenes/starfield.tscn::11dd26fa732b24287a41a7aea1b82616::1773589470::res://.godot/exported/133200997/export-81dd93fa24141c2f824bba4d60be4f52-starfield.scn
 res://scenes/loot_drop.tscn::438aae1a6da6c21d1a29c61ebbb678d9::1773590562::res://.godot/exported/133200997/export-f9c7d64d72ccc61d96e3604addfbabff-loot_drop.scn
 res://scenes/end_screen.tscn::319c8365494202a9cafa7556ca3fddd8::1773610421::res://.godot/exported/133200997/export-06178169d42c94042436e74e8c7a4695-end_screen.scn
+res://scenes/carrier.tscn::7181227eb75e60416c3f566b9e14998a::1773621763::res://.godot/exported/133200997/export-bf67667b887f6240d5017d243be9852e-carrier.scn
+res://scenes/mine.tscn::d6aa21e47387c647955a582a4006c74f::1773621763::res://.godot/exported/133200997/export-54db30df120cfceaf7034daa033ecde6-mine.scn
+res://scenes/minelayer.tscn::da2c93a2697127ebefb532626a3bf5ab::1773621763::res://.godot/exported/133200997/export-4f3753b8fa7eb31d18392b0f54f97066-minelayer.scn
+res://scenes/sniper.tscn::80777a11ab29e461a67dd13557755041::1773621763::res://.godot/exported/133200997/export-2fb233384ba188a49954c7eb11bc055c-sniper.scn
+res://scenes/void_sentinel.tscn::d3d83346181073516e951b454df81328::1773621763::res://.godot/exported/133200997/export-c97eafe34518d11c26d6b529296dd970-void_sentinel.scn
