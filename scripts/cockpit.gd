@@ -124,9 +124,14 @@ class MapControl extends Control:
 
 func _ready() -> void:
 	layer = 15
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
 	GameState.xp_gained.connect(_on_xp_changed)
 	GameState.perk_unlocked.connect(_on_perk_unlocked)
+	get_tree().paused = true
+	var hud: Node = get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("reset_fire"):
+		hud.reset_fire()
 
 
 func _build_ui() -> void:
@@ -760,6 +765,7 @@ func _on_perk_unlocked(_perk_id: String) -> void:
 
 
 func _on_close() -> void:
+	get_tree().paused = false
 	call_deferred("queue_free")
 
 

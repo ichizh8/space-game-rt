@@ -14,7 +14,12 @@ func setup(s_id: String, s_name: String) -> void:
 
 func _ready() -> void:
 	layer = 20
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
+	get_tree().paused = true
+	var hud: Node = get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("reset_fire"):
+		hud.reset_fire()
 
 
 func _build_ui() -> void:
@@ -337,4 +342,5 @@ func _add_station_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> 
 
 
 func _on_close() -> void:
+	get_tree().paused = false
 	call_deferred("queue_free")

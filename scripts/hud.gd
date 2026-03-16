@@ -437,6 +437,15 @@ func _update_zone_label() -> void:
 			4: _zone_label.add_theme_color_override("font_color", Color.RED)
 
 
+func reset_fire() -> void:
+	_fire_pressed = false
+	_fire_debounce = 0.0
+	if is_instance_valid(_fire_button) and _fire_button.has_method("set_active"):
+		_fire_button.set_active(false)
+	if is_instance_valid(_joystick) and _joystick.has_method("_reset"):
+		_joystick._reset()
+
+
 func _draw_fire_button() -> void:
 	pass  # Drawn by fire_button.gd
 

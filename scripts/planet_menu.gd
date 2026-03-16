@@ -20,8 +20,13 @@ func setup(p_id: String, p_name: String, p_quest_id: String) -> void:
 
 func _ready() -> void:
 	layer = 20
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
 	_collect_building_production()
+	get_tree().paused = true
+	var hud: Node = get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("reset_fire"):
+		hud.reset_fire()
 
 
 func _build_ui() -> void:
@@ -798,4 +803,5 @@ func _clear_tab(tab: ScrollContainer) -> void:
 
 func _on_close() -> void:
 	SaveManager.save_game()
+	get_tree().paused = false
 	queue_free()
