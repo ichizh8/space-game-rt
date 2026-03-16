@@ -259,7 +259,7 @@ func _get_zone_difficulty() -> float:
 	if not is_instance_valid(player):
 		return 1.0
 	var dist := player.global_position.length()
-	var zone := min(floor(dist / 1500.0), 5.0)
+	var zone: float = min(floor(dist / 1500.0), 5.0)
 	return 1.0 + zone * 0.35
 
 func _apply_difficulty(enemy: Node2D, diff: float) -> void:
@@ -504,7 +504,7 @@ func _check_story_triggers() -> void:
 	if GameState.story_act == 3 and not GameState.get_story_flag("command_ship_spawned"):
 		var cx: float = 2500.0
 		var cy: float = 800.0
-		var v = GameState.get_story_flag("command_ship_pos_x")
+		var v: Variant = GameState.get_story_flag("command_ship_pos_x")
 		if v != null:
 			cx = float(v)
 		v = GameState.get_story_flag("command_ship_pos_y")
@@ -519,10 +519,10 @@ func _check_story_triggers() -> void:
 	if GameState.story_act == 3 and GameState.get_story_flag("command_ship_spawned"):
 		var total: int = 0
 		var killed: int = 0
-		var vt = GameState.get_story_flag("cmd_total")
+		var vt: Variant = GameState.get_story_flag("cmd_total")
 		if vt != null:
 			total = int(vt)
-		var vk = GameState.get_story_flag("cmd_killed")
+		var vk: Variant = GameState.get_story_flag("cmd_killed")
 		if vk != null:
 			killed = int(vk)
 		if total > 0 and killed >= total and not GameState.get_story_flag("victory_triggered"):
@@ -572,7 +572,7 @@ func _spawn_command_ship_cluster(center: Vector2) -> void:
 
 func _on_command_ship_enemy_died() -> void:
 	var killed: int = 0
-	var v = GameState.get_story_flag("cmd_killed")
+	var v: Variant = GameState.get_story_flag("cmd_killed")
 	if v != null:
 		killed = int(v)
 	GameState.set_story_flag("cmd_killed", killed + 1)

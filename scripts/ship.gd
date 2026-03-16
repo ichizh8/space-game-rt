@@ -2,11 +2,14 @@ extends CharacterBody2D
 
 const BASE_SPEED := 200.0
 const FUEL_DRAIN_RATE := 0.15  # per second while moving
+const ACCEL_LERP := 4.0       # how fast ship accelerates toward target velocity
+const DECEL_LERP := 2.5       # how fast ship decelerates (drift feel)
 
 var is_firing := false
 var can_shoot := true
 var bullet_scene: PackedScene
 var _gravity_accum: Vector2 = Vector2.ZERO
+var _velocity_smooth: Vector2 = Vector2.ZERO
 var _trail_points: Array[Vector2] = []
 var _trail_timer: float = 0.0
 
@@ -28,14 +31,15 @@ func _physics_process(delta: float) -> void:
 
 	if direction.length() > 0.1 and GameState.fuel > 0:
 		var speed := BASE_SPEED + GameState.player_speed_bonus
-		velocity = direction.normalized() * speed
-		rotation = direction.angle() + PI / 2.0
+		var target_vel: Vector2 = direction.normalized() * speed
+		_velocity_smooth = _velocity_smooth.lerp(target_vel, delta * ACCEL_LERP)
+		rotation = _velocity_smooth.angle() + PI / 2.0
 		var drain := FUEL_DRAIN_RATE * (1.0 - GameState.captain_fuel_efficiency)
 		GameState.use_fuel(drain * delta)
 	else:
-		velocity = Vector2.ZERO
+		_velocity_smooth = _velocity_smooth.lerp(Vector2.ZERO, delta * DECEL_LERP)
 
-	velocity += _gravity_accum
+	velocity = _velocity_smooth + _gravity_accum
 	_gravity_accum = Vector2.ZERO
 	move_and_slide()
 

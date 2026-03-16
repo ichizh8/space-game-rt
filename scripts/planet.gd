@@ -7,12 +7,31 @@ var planet_color: Color = Color.GREEN
 var _color_h: float = 0.3
 var planet_radius: float = 30.0
 
+const GRAVITY_RANGE := 250.0   # px from edge of planet
+const GRAVITY_STRENGTH := 800.0
+
 signal landed(p_planet_id: String, p_planet_name: String, p_quest_id: String)
 
 
 func _ready() -> void:
 	add_to_group("planets")
 	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	var players := get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var ship := players[0] as Node2D
+	if not is_instance_valid(ship):
+		return
+	var to_planet: Vector2 = global_position - ship.global_position
+	var dist: float = to_planet.length()
+	var gravity_edge: float = planet_radius + GRAVITY_RANGE
+	if dist < gravity_edge and dist > planet_radius and ship.has_method("apply_gravity"):
+		var force: float = GRAVITY_STRENGTH / max(dist * dist, 100.0)
+		var pull: Vector2 = to_planet.normalized() * force * delta
+		ship.apply_gravity(pull)
 
 
 func setup(p_name: String, p_id: String, p_quest_id: String) -> void:

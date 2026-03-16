@@ -18,6 +18,7 @@ const EXPLOSION_DAMAGE := 30.0
 const XP_REWARD := 8
 const CREDIT_REWARD := 10
 
+var max_hp: float = 20.0
 var difficulty_mult: float = 1.0
 
 func setup(diff_mult: float) -> void:

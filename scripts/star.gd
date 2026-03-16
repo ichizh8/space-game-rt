@@ -15,6 +15,8 @@ const DANGER_RANGE := 110.0
 const WARNING_DAMAGE := 5.0   # hp per second
 const DANGER_DAMAGE := 18.0   # hp per second
 const DAMAGE_INTERVAL := 0.4
+const GRAVITY_RANGE := 400.0   # px from edge of star
+const GRAVITY_STRENGTH := 3000.0
 
 
 func _ready() -> void:
@@ -28,18 +30,29 @@ func _process(delta: float) -> void:
 	_anim_time += delta
 	queue_redraw()
 
-	_damage_timer += delta
-	if _damage_timer < DAMAGE_INTERVAL:
-		return
-	_damage_timer = 0.0
-
 	var players := get_tree().get_nodes_in_group("player")
 	if players.is_empty():
 		return
 	var ship := players[0] as Node2D
 	if not is_instance_valid(ship):
 		return
-	var dist := global_position.distance_to(ship.global_position)
+
+	var to_star: Vector2 = global_position - ship.global_position
+	var dist: float = to_star.length()
+
+	# Gravity pull
+	var gravity_edge: float = star_radius + GRAVITY_RANGE
+	if dist < gravity_edge and dist > star_radius and ship.has_method("apply_gravity"):
+		var force: float = GRAVITY_STRENGTH / max(dist * dist, 100.0)
+		var pull: Vector2 = to_star.normalized() * force * delta
+		ship.apply_gravity(pull)
+
+	# Damage
+	_damage_timer += delta
+	if _damage_timer < DAMAGE_INTERVAL:
+		return
+	_damage_timer = 0.0
+
 	if dist < DANGER_RANGE:
 		call_deferred("_apply_star_damage", DANGER_DAMAGE * DAMAGE_INTERVAL, "SOLAR RADIATION — CRITICAL!")
 	elif dist < WARNING_RANGE:
