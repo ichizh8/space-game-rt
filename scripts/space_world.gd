@@ -30,6 +30,14 @@ func _ready() -> void:
 	GameState.player_died.connect(_on_player_died)
 	GameState.hull_changed.connect(_on_hull_changed)
 	_last_hull = GameState.hull
+	call_deferred("_show_tutorial")
+
+
+func _show_tutorial() -> void:
+	var tut_scene: PackedScene = load("res://scenes/tutorial_overlay.tscn") as PackedScene
+	if is_instance_valid(tut_scene):
+		var tut: Node = tut_scene.instantiate()
+		add_child(tut)
 
 
 func _process(delta: float) -> void:
