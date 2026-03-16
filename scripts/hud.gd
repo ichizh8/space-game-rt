@@ -287,7 +287,6 @@ func _show_action(action_type: String, target: Node2D) -> void:
 
 
 func _hide_action() -> void:
-	show_notification("_hide_action OK", 2.0)
 	_action_button.modulate.a = 0.0
 	_action_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_action_target = null

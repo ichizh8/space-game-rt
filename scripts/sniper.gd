@@ -7,7 +7,6 @@ var speed: float = 60.0
 var difficulty_mult: float = 1.0
 
 signal died()
-var _cached_tex: Texture2D
 
 const SHOOT_RANGE := 700.0
 const RETREAT_RANGE := 300.0
@@ -30,7 +29,6 @@ var bullet_scene: PackedScene
 
 func _ready() -> void:
 	add_to_group("enemies")
-	_cached_tex = load("res://assets/2026-03-15-sniper.png") as Texture2D
 	bullet_scene = load("res://scenes/bullet.tscn")
 	_pick_reposition_target()
 	queue_redraw()
@@ -169,11 +167,6 @@ func _get_player() -> Node2D:
 
 func _draw() -> void:
 	if is_dead:
-		return
-	if _cached_tex != null:
-		var s := 0.09
-		var sz := _cached_tex.get_size() * s
-		draw_texture_rect(_cached_tex, Rect2(-sz * 0.5, sz), false)
 		return
 	# Fallback polygon: long thin ship
 	var points := PackedVector2Array([

@@ -4,7 +4,6 @@ var resource_type: String = "ore"
 var amount: int = 10
 var is_being_mined := false
 var _shape_points: PackedVector2Array
-var _pending_free: bool = false
 
 signal mining_complete()
 
@@ -16,16 +15,6 @@ func _ready() -> void:
 	amount = randi_range(5, 20)
 	_generate_shape()
 	queue_redraw()
-
-
-func _process(_delta: float) -> void:
-	# Schedule queue_free from _process (normal context) to avoid nested call_deferred freeze
-	if _pending_free:
-		_pending_free = false
-		var hud := get_tree().get_first_node_in_group("hud")
-		if is_instance_valid(hud) and hud.has_method("show_notification"):
-			hud.show_notification("AST: calling queue_free", 3.0)
-		call_deferred("queue_free")
 
 
 func _generate_shape() -> void:
@@ -53,11 +42,9 @@ func _do_mine() -> void:
 		var label := "+" + str(final_amount) + " " + resource_type.to_upper()
 		em.add_float(label, global_position, res_color)
 	queue_redraw()
-	var hud2 := get_tree().get_first_node_in_group("hud")
-	if is_instance_valid(hud2) and hud2.has_method("show_notification"):
-		hud2.show_notification("AST: _do_mine done, pending free", 3.0)
-	# Flag for _process() to schedule queue_free — avoids nested call_deferred (WASM crash)
-	_pending_free = true
+	# Do NOT call queue_free here (direct or deferred) — crashes WASM.
+	# Just mark mined; the node becomes invisible (draw returns early) and
+	# is filtered by is_being_mined checks everywhere. Tiny memory cost, no crash.
 
 
 func get_resource_color() -> Color:
