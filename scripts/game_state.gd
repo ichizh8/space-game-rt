@@ -63,6 +63,9 @@ var shield_level: int = 0
 # Last planet the player visited (for respawn)
 var last_planet_id: String = ""
 
+# Sector system
+var current_sector: int = 1
+
 signal hull_changed(new_value: float)
 signal fuel_changed(new_value: float)
 signal credits_changed(new_value: int)
@@ -353,6 +356,11 @@ func get_story_flag(flag: String):
 	return story_flags.get(flag, null)
 
 
+func travel_to_sector(sector_id: int) -> void:
+	current_sector = sector_id
+	get_tree().reload_current_scene()
+
+
 func reset_game() -> void:
 	max_hull = 300.0 + captain_hull_bonus
 	hull = max_hull
@@ -375,6 +383,7 @@ func reset_game() -> void:
 	# do NOT reset map_discovered_planets
 	session_kills = 0
 	session_artifacts = 0
+	current_sector = 1
 	story_act = 1
 	story_flags = {}
 	active_quests = []

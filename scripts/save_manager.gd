@@ -32,6 +32,7 @@ func save_game() -> void:
 		"session_artifacts": GameState.session_artifacts,
 		"story_act": GameState.story_act,
 		"story_flags": GameState.story_flags.duplicate(),
+		"current_sector": GameState.current_sector,
 	}
 	var json_string := JSON.stringify(data, "\t")
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -85,6 +86,7 @@ func load_game() -> bool:
 	GameState.session_artifacts = int(data.get("session_artifacts", 0))
 	GameState.story_act = int(data.get("story_act", 1))
 	GameState.story_flags = data.get("story_flags", {})
+	GameState.current_sector = int(data.get("current_sector", 1))
 	var loaded_map: Dictionary = data.get("map_discovered_planets", {})
 	GameState.map_discovered_planets = {}
 	for pid in loaded_map:

@@ -7,7 +7,7 @@ res://scenes/main_menu.tscn::5ce66bf0bfe4ad68d99ac576739fa464::1773542401::res:/
 res://scenes/planet.tscn::6660124106a5c73d8b6fad41327d15b3::1773542401::res://.godot/exported/133200997/export-41d0045ca2f49b51207b07b02bd81dea-planet.scn
 res://scenes/planet_menu.tscn::05f373ffe150542bae128162de367a68::1773542401::res://.godot/exported/133200997/export-5ff9488b3ab462657c02b14763c59015-planet_menu.scn
 res://scenes/ship.tscn::489e78fab458e11fc20d9948f6906521::1773542401::res://.godot/exported/133200997/export-bf05dba3b1d7e6ded3744c419700a994-ship.scn
-res://scenes/space_world.tscn::b574209c2f92ac11f0d91c48c647247c::1773544072::res://.godot/exported/133200997/export-8620af10a57887ac47f777fac0ab42b4-space_world.scn
+res://scenes/space_world.tscn::f2e697daaee7c72fe336a4d60ea20b10::1773633750::res://.godot/exported/133200997/export-8620af10a57887ac47f777fac0ab42b4-space_world.scn
 res://scenes/cockpit.tscn::e4b6d83f3f780a95376d7ce14e8e4829::1773548415::res://.godot/exported/133200997/export-01cbd571200d6c4ace21ad88ac73e007-cockpit.scn
 res://scenes/black_hole.tscn::049a1c3555ed16eea3933f0d3cb990ee::1773583082::res://.godot/exported/133200997/export-10e9d540a8412b2f884df45bd08e3b54-black_hole.scn
 res://scenes/space_station.tscn::33b5095e69708740308f94f905762cdb::1773583083::res://.godot/exported/133200997/export-8fc21e3f0f8b3bb03d231f04ef99aeed-space_station.scn
@@ -25,3 +25,4 @@ res://scenes/mine.tscn::d6aa21e47387c647955a582a4006c74f::1773621763::res://.god
 res://scenes/minelayer.tscn::da2c93a2697127ebefb532626a3bf5ab::1773621763::res://.godot/exported/133200997/export-4f3753b8fa7eb31d18392b0f54f97066-minelayer.scn
 res://scenes/sniper.tscn::80777a11ab29e461a67dd13557755041::1773621763::res://.godot/exported/133200997/export-2fb233384ba188a49954c7eb11bc055c-sniper.scn
 res://scenes/void_sentinel.tscn::d3d83346181073516e951b454df81328::1773621763::res://.godot/exported/133200997/export-c97eafe34518d11c26d6b529296dd970-void_sentinel.scn
+res://scenes/warp_gate.tscn::2737ac15fea852f2062f3d6c4fa484bb::1773633643::res://.godot/exported/133200997/export-24bd84d02232fdaccb2126ac8d0132df-warp_gate.scn

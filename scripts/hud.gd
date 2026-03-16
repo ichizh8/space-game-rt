@@ -263,6 +263,16 @@ func _check_nearby_objects() -> void:
 			closest_node = station
 			closest_type = "Dock"
 
+	# Check warp gates
+	for gate in get_tree().get_nodes_in_group("warp_gates"):
+		if not is_instance_valid(gate):
+			continue
+		var dist: float = ship_pos.distance_to(gate.global_position)
+		if dist < 100.0 and dist < closest_dist:
+			closest_dist = dist
+			closest_node = gate
+			closest_type = "Warp"
+
 	if is_instance_valid(closest_node):
 		if closest_type != _last_action_type or closest_node != _last_action_target:
 			_last_action_type = closest_type
@@ -311,6 +321,10 @@ func _on_action_pressed() -> void:
 		"Dock":
 			if _action_target.has_method("dock"):
 				_action_target.dock()
+				call_deferred("_hide_action")
+		"Warp":
+			if _action_target.has_method("activate"):
+				_action_target.activate()
 				call_deferred("_hide_action")
 
 
