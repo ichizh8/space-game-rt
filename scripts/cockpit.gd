@@ -694,6 +694,32 @@ func _build_map_tab() -> void:
 	var vbox := VBoxContainer.new()
 	_map_tab.add_child(vbox)
 
+	# Sector info label
+	var sector_lbl := Label.new()
+	var sector_names: Array[String] = ["", "Helion System", "Karath System", "Skull System", "The Void"]
+	var sec_idx: int = clampi(GameState.current_sector, 1, 4)
+	sector_lbl.text = "Sector %d: %s" % [sec_idx, sector_names[sec_idx]]
+	sector_lbl.add_theme_font_size_override("font_size", 13)
+	sector_lbl.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
+	vbox.add_child(sector_lbl)
+
+	# Biome indicator
+	var biome_lbl := Label.new()
+	var sg := get_tree().get_first_node_in_group("sector_generator") if get_tree() != null else null
+	var biome_text: String = "MIXED"
+	var biome_color: Color = Color(0.6, 0.6, 0.7)
+	if is_instance_valid(sg) and sg.get("_current_biome") != null:
+		var biome_id: int = int(sg.get("_current_biome"))
+		var biome_names: Array[String] = ["MIXED", "ASTEROID BELT", "DEBRIS FIELD", "DEEP SPACE", "NEBULA"]
+		var biome_colors: Array[Color] = [Color(0.6, 0.6, 0.7), Color(1.0, 0.7, 0.3), Color(0.5, 0.5, 0.55), Color(0.2, 0.3, 0.7), Color(0.7, 0.4, 0.9)]
+		if biome_id >= 0 and biome_id < biome_names.size():
+			biome_text = biome_names[biome_id]
+			biome_color = biome_colors[biome_id]
+	biome_lbl.text = "Biome: " + biome_text
+	biome_lbl.add_theme_font_size_override("font_size", 11)
+	biome_lbl.add_theme_color_override("font_color", biome_color)
+	vbox.add_child(biome_lbl)
+
 	var legend := Label.new()
 	legend.text = "Cyan = you   Dots = planets   Squares = stations   Rings = warp gates"
 	legend.add_theme_font_size_override("font_size", 10)

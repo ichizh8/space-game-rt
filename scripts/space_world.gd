@@ -26,6 +26,11 @@ func _ready() -> void:
 		var sf := sf_scene.instantiate()
 		add_child(sf)
 		move_child(sf, 0)  # ensure it's behind everything
+	# Add nebula background (behind starfield but above clear color)
+	var nebula: Node2D = Node2D.new()
+	nebula.set_script(load("res://scripts/nebula_background.gd"))
+	add_child(nebula)
+	move_child(nebula, 1)
 	camera.add_to_group("camera")
 	GameState.player_died.connect(_on_player_died)
 	GameState.hull_changed.connect(_on_hull_changed)

@@ -7,6 +7,8 @@ const LAYER_CONFIG := [
 	{"count": 120, "parallax": 0.05, "size_range": [0.6, 1.0], "brightness": 0.35},  # far, slow
 	{"count": 80,  "parallax": 0.12, "size_range": [0.8, 1.5], "brightness": 0.55},  # mid
 	{"count": 40,  "parallax": 0.22, "size_range": [1.2, 2.2], "brightness": 0.85},  # near, fast
+	{"count": 40,  "parallax": 0.30, "size_range": [1.5, 2.5], "brightness": 0.70},  # medium bright stars
+	{"count": 20,  "parallax": 0.50, "size_range": [2.0, 3.5], "brightness": 1.0},   # bright foreground
 ]
 const FIELD_SIZE := 2400.0  # world units covered
 
@@ -23,11 +25,23 @@ func _generate_stars() -> void:
 		var stars: Array = []
 		for _i in range(cfg["count"]):
 			var sr: Array = cfg["size_range"]
+			var b: float = randf_range(cfg["brightness"] * 0.7, cfg["brightness"] * 1.3)
+			var star_color: Color = Color(b, b, b + 0.1, 1.0)
+			# Some colored variants for brighter layers
+			if cfg["parallax"] >= 0.30 and randf() < 0.4:
+				var r: float = randf()
+				if r < 0.33:
+					star_color = Color(b * 0.7, b * 0.8, b * 1.2, 1.0)  # blue
+				elif r < 0.66:
+					star_color = Color(b * 1.2, b * 1.1, b * 0.6, 1.0)  # yellow
+				else:
+					star_color = Color(b * 1.2, b * 0.6, b * 0.5, 1.0)  # red
 			stars.append({
 				"pos": Vector2(randf() * FIELD_SIZE - FIELD_SIZE * 0.5,
 				               randf() * FIELD_SIZE - FIELD_SIZE * 0.5),
 				"size": randf_range(sr[0], sr[1]),
-				"brightness": randf_range(cfg["brightness"] * 0.7, cfg["brightness"] * 1.3),
+				"brightness": b,
+				"color": star_color,
 			})
 		_layers.append({"stars": stars, "parallax": cfg["parallax"]})
 
@@ -59,12 +73,11 @@ func _draw() -> void:
 		var offset := cam_pos * parallax
 		for star in layer_data["stars"]:
 			var spos: Vector2 = star["pos"]
-			var sbright: float = star["brightness"]
 			var ssize: float = star["size"]
 			# Wrap star position so they tile around camera
 			var sx: float = fmod(spos.x - offset.x + FIELD_SIZE * 2.0, FIELD_SIZE) - FIELD_SIZE * 0.5 + cam_pos.x
 			var sy: float = fmod(spos.y - offset.y + FIELD_SIZE * 2.0, FIELD_SIZE) - FIELD_SIZE * 0.5 + cam_pos.y
-			var col := Color(sbright, sbright, sbright + 0.1, 1.0)
+			var col: Color = star.get("color", Color(star["brightness"], star["brightness"], star["brightness"] + 0.1, 1.0))
 			if ssize > 1.5:
 				draw_circle(Vector2(sx, sy), ssize, col)
 			else:
