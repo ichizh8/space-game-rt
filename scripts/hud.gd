@@ -150,7 +150,8 @@ func _build_ui() -> void:
 	_action_button.offset_top = 60
 	_action_button.offset_bottom = 110
 	_action_button.add_theme_font_size_override("font_size", 18)
-	_action_button.visible = false
+	_action_button.modulate.a = 0.0
+	_action_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_action_button.pressed.connect(_on_action_pressed)
 	add_child(_action_button)
 
@@ -281,11 +282,14 @@ func _show_action(action_type: String, target: Node2D) -> void:
 	_action_type = action_type
 	_action_target = target
 	_action_button.text = action_type
-	_action_button.visible = true
+	_action_button.modulate.a = 1.0
+	_action_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 
 func _hide_action() -> void:
-	_action_button.visible = false
+	show_notification("_hide_action OK", 2.0)
+	_action_button.modulate.a = 0.0
+	_action_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_action_target = null
 	_action_type = ""
 
