@@ -10,7 +10,7 @@ var _inventory_tab: ScrollContainer
 
 
 class MapControl extends Control:
-	const MAP_SCALE := 0.042
+	const MAP_SCALE := 0.036
 	const FOG_RADIUS := 18.0
 	const PLANET_RADIUS := 5.0
 	const GRID_WORLD := 1000.0

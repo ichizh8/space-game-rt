@@ -114,14 +114,6 @@ func _load_sector() -> void:
 		_respawn_zones.append(zone)
 	_pending_initial_spawns = true
 
-	# Debug: confirm placement counts
-	var hud: Node = get_tree().get_first_node_in_group("hud")
-	if is_instance_valid(hud) and hud.has_method("show_notification"):
-		var planet_count: int = get_tree().get_nodes_in_group("planets").size()
-		var station_count: int = get_tree().get_nodes_in_group("stations").size()
-		var gate_count: int = get_tree().get_nodes_in_group("warp_gates").size()
-		hud.show_notification("Sector " + str(_sector_id) + " loaded: " + str(planet_count) + "P " + str(station_count) + "S " + str(gate_count) + "G", 5.0)
-
 	# Free data node (not in tree, safe to free)
 	data.free()
 
