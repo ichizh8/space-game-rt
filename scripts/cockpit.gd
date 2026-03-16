@@ -10,10 +10,10 @@ var _inventory_tab: ScrollContainer
 
 
 class MapControl extends Control:
-	const MAP_SCALE := 0.09
+	const MAP_SCALE := 0.042
 	const FOG_RADIUS := 18.0
 	const PLANET_RADIUS := 5.0
-	const GRID_WORLD := 500.0
+	const GRID_WORLD := 1000.0
 
 	var _player_pos: Vector2 = Vector2.ZERO
 	var _poll_timer: float = 0.0
@@ -57,35 +57,57 @@ class MapControl extends Control:
 			draw_line(Vector2(0, gy), Vector2(w, gy), gc, 1.0)
 			gy -= grid_px
 
-		# Fog of war — revealed trail circles
-		var fog_col := Color(0.08, 0.14, 0.22)
-		for trail_pos in GameState.map_visited_trail:
-			var mp := center + (trail_pos - _player_pos) * MAP_SCALE
-			if mp.x > -FOG_RADIUS and mp.x < w + FOG_RADIUS and mp.y > -FOG_RADIUS and mp.y < h + FOG_RADIUS:
-				draw_circle(mp, FOG_RADIUS, fog_col)
-
-		# Origin marker
-		var origin_mp := center + (Vector2.ZERO - _player_pos) * MAP_SCALE
-		if origin_mp.x > -20 and origin_mp.x < w + 20 and origin_mp.y > -20 and origin_mp.y < h + 20:
-			draw_circle(origin_mp, 4.0, Color(0.3, 0.8, 1.0, 0.7))
-			draw_arc(origin_mp, 8.0, 0.0, TAU, 16, Color(0.3, 0.8, 1.0, 0.35), 1.5)
-			draw_string(ThemeDB.fallback_font, origin_mp + Vector2(10, 4), "ORIGIN",
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.3, 0.8, 1.0, 0.8))
-
-		# Discovered planets
-		for planet_id in GameState.map_discovered_planets:
-			var entry: Dictionary = GameState.map_discovered_planets[planet_id]
-			var world_pos := Vector2(float(entry.get("pos_x", 0)), float(entry.get("pos_y", 0)))
-			var mp := center + (world_pos - _player_pos) * MAP_SCALE
-			if mp.x < -20 or mp.x > w + 20 or mp.y < -20 or mp.y > h + 20:
+		# Draw all planets from scene
+		for planet in get_tree().get_nodes_in_group("planets"):
+			if not is_instance_valid(planet):
 				continue
-			var ch := float(entry.get("color_h", 0.3))
-			var pcol := Color.from_hsv(ch, 0.7, 0.9)
+			var world_pos: Vector2 = (planet as Node2D).global_position
+			var mp: Vector2 = center + (world_pos - _player_pos) * MAP_SCALE
+			if mp.x < -20.0 or mp.x > w + 20.0 or mp.y < -20.0 or mp.y > h + 20.0:
+				continue
+			var pcol: Color = Color(0.4, 0.7, 1.0)
+			if planet.get("planet_color") != null:
+				pcol = planet.get("planet_color") as Color
 			draw_circle(mp, PLANET_RADIUS, pcol)
 			draw_arc(mp, PLANET_RADIUS + 2.5, 0.0, TAU, 16, Color(pcol.r, pcol.g, pcol.b, 0.4), 1.0)
-			var pname := str(entry.get("name", "?"))
-			draw_string(ThemeDB.fallback_font, mp + Vector2(9, 4), pname,
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.85, 0.9, 0.9))
+			var pname: String = ""
+			if planet.get("planet_name") != null:
+				pname = str(planet.get("planet_name"))
+			if pname != "":
+				draw_string(ThemeDB.fallback_font, mp + Vector2(8, 4), pname,
+					HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.85, 0.9, 0.9))
+
+		# Draw all stations from scene
+		for station in get_tree().get_nodes_in_group("stations"):
+			if not is_instance_valid(station):
+				continue
+			var world_pos: Vector2 = (station as Node2D).global_position
+			var mp: Vector2 = center + (world_pos - _player_pos) * MAP_SCALE
+			if mp.x < -20.0 or mp.x > w + 20.0 or mp.y < -20.0 or mp.y > h + 20.0:
+				continue
+			draw_rect(Rect2(mp - Vector2(4, 4), Vector2(8, 8)), Color(0.9, 0.8, 0.3))
+			var sname: String = ""
+			if station.get("station_name") != null:
+				sname = str(station.get("station_name"))
+			if sname != "":
+				draw_string(ThemeDB.fallback_font, mp + Vector2(8, 4), sname,
+					HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.9, 0.85, 0.5, 0.9))
+
+		# Draw warp gates
+		for gate in get_tree().get_nodes_in_group("warp_gates"):
+			if not is_instance_valid(gate):
+				continue
+			var world_pos: Vector2 = (gate as Node2D).global_position
+			var mp: Vector2 = center + (world_pos - _player_pos) * MAP_SCALE
+			if mp.x < -20.0 or mp.x > w + 20.0 or mp.y < -20.0 or mp.y > h + 20.0:
+				continue
+			draw_arc(mp, 6.0, 0.0, TAU, 8, Color(0.4, 0.9, 1.0, 0.9), 2.0)
+			var gname: String = ""
+			if gate.get("gate_name") != null:
+				gname = str(gate.get("gate_name"))
+			if gname != "":
+				draw_string(ThemeDB.fallback_font, mp + Vector2(8, 4), gname,
+					HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.4, 0.9, 1.0, 0.8))
 
 		# Player dot
 		draw_circle(center, 4.0, Color.CYAN)
@@ -673,7 +695,7 @@ func _build_map_tab() -> void:
 	_map_tab.add_child(vbox)
 
 	var legend := Label.new()
-	legend.text = "Cyan = you   Colored dots = planets   Blue = origin   Dark = unexplored"
+	legend.text = "Cyan = you   Dots = planets   Squares = stations   Rings = warp gates"
 	legend.add_theme_font_size_override("font_size", 10)
 	legend.add_theme_color_override("font_color", Color(0.45, 0.55, 0.65))
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
