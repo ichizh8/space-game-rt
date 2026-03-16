@@ -60,7 +60,7 @@ battleship.gd::GDScript/GDScript::1790075205264546572::1773621844::0::1::::<>Nod
 black_hole.gd::GDScript/GDScript::4211497730594594793::1773590945::0::1::::<>Node2D<><>0<>0<><>::
 bullet.gd::GDScript/GDScript::4944062554812473694::1773589515::0::1::::<>Node2D<><>0<>0<><>::
 carrier.gd::GDScript/GDScript::8151336334283822535::1773630576::0::1::::<>Node2D<><>0<>0<><>::
-cockpit.gd::GDScript::7778549044109675183::1773634684::0::1::::<>CanvasLayer<><>0<>0<><>::
+cockpit.gd::GDScript/GDScript::7778549044109675183::1773634684::0::1::::<>CanvasLayer<><>0<>0<><>::
 effects_manager.gd::GDScript/GDScript::116975078305468455::1773613463::0::1::::<>Node2D<><>0<>0<><>::
 end_screen.gd::GDScript/GDScript::930197457372939919::1773610416::0::1::::<>CanvasLayer<><>0<>0<><>::
 enemy.gd::GDScript/GDScript::3527565857773294411::1773621786::0::1::::<>Node2D<><>0<>0<><>::
@@ -77,7 +77,7 @@ planet.gd::GDScript/GDScript::4693907266427328966::1773590911::0::1::::<>Node2D<
 planet_menu.gd::GDScript/GDScript::5271842473902023664::1773612905::0::1::::<>CanvasLayer<><>0<>0<><>::
 save_manager.gd::GDScript/GDScript::7650306163663500790::1773634020::0::1::::<>Node<><>0<>0<><>::
 sector_generator.gd::GDScript/GDScript::7122586594381657071::1773621830::0::1::::<>Node2D<><>0<>0<><>::
-sector_loader.gd::GDScript/GDScript::6336700767300208704::1773633729::0::1::::<>Node2D<><>0<>0<><>::
+sector_loader.gd::GDScript::6336700767300208704::1773635321::0::1::::<>Node2D<><>0<>0<><>::
 ship.gd::GDScript/GDScript::5629838719633451787::1773622710::0::1::::<>CharacterBody2D<><>0<>0<><>::
 sniper.gd::GDScript/GDScript::7475074518143974023::1773630576::0::1::::<>Node2D<><>0<>0<><>::
 space_station.gd::GDScript/GDScript::7841865305012411993::1773583041::0::1::::<>Node2D<><>0<>0<><>::
@@ -91,7 +91,7 @@ virtual_joystick.gd::GDScript/GDScript::1020178028105329822::1773542401::0::1:::
 void_sentinel.gd::GDScript/GDScript::2147939099636406732::1773630576::0::1::::<>Node2D<><>0<>0<><>::
 warp_gate.gd::GDScript/GDScript::7217366560798320789::1773633642::0::1::::<>Node2D<><>0<>0<><>::
 world_data.gd::GDScript/GDScript::3340492155267611818::1773610046::0::1::::<>Node<><>0<>0<><>::
-::res://web-export/::1773634034
-index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773634034::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
-index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773634034::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
-index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773634041::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::
+::res://web-export/::1773634704
+index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773634704::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
+index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773634704::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
+index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773634705::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::

@@ -7,6 +7,7 @@ var _respawn_zones: Array = []
 
 var _story_check_timer: float = 0.0
 const STORY_CHECK_INTERVAL: float = 0.5
+var _pending_initial_spawns: bool = false
 
 # Scene paths
 const PLANET_SCENE: String = "res://scenes/planet.tscn"
@@ -28,12 +29,21 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _pending_initial_spawns:
+		_pending_initial_spawns = false
+		_do_initial_spawns()
 	_tick_respawns(delta)
 	_story_check_timer += delta
 	if _story_check_timer >= STORY_CHECK_INTERVAL:
 		_story_check_timer = 0.0
 		_check_story_triggers()
 		_discover_nearby_planets()
+
+func _do_initial_spawns() -> void:
+	for i in range(_respawn_zones.size()):
+		var zone: Dictionary = _respawn_zones[i]
+		for _j in range(int(zone.get("max_count", 0))):
+			_spawn_zone_enemy(i)
 
 
 func _get_sector_data() -> Node:
@@ -102,9 +112,15 @@ func _load_sector() -> void:
 			"enemies": []
 		}
 		_respawn_zones.append(zone)
-		# Initial spawn
-		for i in range(int(zone.max_count)):
-			call_deferred("_spawn_zone_enemy", _respawn_zones.size() - 1)
+	_pending_initial_spawns = true
+
+	# Debug: confirm placement counts
+	var hud: Node = get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		var planet_count: int = get_tree().get_nodes_in_group("planets").size()
+		var station_count: int = get_tree().get_nodes_in_group("stations").size()
+		var gate_count: int = get_tree().get_nodes_in_group("warp_gates").size()
+		hud.show_notification("Sector " + str(_sector_id) + " loaded: " + str(planet_count) + "P " + str(station_count) + "S " + str(gate_count) + "G", 5.0)
 
 	# Free data node (not in tree, safe to free)
 	data.free()
