@@ -176,6 +176,10 @@ func get_planet_data(planet_id: String) -> Dictionary:
 
 func on_player_death() -> void:
 	_dying = false
+	# Award captain XP before reset
+	var death_xp: int = session_kills * 5 + session_artifacts * 20
+	if death_xp > 0:
+		add_xp(death_xp)
 	hull = max_hull
 	fuel = max_fuel
 	# Lose some resources on death
@@ -185,6 +189,37 @@ func on_player_death() -> void:
 	hull_changed.emit(hull)
 	fuel_changed.emit(fuel)
 	player_died.emit()
+
+
+func reset_run() -> void:
+	# Reset run-specific state but keep captain progression
+	hull = max_hull
+	fuel = max_fuel
+	credits = 0
+	resources = {"ore": 0, "crystal": 0, "scrap": 0}
+	inventory = []
+	artifacts_collected = []
+	planets = {}
+	weapon_level = 0
+	speed_level = 0
+	shield_level = 0
+	player_speed_bonus = 0.0
+	player_damage_bonus = 0.0
+	player_mining_speed_bonus = 0.0
+	last_planet_id = ""
+	map_visited_trail = []
+	session_kills = 0
+	session_artifacts = 0
+	current_sector = 1
+	story_act = 1
+	story_flags = {}
+	active_quests = []
+	faction_rep = {"coalition": 50, "pirates": 0}
+	_dying = false
+	hull_changed.emit(hull)
+	fuel_changed.emit(fuel)
+	credits_changed.emit(credits)
+	resources_changed.emit()
 
 
 func add_xp(amount: int) -> void:
