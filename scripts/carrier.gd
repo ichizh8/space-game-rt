@@ -7,6 +7,7 @@ var speed: float = 45.0
 var difficulty_mult: float = 1.0
 
 signal died()
+var _has_sprite := false
 
 const AGGRO_RANGE := 600.0
 const SPAWN_INTERVAL := 8.0
@@ -27,12 +28,22 @@ var _spawned_drones: Array = []
 func _ready() -> void:
 	add_to_group("enemies")
 	_drift_dir = Vector2.from_angle(randf() * TAU)
+	_setup_sprite()
 	queue_redraw()
 
 func setup(diff_mult: float) -> void:
 	difficulty_mult = diff_mult
 	hp = 80.0 * difficulty_mult
 	max_hp = hp
+
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-15-carrier.png") as Texture2D
+	if is_instance_valid(tex):
+		var sprite := Sprite2D.new()
+		sprite.texture = tex
+		sprite.scale = Vector2(0.09, 0.09)
+		add_child(sprite)
+		_has_sprite = true
 
 func _process(delta: float) -> void:
 	if is_dead:
@@ -82,7 +93,6 @@ func _process(delta: float) -> void:
 			if dist > AGGRO_RANGE * 1.5:
 				state = State.IDLE
 
-	queue_redraw()
 
 func _clean_drone_list() -> void:
 	var alive: Array = []
@@ -157,12 +167,7 @@ func _get_player() -> Node2D:
 	return null
 
 func _draw() -> void:
-	if is_dead:
-		return
-	var tex := load("res://assets/2026-03-15-carrier.png") as Texture2D
-	if is_instance_valid(tex):
-		var s := tex.get_size()
-		draw_texture(tex, -s / 2.0)
+	if is_dead or _has_sprite:
 		return
 	# Fallback: wide flat ship
 	var points := PackedVector2Array([

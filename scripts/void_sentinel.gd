@@ -7,6 +7,7 @@ var speed: float = 50.0
 var difficulty_mult: float = 1.0
 
 signal died()
+var _has_sprite := false
 
 const PREFERRED_RANGE := 380.0
 const SHOOT_INTERVAL := 2.8
@@ -22,12 +23,22 @@ var bullet_scene: PackedScene
 func _ready() -> void:
 	add_to_group("enemies")
 	bullet_scene = load("res://scenes/bullet.tscn")
+	_setup_sprite()
 	queue_redraw()
 
 func setup(diff_mult: float) -> void:
 	difficulty_mult = diff_mult
 	hp = 90.0 * difficulty_mult
 	max_hp = hp
+
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-15-void-sentinel.png") as Texture2D
+	if is_instance_valid(tex):
+		var sprite := Sprite2D.new()
+		sprite.texture = tex
+		sprite.scale = Vector2(0.09, 0.09)
+		add_child(sprite)
+		_has_sprite = true
 
 func _process(delta: float) -> void:
 	if is_dead:
@@ -67,7 +78,6 @@ func _process(delta: float) -> void:
 		_shoot_timer = SHOOT_INTERVAL
 		call_deferred("_fire")
 
-	queue_redraw()
 
 func _fire() -> void:
 	if is_dead or not is_instance_valid(bullet_scene):
@@ -133,12 +143,7 @@ func _get_player() -> Node2D:
 	return null
 
 func _draw() -> void:
-	if is_dead:
-		return
-	var tex := load("res://assets/2026-03-15-void-sentinel.png") as Texture2D
-	if is_instance_valid(tex):
-		var s := tex.get_size()
-		draw_texture(tex, -s / 2.0)
+	if is_dead or _has_sprite:
 		return
 	# Fallback: large diamond-ish hull
 	var hull_ratio := hp / max_hp

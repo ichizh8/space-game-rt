@@ -7,6 +7,7 @@ var speed: float = 110.0
 var difficulty_mult: float = 1.0
 
 signal died()
+var _has_sprite := false
 
 const AGGRO_RANGE := 500.0
 const MINE_INTERVAL := 3.5
@@ -26,12 +27,22 @@ func _ready() -> void:
 	add_to_group("enemies")
 	_patrol_dir = Vector2.from_angle(randf() * TAU)
 	_mine_timer = MINE_INTERVAL
+	_setup_sprite()
 	queue_redraw()
 
 func setup(diff_mult: float) -> void:
 	difficulty_mult = diff_mult
 	hp = 35.0 * difficulty_mult
 	max_hp = hp
+
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-15-minelayer.png") as Texture2D
+	if is_instance_valid(tex):
+		var sprite := Sprite2D.new()
+		sprite.texture = tex
+		sprite.scale = Vector2(0.09, 0.09)
+		add_child(sprite)
+		_has_sprite = true
 
 func _process(delta: float) -> void:
 	if is_dead:
@@ -146,12 +157,7 @@ func _get_player() -> Node2D:
 	return null
 
 func _draw() -> void:
-	if is_dead:
-		return
-	var tex := load("res://assets/2026-03-15-minelayer.png") as Texture2D
-	if is_instance_valid(tex):
-		var s := tex.get_size()
-		draw_texture(tex, -s / 2.0)
+	if is_dead or _has_sprite:
 		return
 	# Fallback: stocky hexagonal ship
 	var points := PackedVector2Array([
