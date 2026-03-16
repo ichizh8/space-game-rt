@@ -20,6 +20,9 @@ var _notification_label: Label
 var _notification_timer: float = 0.0
 var _last_action_type: String = ""
 var _last_action_target: Node2D = null
+var _zone_label: Label
+var _zone_check_timer: float = 0.0
+var _current_zone: int = 1
 
 
 func _ready() -> void:
@@ -167,6 +170,18 @@ func _build_ui() -> void:
 	_notification_label.visible = false
 	add_child(_notification_label)
 
+	# Zone indicator (top-right, below resources)
+	_zone_label = Label.new()
+	_zone_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_zone_label.offset_left = -80
+	_zone_label.offset_top = 60
+	_zone_label.offset_right = -10
+	_zone_label.add_theme_font_size_override("font_size", 12)
+	_zone_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_zone_label.text = "ZONE 1"
+	_zone_label.add_theme_color_override("font_color", Color.GREEN)
+	add_child(_zone_label)
+
 
 func _connect_signals() -> void:
 	GameState.hull_changed.connect(_on_hull_changed)
@@ -208,6 +223,12 @@ func _process(delta: float) -> void:
 	var ship := get_tree().get_first_node_in_group("player")
 	if is_instance_valid(ship) and ship.has_method("set_firing"):
 		ship.set_firing(_fire_pressed)
+
+	# Zone label update (every 2s)
+	_zone_check_timer += delta
+	if _zone_check_timer >= 2.0:
+		_zone_check_timer = 0.0
+		_update_zone_label()
 
 
 func get_joystick_direction() -> Vector2:
@@ -383,6 +404,29 @@ func _on_resources_changed() -> void:
 			GameState.resources.get("crystal", 0),
 			GameState.resources.get("scrap", 0)
 		]
+
+
+func _update_zone_label() -> void:
+	var ship_node := get_tree().get_first_node_in_group("player")
+	if not is_instance_valid(ship_node):
+		return
+	var dist: float = (ship_node as Node2D).global_position.length()
+	var zone: int = 1
+	if dist >= 4200.0:
+		zone = 4
+	elif dist >= 2800.0:
+		zone = 3
+	elif dist >= 1500.0:
+		zone = 2
+	if zone != _current_zone:
+		_current_zone = zone
+	if is_instance_valid(_zone_label):
+		_zone_label.text = "ZONE " + str(zone)
+		match zone:
+			1: _zone_label.add_theme_color_override("font_color", Color.GREEN)
+			2: _zone_label.add_theme_color_override("font_color", Color.YELLOW)
+			3: _zone_label.add_theme_color_override("font_color", Color.ORANGE)
+			4: _zone_label.add_theme_color_override("font_color", Color.RED)
 
 
 func _draw_fire_button() -> void:

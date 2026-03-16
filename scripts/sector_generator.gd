@@ -271,8 +271,13 @@ func _get_zone_difficulty() -> float:
 	if not is_instance_valid(player):
 		return 1.0
 	var dist := player.global_position.length()
-	var zone: float = min(floor(dist / 1500.0), 5.0)
-	return 1.0 + zone * 0.35
+	if dist >= 4200.0:
+		return 2.2
+	elif dist >= 2800.0:
+		return 1.7
+	elif dist >= 1500.0:
+		return 1.3
+	return 1.0
 
 func _apply_difficulty(enemy: Node2D, diff: float) -> void:
 	if enemy.has_method("setup"):

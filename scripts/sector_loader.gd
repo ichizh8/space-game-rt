@@ -286,6 +286,17 @@ func _tick_respawns(delta: float) -> void:
 				call_deferred("_spawn_zone_enemy", i)
 
 
+func _get_zone_multiplier(pos: Vector2) -> float:
+	var dist: float = pos.length()
+	if dist >= 4200.0:
+		return 2.2
+	elif dist >= 2800.0:
+		return 1.7
+	elif dist >= 1500.0:
+		return 1.3
+	return 1.0
+
+
 func _spawn_zone_enemy(zone_idx: int) -> void:
 	if zone_idx >= _respawn_zones.size():
 		return
@@ -310,11 +321,13 @@ func _spawn_zone_enemy(zone_idx: int) -> void:
 	var cy: float = float(zone.center_y)
 	var angle: float = randf() * TAU
 	var dist: float = randf_range(100.0, 300.0)
-	enemy.global_position = Vector2(cx + cos(angle) * dist, cy + sin(angle) * dist)
-	# Set difficulty based on sector
+	var spawn_pos: Vector2 = Vector2(cx + cos(angle) * dist, cy + sin(angle) * dist)
+	enemy.global_position = spawn_pos
+	# Set difficulty based on sector + zone
 	if enemy.has_method("setup"):
-		var diff: float = 1.0 + float(_sector_id - 1) * 0.4
-		enemy.call("setup", diff)
+		var sector_mult: float = 1.0 + float(_sector_id - 1) * 0.4
+		var zone_mult: float = _get_zone_multiplier(spawn_pos)
+		enemy.call("setup", sector_mult * zone_mult)
 	get_parent().add_child(enemy)
 	zone.enemies.append(enemy)
 	_respawn_zones[zone_idx] = zone
