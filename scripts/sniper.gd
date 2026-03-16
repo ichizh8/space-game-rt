@@ -7,7 +7,7 @@ var speed: float = 60.0
 var difficulty_mult: float = 1.0
 
 signal died()
-var _has_sprite := false
+var _cached_tex: Texture2D
 
 const SHOOT_RANGE := 700.0
 const RETREAT_RANGE := 300.0
@@ -30,9 +30,9 @@ var bullet_scene: PackedScene
 
 func _ready() -> void:
 	add_to_group("enemies")
+	_cached_tex = load("res://assets/2026-03-15-sniper.png") as Texture2D
 	bullet_scene = load("res://scenes/bullet.tscn")
 	_pick_reposition_target()
-	_setup_sprite()
 	queue_redraw()
 
 func setup(diff_mult: float) -> void:
@@ -49,14 +49,6 @@ func _pick_reposition_target() -> void:
 	_reposition_target = player.global_position + Vector2(cos(angle), sin(angle)) * dist
 	_reposition_timer = 4.0
 
-func _setup_sprite() -> void:
-	var tex := load("res://assets/2026-03-15-sniper.png") as Texture2D
-	if is_instance_valid(tex):
-		var sprite := Sprite2D.new()
-		sprite.texture = tex
-		sprite.scale = Vector2(0.09, 0.09)
-		add_child(sprite)
-		_has_sprite = true
 
 func _process(delta: float) -> void:
 	if is_dead:
@@ -176,7 +168,12 @@ func _get_player() -> Node2D:
 	return null
 
 func _draw() -> void:
-	if is_dead or _has_sprite:
+	if is_dead:
+		return
+	if _cached_tex != null:
+		var s := 0.09
+		var sz := _cached_tex.get_size() * s
+		draw_texture_rect(_cached_tex, Rect2(-sz * 0.5, sz), false)
 		return
 	# Fallback polygon: long thin ship
 	var points := PackedVector2Array([

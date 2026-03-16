@@ -32,16 +32,29 @@ func mine() -> void:
 	call_deferred("_do_mine")
 
 func _do_mine() -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("MINE: step 1 - start", 3.0)
 	var bonus_mult := 1.0 + GameState.captain_mining_bonus
 	var final_amount := int(round(float(amount) * bonus_mult))
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("MINE: step 2 - add_resource", 3.0)
 	GameState.add_resource(resource_type, final_amount)
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("MINE: step 3 - add_xp", 3.0)
 	GameState.add_xp(5)
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("MINE: step 4 - add_float", 3.0)
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_float"):
 		var res_color := get_resource_color().lightened(0.3)
 		var label := "+" + str(final_amount) + " " + resource_type.to_upper()
 		em.add_float(label, global_position, res_color)
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("MINE: step 5 - queue_redraw", 3.0)
 	queue_redraw()
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("MINE: step 6 - queue_free", 3.0)
 	call_deferred("queue_free")
 
 

@@ -18,6 +18,8 @@ var _credits_label: Label
 var _resource_label: Label
 var _notification_label: Label
 var _notification_timer: float = 0.0
+var _last_action_type: String = ""
+var _last_action_target: Node2D = null
 
 
 func _ready() -> void:
@@ -219,7 +221,7 @@ func get_joystick_direction() -> Vector2:
 func _check_nearby_objects() -> void:
 	var ship := get_tree().get_first_node_in_group("player")
 	if not is_instance_valid(ship):
-		_hide_action()
+		call_deferred("_hide_action")
 		return
 
 	var ship_pos: Vector2 = ship.global_position
@@ -261,9 +263,15 @@ func _check_nearby_objects() -> void:
 			closest_type = "Dock"
 
 	if is_instance_valid(closest_node):
-		call_deferred("_show_action", closest_type, closest_node)
+		if closest_type != _last_action_type or closest_node != _last_action_target:
+			_last_action_type = closest_type
+			_last_action_target = closest_node
+			call_deferred("_show_action", closest_type, closest_node)
 	else:
-		call_deferred("_hide_action")
+		if _last_action_type != "" or is_instance_valid(_last_action_target):
+			_last_action_type = ""
+			_last_action_target = null
+			call_deferred("_hide_action")
 
 
 func _hide_notification() -> void:
