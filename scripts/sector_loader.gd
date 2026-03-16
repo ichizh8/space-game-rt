@@ -308,6 +308,10 @@ func _spawn_zone_enemy(zone_idx: int) -> void:
 			scene_path = "res://scenes/battleship.tscn"
 		"void_sentinel":
 			scene_path = "res://scenes/void_sentinel.tscn"
+		"interceptor":
+			scene_path = INTERCEPTOR_SCENE
+		"carrier":
+			scene_path = "res://scenes/carrier.tscn"
 		_:
 			scene_path = ENEMY_SCENE
 	var enemy_scene: PackedScene = load(scene_path) as PackedScene

@@ -11,25 +11,23 @@ var SUN: Dictionary = {
 }
 
 var PLANETS: Array = [
-	{"name": "Cinder",   "planet_id": "s2_cinder",  "pos_x": 580.0,  "pos_y": 220.0,  "radius": 25.0, "color_r": 0.9, "color_g": 0.3, "color_b": 0.1},
-	{"name": "Ashfall",  "planet_id": "s2_ashfall", "pos_x": -900.0, "pos_y": -880.0, "radius": 42.0, "color_r": 0.6, "color_g": 0.35,"color_b": 0.2},
-	{"name": "Meridian", "planet_id": "s2_meridian","pos_x": 1900.0, "pos_y": 1400.0, "radius": 50.0, "color_r": 0.4, "color_g": 0.7, "color_b": 0.5},
+	{"name": "Cinder",   "planet_id": "s2_cinder",   "pos_x": 800.0,   "pos_y": 600.0,   "radius": 28.0, "color_r": 1.0, "color_g": 0.4, "color_b": 0.15},
+	{"name": "Ashfall",  "planet_id": "s2_ashfall",   "pos_x": -1400.0, "pos_y": 900.0,   "radius": 35.0, "color_r": 0.35,"color_g": 0.35,"color_b": 0.38},
+	{"name": "Meridian", "planet_id": "s2_meridian",  "pos_x": 1800.0,  "pos_y": -1100.0, "radius": 42.0, "color_r": 0.3, "color_g": 0.7, "color_b": 0.6},
 ]
 
 var STATIONS: Array = [
-	{"name": "Neutral Trading Post", "pos_x": -300.0,  "pos_y": 300.0,  "faction": "neutral"},
-	{"name": "Coalition Patrol Base","pos_x": -1400.0, "pos_y": -900.0, "faction": "coalition"},
-	{"name": "Pirate Waystation",    "pos_x": 1900.0,  "pos_y": -500.0, "faction": "pirates"},
-	{"name": "Meridian Research",    "pos_x": 2100.0,  "pos_y": 1200.0, "faction": "neutral"},
+	{"name": "Karath Trading Post",       "pos_x": 1200.0,  "pos_y": -500.0, "faction": "neutral"},
+	{"name": "Research Station Meridian",  "pos_x": 1900.0,  "pos_y": -900.0, "faction": "coalition"},
 ]
 
 var ASTEROID_CLUSTERS: Array = [
-	{"pos_x": 800.0,   "pos_y": -700.0, "count": 10, "spread": 240.0, "resources": "ore,ore,crystal",      "pirates": 2},
-	{"pos_x": -400.0,  "pos_y": 1100.0, "count": 8,  "spread": 200.0, "resources": "ore,crystal",           "pirates": 1},
-	{"pos_x": 1400.0,  "pos_y": 400.0,  "count": 9,  "spread": 220.0, "resources": "crystal,crystal,ore",   "pirates": 2},
-	{"pos_x": -1200.0, "pos_y": 600.0,  "count": 7,  "spread": 190.0, "resources": "ore,scrap",             "pirates": 1},
-	{"pos_x": 2500.0,  "pos_y": -800.0, "count": 12, "spread": 280.0, "resources": "crystal,crystal,scrap", "pirates": 3},
-	{"pos_x": -2000.0, "pos_y": 1600.0, "count": 11, "spread": 260.0, "resources": "crystal,ore,scrap",     "pirates": 2},
+	{"pos_x": 800.0,   "pos_y": -700.0,  "count": 10, "spread": 240.0, "resources": "ore,ore,crystal",      "pirates": 2},
+	{"pos_x": -400.0,  "pos_y": 1100.0,  "count": 8,  "spread": 200.0, "resources": "ore,crystal",           "pirates": 1},
+	{"pos_x": 1400.0,  "pos_y": 400.0,   "count": 9,  "spread": 220.0, "resources": "crystal,crystal,ore",   "pirates": 2},
+	{"pos_x": -1200.0, "pos_y": 600.0,   "count": 7,  "spread": 190.0, "resources": "ore,scrap",             "pirates": 1},
+	{"pos_x": 2500.0,  "pos_y": -800.0,  "count": 12, "spread": 280.0, "resources": "crystal,crystal,scrap", "pirates": 3},
+	{"pos_x": -2000.0, "pos_y": 1600.0,  "count": 11, "spread": 260.0, "resources": "crystal,ore,scrap",     "pirates": 2},
 ]
 
 var BLACK_HOLES: Array = [
@@ -42,6 +40,7 @@ var WARP_GATES: Array = [
 ]
 
 var AMBIENT_ENEMIES: Array = [
-	{"pos_x": 0.0,    "pos_y": -1500.0, "enemy_type": "pirate", "count": 3},
-	{"pos_x": 1200.0, "pos_y": -200.0,  "enemy_type": "pirate", "count": 3},
+	{"pos_x": 0.0,     "pos_y": -1500.0, "enemy_type": "pirate", "count": 3},
+	{"pos_x": 1200.0,  "pos_y": -200.0,  "enemy_type": "pirate", "count": 3},
+	{"pos_x": -1600.0, "pos_y": 1200.0,  "enemy_type": "pirate", "count": 2},
 ]
