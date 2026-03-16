@@ -78,7 +78,7 @@ func _fire() -> void:
 	# Fire 2 heavy shots with slight spread
 	for spread in [-0.08, 0.08]:
 		var dir := (player.global_position - global_position).normalized()
-		var angle := dir.angle() + spread
+		var angle: float = dir.angle() + float(spread)
 		var bullet := bullet_scene.instantiate() as Node2D
 		bullet.global_position = global_position
 		bullet.rotation = angle - PI / 2.0
@@ -148,10 +148,7 @@ func _draw() -> void:
 		Vector2(-18, 0), Vector2(-16, -8)
 	])
 	var col := Color(0.15, 0.1, 0.5 * hull_ratio + 0.1)
-	var colors := PackedColorArray()
-	for i in range(points.size()):
-		colors.append(col)
-	draw_colored_polygon(points, colors)
+	draw_colored_polygon(points, col)
 	# Cannon glow
 	draw_circle(Vector2(14, -6), 4.0, Color(0.0, 0.8, 1.0, 0.9))
 	draw_circle(Vector2(-14, -6), 4.0, Color(0.0, 0.8, 1.0, 0.9))

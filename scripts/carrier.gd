@@ -172,10 +172,7 @@ func _draw() -> void:
 	])
 	var hull_ratio := hp / max_hp
 	var col := Color(0.35 + 0.15 * hull_ratio, 0.35 + 0.15 * hull_ratio, 0.4)
-	var colors := PackedColorArray()
-	for i in range(points.size()):
-		colors.append(col)
-	draw_colored_polygon(points, colors)
+	draw_colored_polygon(points, col)
 	# Bay indicators
 	draw_circle(Vector2(14, 0), 4.0, Color(0.8, 0.6, 0.1, 0.8))
 	draw_circle(Vector2(-14, 0), 4.0, Color(0.8, 0.6, 0.1, 0.8))

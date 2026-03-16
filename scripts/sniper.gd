@@ -178,7 +178,7 @@ func _draw() -> void:
 		Vector2(0, 18), Vector2(-3, 14), Vector2(-4, -12)
 	])
 	var col := Color(0.1, 0.6, 0.2) if not is_dead else Color(0.3, 0.3, 0.3, 0.4)
-	draw_colored_polygon(points, PackedColorArray([col, col, col, col, col, col]))
+	draw_colored_polygon(points, col)
 	# Charge indicator
 	if state == State.CHARGE:
 		var t := _charge_timer / CHARGE_TIME

@@ -159,7 +159,7 @@ func _draw() -> void:
 		Vector2(0, 14), Vector2(-12, 7), Vector2(-12, -7)
 	])
 	var col := Color(0.7, 0.45, 0.1)
-	draw_colored_polygon(points, PackedColorArray([col, col, col, col, col, col]))
+	draw_colored_polygon(points, col)
 	# Mine ports
 	draw_circle(Vector2(10, 0), 3.0, Color(0.9, 0.2, 0.2))
 	draw_circle(Vector2(-10, 0), 3.0, Color(0.9, 0.2, 0.2))
