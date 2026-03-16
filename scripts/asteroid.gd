@@ -32,16 +32,22 @@ func mine() -> void:
 	call_deferred("_do_mine")
 
 func _do_mine() -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
 	var bonus_mult := 1.0 + GameState.captain_mining_bonus
 	var final_amount := int(round(float(amount) * bonus_mult))
+	if is_instance_valid(hud): hud.show_notification("S2 add_resource", 4.0)
 	GameState.add_resource(resource_type, final_amount)
+	if is_instance_valid(hud): hud.show_notification("S3 add_xp", 4.0)
 	GameState.add_xp(5)
+	if is_instance_valid(hud): hud.show_notification("S4 add_float", 4.0)
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_float"):
 		var res_color := get_resource_color().lightened(0.3)
 		var label := "+" + str(final_amount) + " " + resource_type.to_upper()
 		em.add_float(label, global_position, res_color)
+	if is_instance_valid(hud): hud.show_notification("S5 queue_redraw", 4.0)
 	queue_redraw()
+	if is_instance_valid(hud): hud.show_notification("S6 done", 4.0)
 	# Do NOT call queue_free here (direct or deferred) — crashes WASM.
 	# Just mark mined; the node becomes invisible (draw returns early) and
 	# is filtered by is_being_mined checks everywhere. Tiny memory cost, no crash.
