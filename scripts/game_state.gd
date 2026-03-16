@@ -1,15 +1,15 @@
 extends Node
 
 # Ship stats
-var hull: float = 100.0
+var hull: float = 300.0
 var _dying: bool = false
-var max_hull: float = 100.0
-var fuel: float = 100.0
-var max_fuel: float = 100.0
-var credits: int = 500
+var max_hull: float = 300.0
+var fuel: float = 500.0
+var max_fuel: float = 500.0
+var credits: int = 9999
 
 # Resources
-var resources: Dictionary = {"ore": 0, "crystal": 0, "scrap": 0}
+var resources: Dictionary = {"ore": 50, "crystal": 20, "scrap": 50}
 
 # Inventory (item IDs)
 var inventory: Array = []
@@ -21,7 +21,7 @@ var artifacts_collected: Array = []
 var planets: Dictionary = {}
 
 # Player bonuses from artifacts
-var player_speed_bonus: float = 0.0
+var player_speed_bonus: float = 120.0
 var player_damage_bonus: float = 0.0
 var player_mining_speed_bonus: float = 0.0
 
@@ -354,11 +354,11 @@ func get_story_flag(flag: String):
 
 
 func reset_game() -> void:
-	max_hull = 100.0 + captain_hull_bonus
+	max_hull = 300.0 + captain_hull_bonus
 	hull = max_hull
-	max_fuel = 100.0
+	max_fuel = 500.0
 	fuel = max_fuel
-	credits = 500
+	credits = 9999
 	resources = {"ore": 0, "crystal": 0, "scrap": 0}
 	inventory = []
 	artifacts_collected = []

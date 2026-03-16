@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 const BASE_SPEED := 200.0
-const FUEL_DRAIN_RATE := 0.5  # per second while moving
+const FUEL_DRAIN_RATE := 0.15  # per second while moving
 
 var is_firing := false
 var can_shoot := true
