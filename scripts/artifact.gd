@@ -42,7 +42,9 @@ func _process(delta: float) -> void:
 	if players.size() > 0:
 		var player := players[0]
 		if is_instance_valid(player) and global_position.distance_to(player.global_position) < 30.0:
-			try_collect(player)
+				if not _collected:
+					_collected = true
+					call_deferred("try_collect", player)
 
 
 func _draw() -> void:

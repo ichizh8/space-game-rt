@@ -41,15 +41,16 @@ func _process(delta: float) -> void:
 		return
 	var dist := global_position.distance_to(ship.global_position)
 	if dist < DANGER_RANGE:
-		GameState.take_damage(DANGER_DAMAGE * DAMAGE_INTERVAL)
-		var hud := get_tree().get_first_node_in_group("hud")
-		if is_instance_valid(hud) and hud.has_method("show_notification"):
-			hud.show_notification("SOLAR RADIATION — CRITICAL!", 0.5)
+		call_deferred("_apply_star_damage", DANGER_DAMAGE * DAMAGE_INTERVAL, "SOLAR RADIATION — CRITICAL!")
 	elif dist < WARNING_RANGE:
-		GameState.take_damage(WARNING_DAMAGE * DAMAGE_INTERVAL)
-		var hud := get_tree().get_first_node_in_group("hud")
-		if is_instance_valid(hud) and hud.has_method("show_notification"):
-			hud.show_notification("WARNING: Solar heat!", 0.5)
+		call_deferred("_apply_star_damage", WARNING_DAMAGE * DAMAGE_INTERVAL, "WARNING: Solar heat!")
+
+
+func _apply_star_damage(amount: float, msg: String) -> void:
+	GameState.take_damage(amount)
+	var hud := get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification(msg, 0.5)
 
 
 func _draw() -> void:
