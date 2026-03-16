@@ -4,9 +4,7 @@ var _joystick: Control
 var _fire_button: Control
 var _fire_pressed := false
 var _fire_debounce: float = 0.0
-var _thrust_button: Control
-var _thrust_active := false
-var _thrust_debounce: float = 0.0
+var _throttle_slider: Control
 
 
 # Action popup
@@ -126,20 +124,19 @@ func _build_ui() -> void:
 	_fire_button = fire_btn
 	add_child(_fire_button)
 
-	# Thrust button (bottom-left) — hold to thrust
-	var thrust_btn := Control.new()
-	thrust_btn.set_script(load("res://scripts/thrust_button.gd") as Script)
-	thrust_btn.anchor_left = 0.0
-	thrust_btn.anchor_right = 0.0
-	thrust_btn.anchor_top = 1.0
-	thrust_btn.anchor_bottom = 1.0
-	thrust_btn.offset_left = 20
-	thrust_btn.offset_right = 110
-	thrust_btn.offset_top = -110
-	thrust_btn.offset_bottom = -20
-	thrust_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_thrust_button = thrust_btn
-	add_child(_thrust_button)
+	# Throttle slider (bottom-left)
+	var throttle := Control.new()
+	throttle.set_script(load("res://scripts/throttle_slider.gd") as Script)
+	throttle.anchor_left = 0.0
+	throttle.anchor_right = 0.0
+	throttle.anchor_top = 1.0
+	throttle.anchor_bottom = 1.0
+	throttle.offset_left = 15.0
+	throttle.offset_right = 75.0
+	throttle.offset_top = -220.0
+	throttle.offset_bottom = -40.0
+	_throttle_slider = throttle
+	add_child(_throttle_slider)
 
 	# Cockpit button (top-left)
 	var cockpit_btn := Button.new()
@@ -254,10 +251,10 @@ func get_joystick_direction() -> Vector2:
 	return Vector2.ZERO
 
 
-func is_thrusting() -> bool:
-	if is_instance_valid(_thrust_button) and _thrust_button.has_method("get_active"):
-		return _thrust_button.get_active()
-	return false
+func get_throttle() -> float:
+	if is_instance_valid(_throttle_slider) and _throttle_slider.has_method("get_throttle"):
+		return _throttle_slider.get_throttle()
+	return 0.0
 
 
 
