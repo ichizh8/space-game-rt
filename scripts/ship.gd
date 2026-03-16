@@ -31,32 +31,26 @@ func _physics_process(delta: float) -> void:
 	if hud_node and hud_node.has_method("get_joystick_direction"):
 		direction = hud_node.get_joystick_direction()
 
-	# Rotation from X axis
+	# Rotation from joystick X axis
 	if abs(direction.x) > 0.1:
 		rotation += direction.x * ROTATION_SPEED * delta
 
-	# Thrust from Y axis (joystick up = negative Y = forward)
-	var thrust := 0.0
-	if direction.y < -0.1 and GameState.fuel > 0:
-		thrust = -direction.y * THRUST_FORCE  # forward
+	# Thrust from dedicated button
+	var thrusting := false
+	if hud_node and hud_node.has_method("is_thrusting"):
+		thrusting = hud_node.is_thrusting()
+
+	if thrusting and GameState.fuel > 0:
+		var forward := Vector2.UP.rotated(rotation)
+		var speed_cap: float = MAX_SPEED + GameState.player_speed_bonus
+		_velocity_smooth += forward * THRUST_FORCE * delta
+		if _velocity_smooth.length() > speed_cap:
+			_velocity_smooth = _velocity_smooth.normalized() * speed_cap
 		var drain := FUEL_DRAIN_RATE * (1.0 - GameState.captain_fuel_efficiency)
 		GameState.use_fuel(drain * delta)
-	elif direction.y > 0.1 and GameState.fuel > 0:
-		thrust = -direction.y * THRUST_FORCE * REVERSE_MULT  # gentle reverse
-		var drain := FUEL_DRAIN_RATE * 0.3 * (1.0 - GameState.captain_fuel_efficiency)
-		GameState.use_fuel(drain * delta)
 
-	# Apply thrust in facing direction
-	var forward := Vector2.UP.rotated(rotation)
-	_velocity_smooth += forward * thrust * delta
-
-	# Frame-rate independent drag
+	# Space drag (always)
 	_velocity_smooth *= pow(DRAG, delta * 60.0)
-
-	# Cap speed
-	var max_spd := MAX_SPEED + GameState.player_speed_bonus
-	if _velocity_smooth.length() > max_spd:
-		_velocity_smooth = _velocity_smooth.normalized() * max_spd
 
 	velocity = _velocity_smooth + _gravity_accum
 	_gravity_accum = Vector2.ZERO
