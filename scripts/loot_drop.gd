@@ -50,13 +50,15 @@ func _process(delta: float) -> void:
 		if not players.is_empty():
 			var ship := players[0] as Node2D
 			if is_instance_valid(ship) and global_position.distance_to(ship.global_position) < PICKUP_RANGE:
-				_collect()
+				_collected = true
+				call_deferred("_collect")
 
 	queue_redraw()
 
 
 func _collect() -> void:
-	_collected = true
+	if not _collected:
+		_collected = true
 	if credits > 0:
 		GameState.add_credits(credits)
 		var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
