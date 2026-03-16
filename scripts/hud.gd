@@ -124,19 +124,7 @@ func _build_ui() -> void:
 	_fire_button = fire_btn
 	add_child(_fire_button)
 
-	# Throttle slider (bottom-left)
-	var throttle := Control.new()
-	throttle.set_script(load("res://scripts/throttle_slider.gd") as Script)
-	throttle.anchor_left = 0.0
-	throttle.anchor_right = 0.0
-	throttle.anchor_top = 1.0
-	throttle.anchor_bottom = 1.0
-	throttle.offset_left = 15.0
-	throttle.offset_right = 75.0
-	throttle.offset_top = -220.0
-	throttle.offset_bottom = -40.0
-	_throttle_slider = throttle
-	add_child(_throttle_slider)
+	# Throttle slider removed — joystick Y axis controls thrust
 
 	# Cockpit button (top-left)
 	var cockpit_btn := Button.new()

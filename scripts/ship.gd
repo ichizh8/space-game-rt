@@ -35,10 +35,9 @@ func _physics_process(delta: float) -> void:
 	if abs(direction.x) > 0.1:
 		rotation += direction.x * ROTATION_SPEED * delta
 
-	# Thrust from throttle slider (0.0–1.0)
-	var throttle: float = 0.0
-	if hud_node and hud_node.has_method("get_throttle"):
-		throttle = hud_node.get_throttle()
+	# Thrust from joystick Y axis (push up = forward, push down = reverse)
+	var throttle: float = clamp(-direction.y, 0.0, 1.0)
+	var reverse: float = clamp(direction.y, 0.0, 1.0)
 
 	if throttle > 0.01 and GameState.fuel > 0:
 		var forward := Vector2.UP.rotated(rotation)
@@ -47,6 +46,11 @@ func _physics_process(delta: float) -> void:
 		if _velocity_smooth.length() > speed_cap:
 			_velocity_smooth = _velocity_smooth.normalized() * speed_cap
 		var drain := FUEL_DRAIN_RATE * throttle * (1.0 - GameState.captain_fuel_efficiency)
+		GameState.use_fuel(drain * delta)
+	elif reverse > 0.01 and GameState.fuel > 0:
+		var forward := Vector2.UP.rotated(rotation)
+		_velocity_smooth -= forward * THRUST_FORCE * REVERSE_MULT * reverse * delta
+		var drain := FUEL_DRAIN_RATE * reverse * 0.5 * (1.0 - GameState.captain_fuel_efficiency)
 		GameState.use_fuel(drain * delta)
 
 	# Space drag (always)
