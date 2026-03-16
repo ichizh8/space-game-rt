@@ -22,11 +22,11 @@ var STATIONS: Array = [
 ]
 
 var ASTEROID_CLUSTERS: Array = [
-	{"pos_x": 1200.0,  "pos_y": -1200.0, "count": 14, "spread": 300.0, "resources": "scrap,scrap,ore,crystal", "pirates": 3},
-	{"pos_x": 2200.0,  "pos_y": 1400.0,  "count": 12, "spread": 280.0, "resources": "crystal,crystal,scrap",   "pirates": 4},
-	{"pos_x": -800.0,  "pos_y": 2000.0,  "count": 10, "spread": 250.0, "resources": "ore,scrap",               "pirates": 3},
-	{"pos_x": 3000.0,  "pos_y": -400.0,  "count": 11, "spread": 260.0, "resources": "crystal,ore",             "pirates": 4},
-	{"pos_x": 800.0,   "pos_y": 2800.0,  "count": 9,  "spread": 230.0, "resources": "scrap,crystal",           "pirates": 3},
+	{"pos_x": 1200.0,  "pos_y": -1200.0, "count": 14, "spread": 300.0, "resources": "scrap,scrap,ore,crystal", "pirates": 2},
+	{"pos_x": 2200.0,  "pos_y": 1400.0,  "count": 12, "spread": 280.0, "resources": "crystal,crystal,scrap",   "pirates": 2},
+	{"pos_x": -800.0,  "pos_y": 2000.0,  "count": 10, "spread": 250.0, "resources": "ore,scrap",               "pirates": 1},
+	{"pos_x": 3000.0,  "pos_y": -400.0,  "count": 11, "spread": 260.0, "resources": "crystal,ore",             "pirates": 2},
+	{"pos_x": 800.0,   "pos_y": 2800.0,  "count": 9,  "spread": 230.0, "resources": "scrap,crystal",           "pirates": 1},
 ]
 
 var WARP_GATES: Array = [
@@ -35,8 +35,8 @@ var WARP_GATES: Array = [
 ]
 
 var AMBIENT_ENEMIES: Array = [
-	{"pos_x": 800.0,   "pos_y": -600.0,  "enemy_type": "pirate",     "count": 4},
-	{"pos_x": -500.0,  "pos_y": -800.0,  "enemy_type": "pirate",     "count": 3},
+	{"pos_x": 800.0,   "pos_y": -600.0,  "enemy_type": "pirate",     "count": 2},
+	{"pos_x": -500.0,  "pos_y": -800.0,  "enemy_type": "pirate",     "count": 2},
 	{"pos_x": 1600.0,  "pos_y": 800.0,   "enemy_type": "battleship", "count": 1},
-	{"pos_x": -1400.0, "pos_y": 1600.0,  "enemy_type": "pirate",     "count": 3},
+	{"pos_x": -1400.0, "pos_y": 1600.0,  "enemy_type": "pirate",     "count": 2},
 ]

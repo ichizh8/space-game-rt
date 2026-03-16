@@ -2,6 +2,7 @@ extends Node2D
 
 enum State { PATROL, CHASE, ORBIT, RETREAT }
 enum EnemyType { PIRATE, DRONE }
+enum AIStyle { STANDARD, AGGRESSIVE, SNIPER, FLANKER, COWARD }
 
 @export var enemy_type: EnemyType = EnemyType.PIRATE
 
@@ -11,6 +12,7 @@ var is_dead := false
 var damage: float = 10.0
 var speed: float = 160.0
 var state: State = State.PATROL
+var ai_style: AIStyle = AIStyle.STANDARD
 
 var velocity: Vector2 = Vector2.ZERO
 var patrol_direction: Vector2 = Vector2.RIGHT
@@ -36,6 +38,15 @@ const ORBIT_RANGE := 120.0
 const RETREAT_RANGE := 50.0
 const DEAGGRO_RANGE := 400.0
 
+# AI style overrides
+var _aggro_range_override: float = -1.0
+var _orbit_range_override: float = -1.0
+var _deaggro_range_override: float = -1.0
+var _no_retreat: bool = false
+var _direction_flip_timer: float = 0.0
+var _coward_fled: bool = false
+var _coward_hit: bool = false
+
 
 var difficulty_mult: float = 1.0
 
@@ -56,14 +67,61 @@ func _ready() -> void:
 			speed = 160.0; hp = 30.0; max_hp = 30.0; damage = 10.0
 			shoot_cooldown = 0.25; burst_max = 3
 			orbit_direction = 1 if randf() > 0.5 else -1
+			# Assign random AI style
+			var roll: int = randi() % 4
+			if roll == 0:
+				ai_style = AIStyle.AGGRESSIVE
+			elif roll == 1:
+				ai_style = AIStyle.SNIPER
+			elif roll == 2:
+				ai_style = AIStyle.FLANKER
+			else:
+				ai_style = AIStyle.COWARD
 		EnemyType.DRONE:
 			speed = 80.0; hp = 60.0; max_hp = 60.0; damage = 18.0
 			shoot_cooldown = 1.5; burst_max = 1
 	orbit_angle = randf() * TAU
 	patrol_direction = Vector2.from_angle(randf() * TAU)
 	_apply_difficulty()
+	_apply_ai_style()
 	_setup_sprite()
 	queue_redraw()
+
+
+func _apply_ai_style() -> void:
+	if enemy_type != EnemyType.PIRATE:
+		return
+	match ai_style:
+		AIStyle.AGGRESSIVE:
+			_aggro_range_override = 250.0
+			_orbit_range_override = 80.0
+			shoot_cooldown = 0.15
+			burst_max = 5
+			_no_retreat = true
+		AIStyle.SNIPER:
+			_orbit_range_override = 220.0
+			shoot_cooldown = 2.0
+			burst_max = 1
+			damage *= 1.5
+			_deaggro_range_override = 600.0
+		AIStyle.FLANKER:
+			orbit_direction = -1
+			_direction_flip_timer = 0.0
+			speed *= 1.1
+		AIStyle.COWARD:
+			_aggro_range_override = 150.0
+			_orbit_range_override = 160.0
+			burst_max = 2
+
+
+func _get_aggro_range() -> float:
+	return _aggro_range_override if _aggro_range_override > 0.0 else AGGRO_RANGE
+
+func _get_orbit_range() -> float:
+	return _orbit_range_override if _orbit_range_override > 0.0 else ORBIT_RANGE
+
+func _get_deaggro_range() -> float:
+	return _deaggro_range_override if _deaggro_range_override > 0.0 else DEAGGRO_RANGE
 
 
 func _process(delta: float) -> void:
@@ -93,7 +151,7 @@ func _process(delta: float) -> void:
 
 	match state:
 		State.PATROL:
-			if dist < AGGRO_RANGE:
+			if dist < _get_aggro_range():
 				# Pirates ignore players with high pirate rep
 				if enemy_type == EnemyType.PIRATE and GameState.faction_rep.get("pirates", 0) >= 70:
 					pass  # skip aggro
@@ -101,17 +159,19 @@ func _process(delta: float) -> void:
 					state = State.CHASE
 					orbit_angle = (global_position - player.global_position).angle()
 		State.CHASE:
-			if dist > DEAGGRO_RANGE:
+			if dist > _get_deaggro_range():
 				state = State.PATROL
-			elif dist < ORBIT_RANGE:
+			elif dist < _get_orbit_range():
 				state = State.ORBIT
 		State.ORBIT:
-			if dist > DEAGGRO_RANGE:
+			if dist > _get_deaggro_range():
 				state = State.PATROL
 			elif dist < RETREAT_RANGE:
 				state = State.RETREAT
 		State.RETREAT:
-			if dist > RETREAT_RANGE * 1.5:
+			if _no_retreat:
+				state = State.ORBIT
+			elif dist > RETREAT_RANGE * 1.5:
 				state = State.ORBIT
 
 	match state:
@@ -135,17 +195,30 @@ func _do_patrol(delta: float) -> void:
 
 func _do_chase(player: Node2D, _delta: float) -> void:
 	var dir := (player.global_position - global_position).normalized()
-	velocity = dir * speed
+	var chase_speed: float = speed * 1.3 if ai_style == AIStyle.AGGRESSIVE else speed
+	velocity = dir * chase_speed
 	rotation = dir.angle() + PI / 2.0
 
 
 func _do_orbit(player: Node2D, delta: float) -> void:
-	orbit_angle += orbit_direction * delta * (speed / ORBIT_RANGE) * 0.8
-	var target_pos := player.global_position + Vector2.from_angle(orbit_angle) * ORBIT_RANGE
+	# Flanker direction flip
+	if ai_style == AIStyle.FLANKER:
+		_direction_flip_timer += delta
+		if _direction_flip_timer > randf_range(3.0, 5.0):
+			_direction_flip_timer = 0.0
+			orbit_direction *= -1
+	# Sniper orbits slower
+	var orbit_speed_mult: float = 0.4 if ai_style == AIStyle.SNIPER else 1.0
+	var cur_orbit_range: float = _get_orbit_range()
+	orbit_angle += orbit_direction * delta * (speed / cur_orbit_range) * 0.8 * orbit_speed_mult
+	var target_pos := player.global_position + Vector2.from_angle(orbit_angle) * cur_orbit_range
 	var dir := (target_pos - global_position).normalized()
 	velocity = dir * speed
 	var face_dir := (player.global_position - global_position).normalized()
 	rotation = face_dir.angle() + PI / 2.0
+	# Coward stops shooting after being hit
+	if ai_style == AIStyle.COWARD and _coward_hit:
+		return
 	_handle_shooting(delta)
 
 
@@ -190,6 +263,14 @@ func take_damage(amount: float) -> void:
 	queue_redraw()
 	if hp <= 0:
 			call_deferred("_die")
+			return
+	# Coward: flee when below 50% HP
+	if ai_style == AIStyle.COWARD and hp < max_hp * 0.5 and not _coward_fled:
+		_coward_fled = true
+		state = State.RETREAT
+	# Coward: stop shooting after first hit
+	if ai_style == AIStyle.COWARD:
+		_coward_hit = true
 
 
 signal died()

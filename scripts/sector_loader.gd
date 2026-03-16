@@ -111,7 +111,7 @@ func _load_sector() -> void:
 			"enemy_type": str(a.get("enemy_type", "pirate")),
 			"max_count": int(a.get("count", 2)),
 			"timer": 0.0,
-			"interval": 75.0,
+			"interval": 90.0,
 			"enemies": []
 		}
 		_respawn_zones.append(zone)
@@ -242,7 +242,7 @@ func _place_asteroid_cluster(cluster: Dictionary, parent: Node) -> void:
 			"enemy_type": "pirate",
 			"max_count": pirate_count,
 			"timer": float(randi_range(5, 20)),
-			"interval": 60.0,
+			"interval": 90.0,
 			"enemies": []
 		}
 		_respawn_zones.append(zone)
