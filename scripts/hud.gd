@@ -273,6 +273,18 @@ func _check_nearby_objects() -> void:
 			closest_node = gate
 			closest_type = "Warp"
 
+	# Check derelicts
+	for derelict in get_tree().get_nodes_in_group("derelicts"):
+		if not is_instance_valid(derelict):
+			continue
+		if derelict.has_method("can_scavenge") and not derelict.can_scavenge():
+			continue
+		var dist: float = ship_pos.distance_to(derelict.global_position)
+		if dist < 80.0 and dist < closest_dist:
+			closest_dist = dist
+			closest_node = derelict
+			closest_type = "Scavenge"
+
 	if is_instance_valid(closest_node):
 		if closest_type != _last_action_type or closest_node != _last_action_target:
 			_last_action_type = closest_type
@@ -325,6 +337,10 @@ func _on_action_pressed() -> void:
 		"Warp":
 			if _action_target.has_method("activate"):
 				_action_target.activate()
+				call_deferred("_hide_action")
+		"Scavenge":
+			if _action_target.has_method("scavenge"):
+				_action_target.scavenge()
 				call_deferred("_hide_action")
 
 

@@ -45,6 +45,10 @@ var _current_biome: Biome = Biome.MIXED
 var _biome_change_timer: float = 0.0
 const BIOME_CHANGE_INTERVAL := 45.0
 
+var _comet_timer: float = 0.0
+var _comet_interval: float = 0.0
+var comet_scene: PackedScene
+
 const PLANET_NAMES: Array[String] = [
 	"Nexara", "Vorthen", "Kaelis", "Zyphora", "Meridax",
 	"Thalonis", "Orinax", "Pyranth", "Xelvion", "Crynara",
@@ -69,6 +73,8 @@ func _ready() -> void:
 	minelayer_scene = load("res://scenes/minelayer.tscn")
 	carrier_scene = load("res://scenes/carrier.tscn")
 	void_sentinel_scene = load("res://scenes/void_sentinel.tscn")
+	comet_scene = load("res://scenes/comet.tscn")
+	_comet_interval = randf_range(45.0, 90.0)
 	call_deferred("_connect_signals_deferred")
 	call_deferred("_spawn_initial")
 
@@ -83,6 +89,12 @@ func _process(delta: float) -> void:
 	if _biome_change_timer >= BIOME_CHANGE_INTERVAL:
 		_biome_change_timer = 0.0
 		_pick_biome()
+	# Comet spawning
+	_comet_timer += delta
+	if _comet_timer >= _comet_interval:
+		_comet_timer = 0.0
+		_comet_interval = randf_range(45.0, 90.0)
+		call_deferred("_spawn_comet")
 
 
 func _spawn_initial() -> void:
@@ -413,6 +425,20 @@ func _spawn_star(pos: Vector2) -> void:
 	star.global_position = pos
 	get_parent().add_child(star)
 	_spawned_objects.append(star)
+
+
+func _spawn_comet() -> void:
+	if comet_scene == null:
+		return
+	var player := _get_player()
+	if not is_instance_valid(player):
+		return
+	# Spawn at edge of view, random direction
+	var angle: float = randf() * TAU
+	var spawn_pos: Vector2 = player.global_position + Vector2.from_angle(angle) * 600.0
+	var comet: Node2D = comet_scene.instantiate() as Node2D
+	comet.global_position = spawn_pos
+	get_parent().add_child(comet)
 
 
 func _spawn_black_hole(pos: Vector2) -> void:

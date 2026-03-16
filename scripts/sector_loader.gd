@@ -19,6 +19,9 @@ const ENEMY_SCENE: String = "res://scenes/enemy.tscn"
 const BLACK_HOLE_SCENE: String = "res://scenes/black_hole.tscn"
 const INTERCEPTOR_SCENE: String = "res://scenes/interceptor.tscn"
 const BATTLESHIP_SCENE: String = "res://scenes/battleship.tscn"
+const MINER_SCENE: String = "res://scenes/miner_npc.tscn"
+const FREIGHTER_SCENE: String = "res://scenes/cargo_freighter.tscn"
+const DERELICT_SCENE: String = "res://scenes/derelict.tscn"
 
 
 func _ready() -> void:
@@ -113,6 +116,9 @@ func _load_sector() -> void:
 		}
 		_respawn_zones.append(zone)
 	_pending_initial_spawns = true
+
+	# Spawn civilian NPCs
+	call_deferred("_spawn_civilian_npcs")
 
 	# Free data node (not in tree, safe to free)
 	data.free()
@@ -507,3 +513,37 @@ func _get_player() -> Node2D:
 	if players.size() > 0:
 		return players[0] as Node2D
 	return null
+
+
+func _spawn_civilian_npcs() -> void:
+	var parent: Node = get_parent()
+	# Miners: 1-2 per sector
+	var miner_scene: PackedScene = load(MINER_SCENE) as PackedScene
+	if is_instance_valid(miner_scene):
+		var miner_count: int = randi_range(1, 2)
+		for i in range(miner_count):
+			var miner: Node2D = miner_scene.instantiate() as Node2D
+			var angle: float = randf() * TAU
+			miner.global_position = Vector2.from_angle(angle) * randf_range(300.0, 800.0)
+			parent.add_child(miner)
+			_spawned_objects.append(miner)
+
+	# Freighter: 1 per sector
+	var freighter_scene: PackedScene = load(FREIGHTER_SCENE) as PackedScene
+	if is_instance_valid(freighter_scene):
+		var freighter: Node2D = freighter_scene.instantiate() as Node2D
+		var angle: float = randf() * TAU
+		freighter.global_position = Vector2.from_angle(angle) * randf_range(400.0, 1000.0)
+		parent.add_child(freighter)
+		_spawned_objects.append(freighter)
+
+	# Derelicts: 1-2 per sector, placed 800-2500px from origin
+	var derelict_scene: PackedScene = load(DERELICT_SCENE) as PackedScene
+	if is_instance_valid(derelict_scene):
+		var derelict_count: int = randi_range(1, 2)
+		for i in range(derelict_count):
+			var derelict: Node2D = derelict_scene.instantiate() as Node2D
+			var angle: float = randf() * TAU
+			derelict.global_position = Vector2.from_angle(angle) * randf_range(800.0, 2500.0)
+			parent.add_child(derelict)
+			_spawned_objects.append(derelict)

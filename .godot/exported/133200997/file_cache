@@ -26,3 +26,7 @@ res://scenes/minelayer.tscn::da2c93a2697127ebefb532626a3bf5ab::1773621763::res:/
 res://scenes/sniper.tscn::80777a11ab29e461a67dd13557755041::1773621763::res://.godot/exported/133200997/export-2fb233384ba188a49954c7eb11bc055c-sniper.scn
 res://scenes/void_sentinel.tscn::d3d83346181073516e951b454df81328::1773621763::res://.godot/exported/133200997/export-c97eafe34518d11c26d6b529296dd970-void_sentinel.scn
 res://scenes/warp_gate.tscn::2737ac15fea852f2062f3d6c4fa484bb::1773633643::res://.godot/exported/133200997/export-24bd84d02232fdaccb2126ac8d0132df-warp_gate.scn
+res://scenes/cargo_freighter.tscn::0c3ac8f625e7a83d70165ac2ae90e727::1773637082::res://.godot/exported/133200997/export-4f4fdd23f8ba5a2e86365819325df38a-cargo_freighter.scn
+res://scenes/comet.tscn::513ee31a6002fd8cff3624e9801fc157::1773637073::res://.godot/exported/133200997/export-a1bfc8aaf307692dd8349c409c3f42bc-comet.scn
+res://scenes/derelict.tscn::c1be38c11a3d4d09bd4da2fbc5795758::1773637088::res://.godot/exported/133200997/export-afcd149fb8d9f6f41a46011c32b2a4fb-derelict.scn
+res://scenes/miner_npc.tscn::b2835b9ed54417481018d62230c432dd::1773637077::res://.godot/exported/133200997/export-d8342eea4ffb77baa26155f185765aed-miner_npc.scn
