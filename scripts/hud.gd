@@ -199,7 +199,7 @@ func _process(delta: float) -> void:
 	if _notification_timer > 0:
 		_notification_timer -= delta
 		if _notification_timer <= 0:
-			_notification_label.visible = false
+			call_deferred("_hide_notification")
 
 	# Continuously update fire state on ship
 	var ship := get_tree().get_first_node_in_group("player")
@@ -261,10 +261,13 @@ func _check_nearby_objects() -> void:
 			closest_type = "Dock"
 
 	if is_instance_valid(closest_node):
-		_show_action(closest_type, closest_node)
+		call_deferred("_show_action", closest_type, closest_node)
 	else:
-		_hide_action()
+		call_deferred("_hide_action")
 
+
+func _hide_notification() -> void:
+	_notification_label.visible = false
 
 func _show_action(action_type: String, target: Node2D) -> void:
 	_action_type = action_type
