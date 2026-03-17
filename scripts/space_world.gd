@@ -8,6 +8,10 @@ var _last_hull: float = 100.0
 const SHAKE_MAX := Vector2(8.0, 8.0)
 const TRAUMA_DECAY := 1.5
 
+# Autosave
+var _autosave_timer: float = 0.0
+const AUTOSAVE_INTERVAL := 90.0
+
 # Raid system
 var _raid_timer: float = 0.0
 var _raid_first: bool = true
@@ -59,6 +63,12 @@ func _process(delta: float) -> void:
 		_trauma = max(_trauma - delta * TRAUMA_DECAY, 0.0)
 	else:
 		camera.offset = Vector2.ZERO
+
+	# Periodic autosave
+	_autosave_timer += delta
+	if _autosave_timer >= AUTOSAVE_INTERVAL:
+		_autosave_timer = 0.0
+		SaveManager.save_game()
 
 	# Raid system
 	if _raid_warning_timer > 0:

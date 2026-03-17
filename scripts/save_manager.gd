@@ -90,6 +90,7 @@ func save_game() -> void:
 	if file:
 		file.store_string(json_string)
 		file.close()
+	_sync_web_fs()
 
 
 func load_game(slot: int) -> bool:
@@ -160,3 +161,11 @@ func delete_save(slot: int) -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(_get_slot_path(slot)))
 	if active_slot == slot:
 		active_slot = 0
+	_sync_web_fs()
+
+
+# Flush Godot's in-memory IDBFS to IndexedDB on WebGL builds.
+# Without this, writes are lost when the browser tab closes.
+func _sync_web_fs() -> void:
+	if OS.get_name() == "Web":
+		JavaScriptBridge.eval("if(typeof FS !== 'undefined') FS.syncfs(false, function(e){});", true)
