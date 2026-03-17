@@ -1,9 +1,57 @@
 extends Node
 
-const SAVE_PATH := "user://save_game.json"
+var active_slot: int = 0  # 0 = no slot active; set before starting/loading a game
+
+const SLOT_COUNT := 3
+const SECTOR_NAMES: Dictionary = {
+	1: "Helion System",
+	2: "Karath System",
+	3: "Skull System",
+	4: "The Void"
+}
+
+
+func _get_slot_path(slot: int) -> String:
+	return "user://save_slot_%d.json" % slot
+
+
+func has_save(slot: int) -> bool:
+	return FileAccess.file_exists(_get_slot_path(slot))
+
+
+func get_slot_summary(slot: int) -> Dictionary:
+	if not has_save(slot):
+		return {}
+	var file := FileAccess.open(_get_slot_path(slot), FileAccess.READ)
+	if not file:
+		return {}
+	var json := JSON.new()
+	var err: int = json.parse(file.get_as_text())
+	file.close()
+	if err != OK:
+		return {}
+	var data: Dictionary = json.data
+	return {
+		"credits": int(data.get("credits", 0)),
+		"hull": float(data.get("hull", 100.0)),
+		"max_hull": float(data.get("max_hull", 100.0)),
+		"sector": int(data.get("current_sector", 1)),
+		"sector_name": str(SECTOR_NAMES.get(int(data.get("current_sector", 1)), "Unknown")),
+		"timestamp": float(data.get("timestamp", 0.0)),
+		"story_act": int(data.get("story_act", 1)),
+	}
 
 
 func save_game() -> void:
+	if active_slot == 0:
+		return
+	var px: float = 0.0
+	var py: float = 0.0
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if is_instance_valid(player):
+		px = player.global_position.x
+		py = player.global_position.y
+
 	var data := {
 		"hull": GameState.hull,
 		"max_hull": GameState.max_hull,
@@ -33,28 +81,30 @@ func save_game() -> void:
 		"story_act": GameState.story_act,
 		"story_flags": GameState.story_flags.duplicate(),
 		"current_sector": GameState.current_sector,
+		"player_pos_x": px,
+		"player_pos_y": py,
+		"timestamp": Time.get_unix_time_from_system(),
 	}
 	var json_string := JSON.stringify(data, "\t")
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(_get_slot_path(active_slot), FileAccess.WRITE)
 	if file:
 		file.store_string(json_string)
 		file.close()
 
 
-func load_game() -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
+func load_game(slot: int) -> bool:
+	if not has_save(slot):
 		return false
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var file := FileAccess.open(_get_slot_path(slot), FileAccess.READ)
 	if not file:
 		return false
-	var json_string := file.get_as_text()
-	file.close()
-
 	var json := JSON.new()
-	var error := json.parse(json_string)
+	var error: int = json.parse(file.get_as_text())
+	file.close()
 	if error != OK:
 		return false
 
+	active_slot = slot
 	var data: Dictionary = json.data
 	GameState.hull = float(data.get("hull", 100.0))
 	GameState.max_hull = float(data.get("max_hull", 100.0))
@@ -97,9 +147,16 @@ func load_game() -> bool:
 			"name": str(entry.get("name", "")),
 			"color_h": float(entry.get("color_h", 0.3))
 		}
+	# Restore spawn position
+	var ppx: float = float(data.get("player_pos_x", 0.0))
+	var ppy: float = float(data.get("player_pos_y", 0.0))
+	if ppx != 0.0 or ppy != 0.0:
+		GameState.saved_player_pos = Vector2(ppx, ppy)
 	return true
 
 
-func delete_save() -> void:
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
+func delete_save(slot: int) -> void:
+	if has_save(slot):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(_get_slot_path(slot)))
+	if active_slot == slot:
+		active_slot = 0

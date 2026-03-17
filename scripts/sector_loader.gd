@@ -70,6 +70,9 @@ func _load_sector() -> void:
 	var ship: Node2D = get_tree().get_first_node_in_group("player") as Node2D
 	if is_instance_valid(ship):
 		var spawn: Vector2 = data.get("PLAYER_SPAWN") if data.get("PLAYER_SPAWN") != null else Vector2.ZERO
+		if GameState.saved_player_pos != Vector2.ZERO:
+			spawn = GameState.saved_player_pos
+			GameState.saved_player_pos = Vector2.ZERO  # consume once
 		ship.global_position = spawn
 
 	# Place sun

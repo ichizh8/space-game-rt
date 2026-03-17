@@ -63,6 +63,8 @@ var shield_level: int = 0
 
 # Last planet the player visited (for respawn)
 var last_planet_id: String = ""
+# Saved spawn position restored from save file (consumed on use)
+var saved_player_pos: Vector2 = Vector2.ZERO
 
 # Sector system
 var current_sector: int = 1
@@ -397,6 +399,7 @@ func get_story_flag(flag: String):
 
 func travel_to_sector(sector_id: int) -> void:
 	current_sector = sector_id
+	SaveManager.save_game()
 	get_tree().reload_current_scene()
 
 
@@ -418,6 +421,7 @@ func reset_game() -> void:
 	player_damage_bonus = 0.0
 	player_mining_speed_bonus = 0.0
 	last_planet_id = ""
+	saved_player_pos = Vector2.ZERO
 	map_visited_trail = []
 	# do NOT reset map_discovered_planets
 	session_kills = 0
