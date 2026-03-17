@@ -185,13 +185,42 @@ func on_player_death() -> void:
 		add_xp(death_xp)
 	hull = max_hull
 	fuel = max_fuel
+	# Credit penalty: lose 25%
+	credits = int(credits * 0.75)
+	credits_changed.emit(credits)
 	# Lose some resources on death
 	for key in resources:
 		resources[key] = int(resources[key] * 0.5)
 	resources_changed.emit()
 	hull_changed.emit(hull)
 	fuel_changed.emit(fuel)
+	# Respawn at nearest station
+	var respawn: Vector2 = _find_nearest_station_pos()
+	if respawn != Vector2.ZERO:
+		saved_player_pos = respawn
 	player_died.emit()
+
+
+func _find_nearest_station_pos() -> Vector2:
+	var sector_script = load("res://data/sector_%d.gd" % current_sector)
+	if sector_script == null:
+		return Vector2.ZERO
+	var sector_node := Node.new()
+	sector_node.set_script(sector_script)
+	var stations: Array = sector_node.get("STATIONS")
+	sector_node.free()
+	if stations == null or stations.is_empty():
+		return Vector2.ZERO
+	var origin: Vector2 = saved_player_pos if saved_player_pos != Vector2.ZERO else Vector2.ZERO
+	var best_pos: Vector2 = Vector2.ZERO
+	var best_dist: float = INF
+	for s in stations:
+		var sp := Vector2(float(s.get("pos_x", 0)), float(s.get("pos_y", 0)))
+		var d: float = origin.distance_squared_to(sp)
+		if d < best_dist:
+			best_dist = d
+			best_pos = sp
+	return best_pos
 
 
 func reset_run() -> void:

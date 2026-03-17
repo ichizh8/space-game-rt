@@ -115,13 +115,13 @@ func _build_ui() -> void:
 
 func _on_try_again() -> void:
 	GameState.reset_run()
-	SaveManager.delete_save()
+	SaveManager.delete_save(SaveManager.active_slot)
 	call_deferred("_change_to_game")
 
 
 func _on_main_menu() -> void:
 	GameState.reset_run()
-	SaveManager.delete_save()
+	SaveManager.delete_save(SaveManager.active_slot)
 	call_deferred("_change_to_menu")
 
 

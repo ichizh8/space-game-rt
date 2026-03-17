@@ -15,19 +15,53 @@ func _get_slot_path(slot: int) -> String:
 	return "user://save_slot_%d.json" % slot
 
 
+# ── Web (localStorage) helpers ──────────────────────────────────
+
+func _web_save(slot: int, json_string: String) -> void:
+	var bytes: PackedByteArray = json_string.to_utf8_buffer()
+	var b64: String = Marshalls.raw_to_base64(bytes)
+	JavaScriptBridge.eval("localStorage.setItem('save_slot_%d', '%s');" % [slot, b64], true)
+
+
+func _web_load(slot: int) -> String:
+	var result = JavaScriptBridge.eval("localStorage.getItem('save_slot_%d') || '';" % slot, true)
+	if result == null or str(result).is_empty():
+		return ""
+	var bytes: PackedByteArray = Marshalls.base64_to_raw(str(result))
+	return bytes.get_string_from_utf8()
+
+
+func _web_has_save(slot: int) -> bool:
+	var result = JavaScriptBridge.eval("localStorage.getItem('save_slot_%d') !== null;" % slot, true)
+	if result == null:
+		return false
+	return bool(result)
+
+
+# ── Public API ──────────────────────────────────────────────────
+
 func has_save(slot: int) -> bool:
+	if OS.get_name() == "Web":
+		return _web_has_save(slot)
 	return FileAccess.file_exists(_get_slot_path(slot))
 
 
 func get_slot_summary(slot: int) -> Dictionary:
 	if not has_save(slot):
 		return {}
-	var file := FileAccess.open(_get_slot_path(slot), FileAccess.READ)
-	if not file:
+	var json_text: String = ""
+	if OS.get_name() == "Web":
+		json_text = _web_load(slot)
+	else:
+		var file := FileAccess.open(_get_slot_path(slot), FileAccess.READ)
+		if not file:
+			return {}
+		json_text = file.get_as_text()
+		file.close()
+	if json_text.is_empty():
 		return {}
 	var json := JSON.new()
-	var err: int = json.parse(file.get_as_text())
-	file.close()
+	var err: int = json.parse(json_text)
 	if err != OK:
 		return {}
 	var data: Dictionary = json.data
@@ -86,22 +120,31 @@ func save_game() -> void:
 		"timestamp": Time.get_unix_time_from_system(),
 	}
 	var json_string := JSON.stringify(data, "\t")
-	var file := FileAccess.open(_get_slot_path(active_slot), FileAccess.WRITE)
-	if file:
-		file.store_string(json_string)
-		file.close()
-	_sync_web_fs()
+	if OS.get_name() == "Web":
+		_web_save(active_slot, json_string)
+	else:
+		var file := FileAccess.open(_get_slot_path(active_slot), FileAccess.WRITE)
+		if file:
+			file.store_string(json_string)
+			file.close()
 
 
 func load_game(slot: int) -> bool:
 	if not has_save(slot):
 		return false
-	var file := FileAccess.open(_get_slot_path(slot), FileAccess.READ)
-	if not file:
+	var json_text: String = ""
+	if OS.get_name() == "Web":
+		json_text = _web_load(slot)
+	else:
+		var file := FileAccess.open(_get_slot_path(slot), FileAccess.READ)
+		if not file:
+			return false
+		json_text = file.get_as_text()
+		file.close()
+	if json_text.is_empty():
 		return false
 	var json := JSON.new()
-	var error: int = json.parse(file.get_as_text())
-	file.close()
+	var error: int = json.parse(json_text)
 	if error != OK:
 		return false
 
@@ -157,15 +200,11 @@ func load_game(slot: int) -> bool:
 
 
 func delete_save(slot: int) -> void:
-	if has_save(slot):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(_get_slot_path(slot)))
+	if OS.get_name() == "Web":
+		if _web_has_save(slot):
+			JavaScriptBridge.eval("localStorage.removeItem('save_slot_%d');" % slot, true)
+	else:
+		if has_save(slot):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(_get_slot_path(slot)))
 	if active_slot == slot:
 		active_slot = 0
-	_sync_web_fs()
-
-
-# Flush Godot's in-memory IDBFS to IndexedDB on WebGL builds.
-# Without this, writes are lost when the browser tab closes.
-func _sync_web_fs() -> void:
-	if OS.get_name() == "Web":
-		JavaScriptBridge.eval("if(typeof FS !== 'undefined') FS.syncfs(false, function(e){});", true)

@@ -128,7 +128,6 @@ func _refresh_quest_tab() -> void:
 			var sq3 := WorldData.get_quest_by_id("story_act3")
 			if not sq3.is_empty():
 				GameState.accept_quest(sq3, planet_id)
-			SaveManager.save_game()
 			vbox.add_child(HSeparator.new())
 
 	# Classic text quest section
@@ -178,7 +177,6 @@ func _refresh_quest_tab() -> void:
 		for i in range(count):
 			ids.append(board_quests[i]["id"])
 		planet_data["available_quests"] = ids
-		SaveManager.save_game()
 
 	var quest_ids: Array = planet_data.get("available_quests", [])
 	if quest_ids.is_empty():
@@ -229,7 +227,6 @@ func _add_board_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> vo
 				var fr: Dictionary = q.get("faction_reward", {})
 				for faction in fr:
 					GameState.add_faction_rep(faction, int(fr[faction]))
-				SaveManager.save_game()
 				cstyle.border_color = Color(0.3, 0.6, 0.3)
 				container.add_theme_stylebox_override("panel", cstyle)
 				vbox.add_child(container)
@@ -306,7 +303,6 @@ func _add_board_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> vo
 	accept_btn.add_theme_font_size_override("font_size", 13)
 	accept_btn.pressed.connect(func():
 		GameState.accept_quest(q, planet_id)
-		SaveManager.save_game()
 		_refresh_quest_tab())
 	inner.add_child(accept_btn)
 
@@ -366,8 +362,6 @@ func _on_quest_choice(q_id: String, choice: Dictionary) -> void:
 	continue_btn.add_theme_font_size_override("font_size", 15)
 	continue_btn.pressed.connect(func(): call_deferred("queue_free"))
 	vbox.add_child(continue_btn)
-
-	SaveManager.save_game()
 
 
 func _build_buildings_tab() -> void:
@@ -493,7 +487,6 @@ func _on_build_pressed(building_id: String, cost: Dictionary) -> void:
 		var current: int = planet_data["buildings"].get(building_id, 0)
 		planet_data["buildings"][building_id] = current + 1
 		_refresh_buildings()
-		SaveManager.save_game()
 
 
 func _on_repair_pressed() -> void:
@@ -654,7 +647,6 @@ func _on_upgrade_pressed(kind: int) -> void:
 			GameState.hull = min(GameState.hull + bonus, GameState.max_hull)
 			GameState.hull_changed.emit(GameState.hull)
 			GameState.shield_level += 1
-	SaveManager.save_game()
 	_refresh_services()
 
 
@@ -746,7 +738,6 @@ func _on_deposit(res_type: String) -> void:
 		planet_data["storage"] = {"ore": 0, "crystal": 0, "scrap": 0}
 	planet_data["storage"][res_type] = planet_data["storage"].get(res_type, 0) + amount
 	_refresh_storage()
-	SaveManager.save_game()
 
 
 func _on_withdraw(res_type: String) -> void:
@@ -758,7 +749,6 @@ func _on_withdraw(res_type: String) -> void:
 	storage[res_type] = 0
 	GameState.add_resource(res_type, amount)
 	_refresh_storage()
-	SaveManager.save_game()
 
 
 func _collect_building_production() -> void:
@@ -793,7 +783,6 @@ func _collect_building_production() -> void:
 				planet_data["storage"][res_key] = planet_data["storage"].get(res_key, 0) + produced
 
 	planet_data["last_visit_time"] = now
-	SaveManager.save_game()
 
 
 func _clear_tab(tab: ScrollContainer) -> void:

@@ -202,7 +202,7 @@ func _check_raid_complete() -> void:
 
 func _on_player_died() -> void:
 	if is_instance_valid(ship):
-		ship.global_position = Vector2.ZERO
+		ship.global_position = GameState.saved_player_pos
 	_trauma = 0.7
 	_raid_active = false
 	_raid_enemies.clear()

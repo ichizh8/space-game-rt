@@ -853,13 +853,11 @@ func _on_craft(kind: String, cost: Dictionary, value: float) -> void:
 		"repair":  GameState.heal(value)
 		"fuel":    GameState.add_fuel(value)
 		"credits": GameState.add_credits(int(value))
-	SaveManager.save_game()
 	_refresh_crafting()
 
 
 func _on_perk_buy(perk_id: String) -> void:
 	if GameState.unlock_perk(perk_id):
-		SaveManager.save_game()
 		_refresh_captain()
 
 
@@ -874,6 +872,7 @@ func _on_perk_unlocked(_perk_id: String) -> void:
 
 
 func _on_close() -> void:
+	SaveManager.save_game()
 	call_deferred("_do_close")
 
 func _do_close() -> void:

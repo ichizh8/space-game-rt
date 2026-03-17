@@ -95,7 +95,6 @@ func _fill_services(vbox: VBoxContainer) -> void:
 	repair_btn.pressed.connect(func():
 		if GameState.remove_resource("scrap", 15):
 			GameState.heal(50.0)
-			SaveManager.save_game()
 			_on_close())
 	vbox.add_child(repair_btn)
 
@@ -106,7 +105,6 @@ func _fill_services(vbox: VBoxContainer) -> void:
 	full_repair_btn.pressed.connect(func():
 		if GameState.remove_resource("scrap", 40):
 			GameState.heal(GameState.max_hull)
-			SaveManager.save_game()
 			_on_close())
 	vbox.add_child(full_repair_btn)
 
@@ -124,7 +122,6 @@ func _fill_services(vbox: VBoxContainer) -> void:
 			GameState.credits -= 25
 			GameState.credits_changed.emit(GameState.credits)
 			GameState.add_fuel(50.0)
-			SaveManager.save_game()
 			_on_close())
 	vbox.add_child(refuel_btn)
 
@@ -156,7 +153,6 @@ func _fill_services(vbox: VBoxContainer) -> void:
 				GameState.resources[res] = 0
 				GameState.add_credits(a * effective)
 				GameState.resources_changed.emit()
-				SaveManager.save_game()
 				_on_close())
 		row.add_child(sell_btn)
 		vbox.add_child(row)
@@ -215,7 +211,6 @@ func _refresh_quests_tab() -> void:
 			GameState.set_story_flag("distress_given", true)
 			var sq2 := WorldData.get_quest_by_id("story_act1")
 			GameState.accept_quest(sq2, station_id)
-			SaveManager.save_game()
 			_refresh_quests_tab())
 		sp_inner.add_child(accept_btn)
 		vbox.add_child(HSeparator.new())
@@ -234,7 +229,6 @@ func _refresh_quests_tab() -> void:
 		for i in range(count):
 			ids.append(board_quests[i]["id"])
 		station_data["available_quests"] = ids
-		SaveManager.save_game()
 
 	var quest_ids: Array = station_data.get("available_quests", [])
 	if quest_ids.is_empty():
@@ -336,12 +330,12 @@ func _add_station_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> 
 	accept_btn.add_theme_font_size_override("font_size", 13)
 	accept_btn.pressed.connect(func():
 		GameState.accept_quest(q, station_id)
-		SaveManager.save_game()
 		_refresh_quests_tab())
 	inner.add_child(accept_btn)
 
 
 func _on_close() -> void:
+	SaveManager.save_game()
 	call_deferred("_do_close")
 
 func _do_close() -> void:
