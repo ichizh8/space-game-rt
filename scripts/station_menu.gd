@@ -214,7 +214,7 @@ func _refresh_quests_tab() -> void:
 		accept_btn.pressed.connect(func():
 			GameState.set_story_flag("distress_given", true)
 			var sq2 := WorldData.get_quest_by_id("story_act1")
-			GameState.accept_quest(sq2)
+			GameState.accept_quest(sq2, station_id)
 			SaveManager.save_game()
 			_refresh_quests_tab())
 		sp_inner.add_child(accept_btn)
@@ -335,7 +335,7 @@ func _add_station_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> 
 	accept_btn.custom_minimum_size.y = 34
 	accept_btn.add_theme_font_size_override("font_size", 13)
 	accept_btn.pressed.connect(func():
-		GameState.accept_quest(q)
+		GameState.accept_quest(q, station_id)
 		SaveManager.save_game()
 		_refresh_quests_tab())
 	inner.add_child(accept_btn)

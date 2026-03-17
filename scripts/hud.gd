@@ -34,6 +34,181 @@ func _ready() -> void:
 	_update_all()
 
 
+class MinimapControl extends Control:
+	const SIZE_PX := 80.0
+	const HALF := SIZE_PX / 2.0
+	const SCALE := HALF / 1500.0  # 1500 world units fills half the map
+
+	var _player_pos: Vector2 = Vector2.ZERO
+	var _poll_timer: float = 0.0
+
+	func _process(delta: float) -> void:
+		_poll_timer += delta
+		if _poll_timer >= 0.15:
+			_poll_timer = 0.0
+			var p := get_tree().get_first_node_in_group("player")
+			if is_instance_valid(p):
+				_player_pos = (p as Node2D).global_position
+			queue_redraw()
+
+	func _draw() -> void:
+		var c := Vector2(HALF, HALF)
+		draw_rect(Rect2(0.0, 0.0, SIZE_PX, SIZE_PX), Color(0.02, 0.04, 0.08, 0.78))
+		# Planets
+		for planet in get_tree().get_nodes_in_group("planets"):
+			if not is_instance_valid(planet):
+				continue
+			var mp: Vector2 = c + ((planet as Node2D).global_position - _player_pos) * SCALE
+			if mp.x < 2.0 or mp.x > SIZE_PX - 2.0 or mp.y < 2.0 or mp.y > SIZE_PX - 2.0:
+				continue
+			var pcol := Color(0.4, 0.7, 1.0)
+			if planet.get("planet_color") != null:
+				pcol = planet.get("planet_color") as Color
+			draw_circle(mp, 3.0, pcol)
+		# Stations
+		for station in get_tree().get_nodes_in_group("stations"):
+			if not is_instance_valid(station):
+				continue
+			var mp: Vector2 = c + ((station as Node2D).global_position - _player_pos) * SCALE
+			if mp.x < 2.0 or mp.x > SIZE_PX - 2.0 or mp.y < 2.0 or mp.y > SIZE_PX - 2.0:
+				continue
+			draw_rect(Rect2(mp - Vector2(2.0, 2.0), Vector2(4.0, 4.0)), Color(0.9, 0.8, 0.3))
+		# Warp gates
+		for gate in get_tree().get_nodes_in_group("warp_gates"):
+			if not is_instance_valid(gate):
+				continue
+			var mp: Vector2 = c + ((gate as Node2D).global_position - _player_pos) * SCALE
+			if mp.x < 2.0 or mp.x > SIZE_PX - 2.0 or mp.y < 2.0 or mp.y > SIZE_PX - 2.0:
+				continue
+			draw_arc(mp, 3.5, 0.0, TAU, 6, Color(0.4, 0.9, 1.0, 0.9), 1.5)
+		# Quest turn-in markers
+		for q in GameState.active_quests:
+			var source_id: String = q.get("source_id", "")
+			if source_id == "":
+				continue
+			var target_pos := Vector2(1e9, 1e9)
+			for planet in get_tree().get_nodes_in_group("planets"):
+				if is_instance_valid(planet) and str(planet.get("planet_id")) == source_id:
+					target_pos = (planet as Node2D).global_position
+					break
+			if target_pos.x > 1e8:
+				for station in get_tree().get_nodes_in_group("stations"):
+					if is_instance_valid(station) and str(station.get("station_id")) == source_id:
+						target_pos = (station as Node2D).global_position
+						break
+			if target_pos.x > 1e8:
+				continue
+			var mp: Vector2 = c + (target_pos - _player_pos) * SCALE
+			# If off-map, clamp to edge with arrow direction
+			if mp.x < 2.0 or mp.x > SIZE_PX - 2.0 or mp.y < 2.0 or mp.y > SIZE_PX - 2.0:
+				var dir: Vector2 = (mp - c).normalized()
+				mp = c + dir * (HALF - 4.0)
+			draw_string(ThemeDB.fallback_font, mp - Vector2(3.0, 0.0), "!",
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1.0, 0.9, 0.0, 1.0))
+		# Player dot
+		draw_circle(c, 3.0, Color.CYAN)
+		draw_arc(c, 5.5, 0.0, TAU, 12, Color(0.0, 1.0, 1.0, 0.35), 1.0)
+		# Border
+		draw_rect(Rect2(0.0, 0.0, SIZE_PX, SIZE_PX), Color(0.15, 0.35, 0.55, 0.85), false, 1.5)
+
+
+class CompassControl extends Control:
+	var _poll_timer: float = 0.0
+	var _show: bool = false
+	var _direction: Vector2 = Vector2.UP
+	var _quest_title: String = ""
+	var _distance: float = 0.0
+	var _is_story: bool = false
+
+	func _process(delta: float) -> void:
+		_poll_timer += delta
+		if _poll_timer >= 0.25:
+			_poll_timer = 0.0
+			_update()
+			queue_redraw()
+
+	func _update() -> void:
+		var tracked_id := GameState.tracked_quest_id
+		if tracked_id == "":
+			_show = false
+			return
+		var tracked_quest: Dictionary = {}
+		for q in GameState.active_quests:
+			if q.get("id") == tracked_id:
+				tracked_quest = q
+				break
+		if tracked_quest.is_empty():
+			GameState.tracked_quest_id = ""
+			_show = false
+			return
+		_quest_title = tracked_quest.get("title", "Quest")
+		var player_node := get_tree().get_first_node_in_group("player")
+		if not is_instance_valid(player_node):
+			_show = false
+			return
+		var player_pos: Vector2 = (player_node as Node2D).global_position
+		var target_pos := Vector2(1e9, 1e9)
+		var source_id: String = tracked_quest.get("source_id", "")
+		if source_id != "":
+			for planet in get_tree().get_nodes_in_group("planets"):
+				if is_instance_valid(planet) and str(planet.get("planet_id")) == source_id:
+					target_pos = (planet as Node2D).global_position
+					break
+			if target_pos.x > 1e8:
+				for station in get_tree().get_nodes_in_group("stations"):
+					if is_instance_valid(station) and str(station.get("station_id")) == source_id:
+						target_pos = (station as Node2D).global_position
+						break
+		elif tracked_id == "story_act3":
+			var px = GameState.get_story_flag("command_ship_pos_x")
+			var py_val = GameState.get_story_flag("command_ship_pos_y")
+			if px != null and py_val != null:
+				target_pos = Vector2(float(px), float(py_val))
+		elif tracked_id == "story_act2":
+			for planet in get_tree().get_nodes_in_group("planets"):
+				if is_instance_valid(planet) and str(planet.get("planet_id")) == "story_signal_planet":
+					target_pos = (planet as Node2D).global_position
+					break
+		if target_pos.x > 1e8:
+			_show = false
+			return
+		_direction = (target_pos - player_pos).normalized()
+		_distance = player_pos.distance_to(target_pos)
+		_is_story = tracked_quest.get("type", "") == "story"
+		_show = true
+
+	func _draw() -> void:
+		if not _show:
+			return
+		var w: float = size.x
+		var cx: float = w / 2.0
+		var cy: float = size.y / 2.0
+		# Arrow (triangle)
+		var arrow_len := 18.0
+		var arrow_wing := 7.0
+		var tip: Vector2 = Vector2(cx, cy) + _direction * arrow_len
+		var perp: Vector2 = _direction.rotated(PI / 2.0)
+		var base_center: Vector2 = Vector2(cx, cy) - _direction * 4.0
+		var left_pt: Vector2 = base_center + perp * arrow_wing
+		var right_pt: Vector2 = base_center - perp * arrow_wing
+		var acol: Color = Color(0.3, 1.0, 0.5) if not _is_story else Color(1.0, 0.7, 0.2)
+		draw_polygon([tip, left_pt, right_pt],
+			[acol, Color(acol.r * 0.5, acol.g * 0.5, acol.b * 0.5),
+			Color(acol.r * 0.5, acol.g * 0.5, acol.b * 0.5)])
+		# Quest name (truncated)
+		var title_short := _quest_title if _quest_title.length() <= 14 else _quest_title.left(13) + "…"
+		draw_string(ThemeDB.fallback_font, Vector2(cx + 24.0, cy - 6.0), title_short,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.9, 0.0, 0.95))
+		# Distance
+		var dist_text: String
+		if _distance >= 1000.0:
+			dist_text = "%.1fk" % (_distance / 1000.0)
+		else:
+			dist_text = "%.0f" % _distance
+		draw_string(ThemeDB.fallback_font, Vector2(cx + 24.0, cy + 8.0), dist_text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.6, 0.8, 0.6, 0.85))
+
+
 func _build_ui() -> void:
 	# Top bar container
 	var top_bar := VBoxContainer.new()
@@ -171,6 +346,32 @@ func _build_ui() -> void:
 	_notification_label.add_theme_color_override("font_color", Color.YELLOW)
 	_notification_label.visible = false
 	add_child(_notification_label)
+
+	# Minimap (bottom-left)
+	var minimap := MinimapControl.new()
+	minimap.custom_minimum_size = Vector2(80.0, 80.0)
+	minimap.anchor_left = 0.0
+	minimap.anchor_right = 0.0
+	minimap.anchor_top = 1.0
+	minimap.anchor_bottom = 1.0
+	minimap.offset_left = 8.0
+	minimap.offset_right = 88.0
+	minimap.offset_top = -90.0
+	minimap.offset_bottom = -10.0
+	add_child(minimap)
+
+	# Quest compass (center-left, points to tracked quest)
+	var compass := CompassControl.new()
+	compass.custom_minimum_size = Vector2(160.0, 44.0)
+	compass.anchor_left = 0.0
+	compass.anchor_right = 0.0
+	compass.anchor_top = 0.5
+	compass.anchor_bottom = 0.5
+	compass.offset_left = 8.0
+	compass.offset_right = 168.0
+	compass.offset_top = -22.0
+	compass.offset_bottom = 22.0
+	add_child(compass)
 
 	# Zone indicator (top-right, below resources)
 	_zone_label = Label.new()

@@ -46,6 +46,7 @@ var faction_rep: Dictionary = {"coalition": 50, "pirates": 0}
 # Quest system
 var active_quests: Array = []
 var completed_quests: Array = []
+var tracked_quest_id: String = ""
 
 # Session stats
 var session_kills: int = 0
@@ -301,13 +302,16 @@ func add_faction_rep(faction: String, amount: int) -> void:
 		faction_rep[faction] = clamp(faction_rep[faction] + amount, 0, 100)
 
 
-func accept_quest(quest_data: Dictionary) -> bool:
+func accept_quest(quest_data: Dictionary, source_id: String = "") -> bool:
 	if active_quests.size() >= 3:
 		return false
 	for q in active_quests:
 		if q["id"] == quest_data["id"]:
 			return false
-	active_quests.append(quest_data.duplicate(true))
+	var q_copy: Dictionary = quest_data.duplicate(true)
+	if source_id != "":
+		q_copy["source_id"] = source_id
+	active_quests.append(q_copy)
 	return true
 
 

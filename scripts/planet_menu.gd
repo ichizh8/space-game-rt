@@ -127,7 +127,7 @@ func _refresh_quest_tab() -> void:
 			# Accept act 3 quest automatically
 			var sq3 := WorldData.get_quest_by_id("story_act3")
 			if not sq3.is_empty():
-				GameState.accept_quest(sq3)
+				GameState.accept_quest(sq3, planet_id)
 			SaveManager.save_game()
 			vbox.add_child(HSeparator.new())
 
@@ -305,7 +305,7 @@ func _add_board_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> vo
 	accept_btn.custom_minimum_size.y = 34
 	accept_btn.add_theme_font_size_override("font_size", 13)
 	accept_btn.pressed.connect(func():
-		GameState.accept_quest(q)
+		GameState.accept_quest(q, planet_id)
 		SaveManager.save_game()
 		_refresh_quest_tab())
 	inner.add_child(accept_btn)

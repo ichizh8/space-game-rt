@@ -109,6 +109,62 @@ class MapControl extends Control:
 				draw_string(ThemeDB.fallback_font, mp + Vector2(8, 4), gname,
 					HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.4, 0.9, 1.0, 0.8))
 
+		# Quest markers — turn-in locations
+		for q in GameState.active_quests:
+			var source_id: String = q.get("source_id", "")
+			if source_id == "":
+				continue
+			var target_pos := Vector2(1e9, 1e9)
+			for planet in get_tree().get_nodes_in_group("planets"):
+				if not is_instance_valid(planet):
+					continue
+				if str(planet.get("planet_id")) == source_id:
+					target_pos = (planet as Node2D).global_position
+					break
+			if target_pos.x > 1e8:
+				for station in get_tree().get_nodes_in_group("stations"):
+					if not is_instance_valid(station):
+						continue
+					if str(station.get("station_id")) == source_id:
+						target_pos = (station as Node2D).global_position
+						break
+			if target_pos.x > 1e8:
+				continue
+			var qmp: Vector2 = center + (target_pos - _player_pos) * MAP_SCALE
+			if qmp.x < 0.0 or qmp.x > w or qmp.y < 0.0 or qmp.y > h:
+				continue
+			var is_tracked: bool = (GameState.tracked_quest_id == q.get("id", ""))
+			var qcol: Color = Color(1.0, 0.9, 0.0, 0.95) if not is_tracked else Color(0.3, 1.0, 0.4, 1.0)
+			draw_circle(qmp + Vector2(0.0, -10.0), 5.0, qcol)
+			draw_string(ThemeDB.fallback_font, qmp + Vector2(-3.0, -6.0), "!",
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.05, 0.05))
+
+		# Story act 2 target — signal planet
+		if GameState.story_act == 2 or (GameState.story_act >= 2 and GameState.is_quest_active("story_act2")):
+			for planet in get_tree().get_nodes_in_group("planets"):
+				if not is_instance_valid(planet):
+					continue
+				if str(planet.get("planet_id")) == "story_signal_planet":
+					var sp: Vector2 = (planet as Node2D).global_position
+					var smp: Vector2 = center + (sp - _player_pos) * MAP_SCALE
+					if smp.x >= 0.0 and smp.x <= w and smp.y >= 0.0 and smp.y <= h:
+						draw_circle(smp + Vector2(0.0, -10.0), 5.0, Color(1.0, 0.5, 0.0, 0.9))
+						draw_string(ThemeDB.fallback_font, smp + Vector2(-3.0, -6.0), "!",
+							HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.05, 0.05))
+					break
+
+		# Story act 3 target — command ship
+		if GameState.is_quest_active("story_act3"):
+			var px = GameState.get_story_flag("command_ship_pos_x")
+			var py_val = GameState.get_story_flag("command_ship_pos_y")
+			if px != null and py_val != null:
+				var cmd_pos := Vector2(float(px), float(py_val))
+				var cmp: Vector2 = center + (cmd_pos - _player_pos) * MAP_SCALE
+				if cmp.x >= 0.0 and cmp.x <= w and cmp.y >= 0.0 and cmp.y <= h:
+					draw_circle(cmp, 6.0, Color(1.0, 0.2, 0.2, 0.9))
+					draw_string(ThemeDB.fallback_font, cmp + Vector2(8.0, 4.0), "CMD",
+						HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1.0, 0.3, 0.3, 0.9))
+
 		# Player dot
 		draw_circle(center, 4.0, Color.CYAN)
 		draw_arc(center, 7.0, 0.0, TAU, 16, Color(0.0, 1.0, 1.0, 0.4), 1.5)
@@ -454,12 +510,39 @@ func _refresh_quests() -> void:
 			prog_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
 			info.add_child(prog_lbl)
 
+			var qid_bind: String = q.get("id", "")
+			var is_tracked: bool = GameState.tracked_quest_id == qid_bind
+			if is_tracked:
+				cstyle.border_color = Color(0.3, 1.0, 0.4)
+				card.add_theme_stylebox_override("panel", cstyle)
+
+			var track_btn := Button.new()
+			track_btn.text = "NAV" if not is_tracked else "NAV"
+			track_btn.custom_minimum_size = Vector2(42, 36)
+			track_btn.add_theme_font_size_override("font_size", 11)
+			var track_style := StyleBoxFlat.new()
+			track_style.bg_color = Color(0.1, 0.4, 0.15) if not is_tracked else Color(0.15, 0.6, 0.2)
+			track_style.corner_radius_top_left = 3
+			track_style.corner_radius_top_right = 3
+			track_style.corner_radius_bottom_left = 3
+			track_style.corner_radius_bottom_right = 3
+			track_btn.add_theme_stylebox_override("normal", track_style)
+			track_btn.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5) if not is_tracked else Color.WHITE)
+			track_btn.pressed.connect(func():
+				if GameState.tracked_quest_id == qid_bind:
+					GameState.tracked_quest_id = ""
+				else:
+					GameState.tracked_quest_id = qid_bind
+				_refresh_quests())
+			row.add_child(track_btn)
+
 			var abandon_btn := Button.new()
 			abandon_btn.text = "X"
 			abandon_btn.custom_minimum_size = Vector2(36, 36)
 			abandon_btn.add_theme_font_size_override("font_size", 14)
-			var qid_bind: String = q.get("id", "")
 			abandon_btn.pressed.connect(func():
+				if GameState.tracked_quest_id == qid_bind:
+					GameState.tracked_quest_id = ""
 				GameState.abandon_quest(qid_bind)
 				_refresh_quests())
 			row.add_child(abandon_btn)
