@@ -342,5 +342,8 @@ func _add_station_quest_row(vbox: VBoxContainer, q: Dictionary, qid: String) -> 
 
 
 func _on_close() -> void:
+	call_deferred("_do_close")
+
+func _do_close() -> void:
 	get_tree().paused = false
-	call_deferred("queue_free")
+	queue_free()

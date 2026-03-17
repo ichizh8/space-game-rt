@@ -848,8 +848,11 @@ func _on_perk_unlocked(_perk_id: String) -> void:
 
 
 func _on_close() -> void:
+	call_deferred("_do_close")
+
+func _do_close() -> void:
 	get_tree().paused = false
-	call_deferred("queue_free")
+	queue_free()
 
 
 func _make_section_label(text: String) -> Label:

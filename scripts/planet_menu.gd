@@ -803,5 +803,8 @@ func _clear_tab(tab: ScrollContainer) -> void:
 
 func _on_close() -> void:
 	SaveManager.save_game()
+	call_deferred("_do_close")
+
+func _do_close() -> void:
 	get_tree().paused = false
 	queue_free()
