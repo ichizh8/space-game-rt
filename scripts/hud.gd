@@ -35,7 +35,7 @@ func _ready() -> void:
 
 
 class MinimapControl extends Control:
-	const SIZE_PX := 80.0
+	const SIZE_PX := 88.0
 	const HALF := SIZE_PX / 2.0
 	const SCALE := HALF / 1500.0  # 1500 world units fills half the map
 
@@ -108,6 +108,20 @@ class MinimapControl extends Control:
 		# Player dot
 		draw_circle(c, 3.0, Color.CYAN)
 		draw_arc(c, 5.5, 0.0, TAU, 12, Color(0.0, 1.0, 1.0, 0.35), 1.0)
+		# Zone overlay (bottom-left of minimap)
+		var dist_z: float = _player_pos.length()
+		var zone: int = 1
+		if dist_z >= 4200.0: zone = 4
+		elif dist_z >= 2800.0: zone = 3
+		elif dist_z >= 1500.0: zone = 2
+		var zcol: Color
+		match zone:
+			1: zcol = Color(0.3, 1.0, 0.4, 0.85)
+			2: zcol = Color(1.0, 0.9, 0.2, 0.85)
+			3: zcol = Color(1.0, 0.55, 0.1, 0.85)
+			_: zcol = Color(1.0, 0.2, 0.2, 0.85)
+		draw_string(ThemeDB.fallback_font, Vector2(3.0, SIZE_PX - 4.0), "Z" + str(zone),
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, zcol)
 		# Border
 		draw_rect(Rect2(0.0, 0.0, SIZE_PX, SIZE_PX), Color(0.15, 0.35, 0.55, 0.85), false, 1.5)
 
@@ -210,66 +224,87 @@ class CompassControl extends Control:
 
 
 func _build_ui() -> void:
-	# Top bar container
-	var top_bar := VBoxContainer.new()
-	top_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	top_bar.offset_bottom = 80
-	top_bar.offset_left = 94   # clear COCKPIT button on left
-	top_bar.offset_right = -10
-	top_bar.offset_top = 6
-	add_child(top_bar)
+	# Bottom-left stats panel (hull, fuel, credits, resources)
+	var stats_bg := PanelContainer.new()
+	stats_bg.anchor_left = 0.0
+	stats_bg.anchor_right = 0.0
+	stats_bg.anchor_top = 1.0
+	stats_bg.anchor_bottom = 1.0
+	stats_bg.offset_left = 6.0
+	stats_bg.offset_right = 120.0
+	stats_bg.offset_top = -100.0
+	stats_bg.offset_bottom = -6.0
+	var stats_style := StyleBoxFlat.new()
+	stats_style.bg_color = Color(0.02, 0.04, 0.10, 0.78)
+	stats_style.corner_radius_top_left = 4
+	stats_style.corner_radius_top_right = 4
+	stats_style.corner_radius_bottom_left = 4
+	stats_style.corner_radius_bottom_right = 4
+	stats_style.content_margin_left = 5
+	stats_style.content_margin_right = 5
+	stats_style.content_margin_top = 4
+	stats_style.content_margin_bottom = 4
+	stats_bg.add_theme_stylebox_override("panel", stats_style)
+	add_child(stats_bg)
 
-	# Hull bar
-	var hull_container := HBoxContainer.new()
-	top_bar.add_child(hull_container)
-	var hull_label := Label.new()
-	hull_label.text = "Hull"
-	hull_label.add_theme_font_size_override("font_size", 14)
-	hull_label.custom_minimum_size.x = 50
-	hull_container.add_child(hull_label)
+	var stats_vbox := VBoxContainer.new()
+	stats_vbox.add_theme_constant_override("separation", 3)
+	stats_bg.add_child(stats_vbox)
+
+	# Hull bar row
+	var hull_row := HBoxContainer.new()
+	hull_row.add_theme_constant_override("separation", 3)
+	stats_vbox.add_child(hull_row)
+	var hull_lbl := Label.new()
+	hull_lbl.text = "HP"
+	hull_lbl.add_theme_font_size_override("font_size", 11)
+	hull_lbl.custom_minimum_size.x = 18
+	hull_lbl.add_theme_color_override("font_color", Color(0.9, 0.4, 0.4))
+	hull_row.add_child(hull_lbl)
 	_hull_bar = ProgressBar.new()
 	_hull_bar.max_value = GameState.max_hull
 	_hull_bar.value = GameState.hull
 	_hull_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_hull_bar.custom_minimum_size.y = 18
+	_hull_bar.custom_minimum_size.y = 12
+	_hull_bar.show_percentage = false
 	var hull_style := StyleBoxFlat.new()
 	hull_style.bg_color = Color(0.8, 0.1, 0.1)
 	_hull_bar.add_theme_stylebox_override("fill", hull_style)
-	hull_container.add_child(_hull_bar)
+	hull_row.add_child(_hull_bar)
 
-	# Fuel bar
-	var fuel_container := HBoxContainer.new()
-	top_bar.add_child(fuel_container)
-	var fuel_label := Label.new()
-	fuel_label.text = "Fuel"
-	fuel_label.add_theme_font_size_override("font_size", 14)
-	fuel_label.custom_minimum_size.x = 50
-	fuel_container.add_child(fuel_label)
+	# Fuel bar row
+	var fuel_row := HBoxContainer.new()
+	fuel_row.add_theme_constant_override("separation", 3)
+	stats_vbox.add_child(fuel_row)
+	var fuel_lbl := Label.new()
+	fuel_lbl.text = "FU"
+	fuel_lbl.add_theme_font_size_override("font_size", 11)
+	fuel_lbl.custom_minimum_size.x = 18
+	fuel_lbl.add_theme_color_override("font_color", Color(0.4, 0.6, 1.0))
+	fuel_row.add_child(fuel_lbl)
 	_fuel_bar = ProgressBar.new()
 	_fuel_bar.max_value = GameState.max_fuel
 	_fuel_bar.value = GameState.fuel
 	_fuel_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_fuel_bar.custom_minimum_size.y = 18
+	_fuel_bar.custom_minimum_size.y = 12
+	_fuel_bar.show_percentage = false
 	var fuel_style := StyleBoxFlat.new()
 	fuel_style.bg_color = Color(0.1, 0.3, 0.9)
 	_fuel_bar.add_theme_stylebox_override("fill", fuel_style)
-	fuel_container.add_child(_fuel_bar)
+	fuel_row.add_child(_fuel_bar)
 
-	# Credits label
+	# Credits
 	_credits_label = Label.new()
-	_credits_label.text = "Credits: " + str(GameState.credits)
-	_credits_label.add_theme_font_size_override("font_size", 14)
-	top_bar.add_child(_credits_label)
+	_credits_label.add_theme_font_size_override("font_size", 11)
+	_credits_label.add_theme_color_override("font_color", Color(0.85, 0.75, 0.3))
+	_credits_label.text = str(GameState.credits) + " cr"
+	stats_vbox.add_child(_credits_label)
 
-	# Resource display (top-right)
+	# Resources compact
 	_resource_label = Label.new()
-	_resource_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_resource_label.offset_left = -140
-	_resource_label.offset_top = 10
-	_resource_label.offset_right = -10
-	_resource_label.add_theme_font_size_override("font_size", 12)
-	_resource_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	add_child(_resource_label)
+	_resource_label.add_theme_font_size_override("font_size", 11)
+	_resource_label.add_theme_color_override("font_color", Color(0.65, 0.75, 0.65))
+	stats_vbox.add_child(_resource_label)
 
 	# Virtual joystick (center-bottom)
 	_joystick = Control.new()
@@ -347,17 +382,17 @@ func _build_ui() -> void:
 	_notification_label.visible = false
 	add_child(_notification_label)
 
-	# Minimap (bottom-left)
+	# Minimap (top-right)
 	var minimap := MinimapControl.new()
-	minimap.custom_minimum_size = Vector2(80.0, 80.0)
-	minimap.anchor_left = 0.0
-	minimap.anchor_right = 0.0
-	minimap.anchor_top = 1.0
-	minimap.anchor_bottom = 1.0
-	minimap.offset_left = 8.0
-	minimap.offset_right = 88.0
-	minimap.offset_top = -90.0
-	minimap.offset_bottom = -10.0
+	minimap.custom_minimum_size = Vector2(88.0, 88.0)
+	minimap.anchor_left = 1.0
+	minimap.anchor_right = 1.0
+	minimap.anchor_top = 0.0
+	minimap.anchor_bottom = 0.0
+	minimap.offset_left = -96.0
+	minimap.offset_right = -8.0
+	minimap.offset_top = 8.0
+	minimap.offset_bottom = 96.0
 	add_child(minimap)
 
 	# Quest compass (center-left, points to tracked quest)
@@ -373,17 +408,8 @@ func _build_ui() -> void:
 	compass.offset_bottom = 22.0
 	add_child(compass)
 
-	# Zone indicator (top-right, below resources)
-	_zone_label = Label.new()
-	_zone_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_zone_label.offset_left = -80
-	_zone_label.offset_top = 60
-	_zone_label.offset_right = -10
-	_zone_label.add_theme_font_size_override("font_size", 12)
-	_zone_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_zone_label.text = "ZONE 1"
-	_zone_label.add_theme_color_override("font_color", Color.GREEN)
-	add_child(_zone_label)
+	# Zone label is now drawn inside the MinimapControl overlay
+	_zone_label = null
 
 
 func _connect_signals() -> void:
@@ -603,12 +629,12 @@ func _on_fuel_changed(value: float) -> void:
 
 func _on_credits_changed(value: int) -> void:
 	if is_instance_valid(_credits_label):
-		_credits_label.text = "Credits: " + str(value)
+		_credits_label.text = str(value) + " cr"
 
 
 func _on_resources_changed() -> void:
 	if is_instance_valid(_resource_label):
-		_resource_label.text = "Ore: %d\nCrystal: %d\nScrap: %d" % [
+		_resource_label.text = "O:%d C:%d S:%d" % [
 			GameState.resources.get("ore", 0),
 			GameState.resources.get("crystal", 0),
 			GameState.resources.get("scrap", 0)
@@ -616,26 +642,7 @@ func _on_resources_changed() -> void:
 
 
 func _update_zone_label() -> void:
-	var ship_node := get_tree().get_first_node_in_group("player")
-	if not is_instance_valid(ship_node):
-		return
-	var dist: float = (ship_node as Node2D).global_position.length()
-	var zone: int = 1
-	if dist >= 4200.0:
-		zone = 4
-	elif dist >= 2800.0:
-		zone = 3
-	elif dist >= 1500.0:
-		zone = 2
-	if zone != _current_zone:
-		_current_zone = zone
-	if is_instance_valid(_zone_label):
-		_zone_label.text = "ZONE " + str(zone)
-		match zone:
-			1: _zone_label.add_theme_color_override("font_color", Color.GREEN)
-			2: _zone_label.add_theme_color_override("font_color", Color.YELLOW)
-			3: _zone_label.add_theme_color_override("font_color", Color.ORANGE)
-			4: _zone_label.add_theme_color_override("font_color", Color.RED)
+	pass  # Zone is now shown inside MinimapControl overlay
 
 
 func reset_fire() -> void:
