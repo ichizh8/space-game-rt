@@ -3,7 +3,7 @@ extends Node
 var resources_data: Dictionary = {}
 var artifacts_data: Array = []
 var quests_data: Array = []
-var buildings_data: Dictionary = {}
+
 
 
 func _ready() -> void:
@@ -14,7 +14,6 @@ func _load_json_data() -> void:
 	resources_data = _load_json("res://data/resources.json") as Dictionary
 	artifacts_data = _load_json("res://data/artifacts.json") as Array
 	quests_data = _load_json("res://data/quests.json") as Array
-	buildings_data = _load_json("res://data/buildings.json") as Dictionary
 
 
 func _load_json(path: String) -> Variant:
@@ -82,7 +81,4 @@ func get_board_quests_for(source_type: String) -> Array:
 	return result
 
 
-func get_building_data(building_id: String) -> Dictionary:
-	if buildings_data.has(building_id):
-		return buildings_data[building_id]
-	return {}
+

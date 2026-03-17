@@ -8,7 +8,6 @@ var _panel: Panel
 var _tab_container: TabContainer
 var _quest_tab: Control
 var _services_tab: ScrollContainer
-var _buildings_tab: Control
 var _storage_tab: Control
 
 
@@ -22,7 +21,6 @@ func _ready() -> void:
 	layer = 20
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
-	_collect_building_production()
 	get_tree().paused = true
 	var hud: Node = get_tree().get_first_node_in_group("hud")
 	if is_instance_valid(hud) and hud.has_method("reset_fire"):
@@ -73,7 +71,6 @@ func _build_ui() -> void:
 	# Build tabs
 	_build_quest_tab()
 	_build_services_tab()
-	_build_buildings_tab()
 	_build_storage_tab()
 
 
@@ -364,146 +361,6 @@ func _on_quest_choice(q_id: String, choice: Dictionary) -> void:
 	vbox.add_child(continue_btn)
 
 
-func _build_buildings_tab() -> void:
-	_buildings_tab = ScrollContainer.new()
-	_buildings_tab.name = "Buildings"
-	_tab_container.add_child(_buildings_tab)
-
-	_refresh_buildings()
-
-
-func _refresh_buildings() -> void:
-	_clear_tab(_buildings_tab)
-
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_buildings_tab.add_child(vbox)
-
-	var planet_data := GameState.get_planet_data(planet_id)
-	var buildings: Dictionary = planet_data.get("buildings", {})
-
-	var building_ids := ["mining_plant", "manufacturing", "storage_depot", "shipyard"]
-	for b_id in building_ids:
-		var b_data := WorldData.get_building_data(b_id)
-		if b_data.is_empty():
-			continue
-
-		var current_level: int = buildings.get(b_id, 0)
-		var tiers: Array = b_data.get("tiers", [])
-
-		var container := PanelContainer.new()
-		var container_style := StyleBoxFlat.new()
-		container_style.bg_color = Color(0.1, 0.1, 0.2, 0.8)
-		container_style.border_color = Color(0.3, 0.3, 0.5)
-		container_style.set_border_width_all(1)
-		container_style.content_margin_left = 10
-		container_style.content_margin_right = 10
-		container_style.content_margin_top = 8
-		container_style.content_margin_bottom = 8
-		container.add_theme_stylebox_override("panel", container_style)
-		vbox.add_child(container)
-
-		var inner_vbox := VBoxContainer.new()
-		container.add_child(inner_vbox)
-
-		# Name + level
-		var name_label := Label.new()
-		name_label.text = b_data.get("name", b_id) + " (Level " + str(current_level) + ")"
-		name_label.add_theme_font_size_override("font_size", 17)
-		name_label.add_theme_color_override("font_color", Color(0.8, 0.8, 1.0))
-		inner_vbox.add_child(name_label)
-
-		# Description
-		var desc_label := Label.new()
-		desc_label.text = b_data.get("description", "")
-		desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		desc_label.add_theme_font_size_override("font_size", 13)
-		inner_vbox.add_child(desc_label)
-
-		# Production info (if built)
-		if current_level > 0 and current_level <= tiers.size():
-			var tier: Dictionary = tiers[current_level - 1]
-			var prod: Dictionary = tier.get("production", {})
-			if not prod.is_empty():
-				var prod_text := "Producing: "
-				var parts: Array[String] = []
-				var interval: int = tier.get("production_interval", 300)
-				for res_key in prod:
-					parts.append(str(prod[res_key]) + " " + res_key)
-				prod_text += ", ".join(parts) + " per " + str(interval / 60) + " min"
-				var prod_label := Label.new()
-				prod_label.text = prod_text
-				prod_label.add_theme_font_size_override("font_size", 13)
-				prod_label.add_theme_color_override("font_color", Color.GREEN)
-				inner_vbox.add_child(prod_label)
-
-		# Shipyard special actions
-		if b_id == "shipyard" and current_level >= 1:
-			var repair_btn := Button.new()
-			repair_btn.text = "Repair Hull (20 scrap)"
-			repair_btn.add_theme_font_size_override("font_size", 14)
-			repair_btn.custom_minimum_size.y = 36
-			repair_btn.pressed.connect(_on_repair_pressed)
-			inner_vbox.add_child(repair_btn)
-
-			var refuel_btn := Button.new()
-			refuel_btn.text = "Refuel +50 fuel  (20 credits)"
-			refuel_btn.add_theme_font_size_override("font_size", 14)
-			refuel_btn.custom_minimum_size.y = 36
-			refuel_btn.pressed.connect(_on_refuel_pressed)
-			inner_vbox.add_child(refuel_btn)
-
-		# Build / Upgrade button
-		if current_level < tiers.size():
-			var next_tier: Dictionary = tiers[current_level]
-			var cost: Dictionary = next_tier.get("cost", {})
-			var cost_text := ""
-			for key in cost:
-				cost_text += key.capitalize() + ": " + str(cost[key]) + "  "
-
-			var build_btn := Button.new()
-			if current_level == 0:
-				build_btn.text = "Build (" + cost_text.strip_edges() + ")"
-			else:
-				build_btn.text = "Upgrade (" + cost_text.strip_edges() + ")"
-			build_btn.add_theme_font_size_override("font_size", 14)
-			build_btn.custom_minimum_size.y = 36
-			build_btn.disabled = not GameState.has_resources(cost)
-			build_btn.pressed.connect(_on_build_pressed.bind(b_id, cost))
-			inner_vbox.add_child(build_btn)
-		elif current_level >= tiers.size():
-			var max_label := Label.new()
-			max_label.text = "MAX LEVEL"
-			max_label.add_theme_font_size_override("font_size", 14)
-			max_label.add_theme_color_override("font_color", Color.GOLD)
-			inner_vbox.add_child(max_label)
-
-
-func _on_build_pressed(building_id: String, cost: Dictionary) -> void:
-	if GameState.spend_resources(cost):
-		var planet_data := GameState.get_planet_data(planet_id)
-		if not planet_data.has("buildings"):
-			planet_data["buildings"] = {}
-		var current: int = planet_data["buildings"].get(building_id, 0)
-		planet_data["buildings"][building_id] = current + 1
-		_refresh_buildings()
-
-
-func _on_repair_pressed() -> void:
-	if GameState.remove_resource("scrap", 20):
-		GameState.heal(50.0)
-		_refresh_buildings()
-
-
-func _on_refuel_pressed() -> void:
-	if GameState.credits >= 20:
-		GameState.credits -= 20
-		GameState.credits_changed.emit(GameState.credits)
-		GameState.add_fuel(50.0)
-		_refresh_buildings()
-
-
-
 func _build_services_tab() -> void:
 	_services_tab = ScrollContainer.new()
 	_services_tab.name = "Services"
@@ -749,40 +606,6 @@ func _on_withdraw(res_type: String) -> void:
 	storage[res_type] = 0
 	GameState.add_resource(res_type, amount)
 	_refresh_storage()
-
-
-func _collect_building_production() -> void:
-	var planet_data := GameState.get_planet_data(planet_id)
-	var buildings: Dictionary = planet_data.get("buildings", {})
-	var last_visit: float = planet_data.get("last_visit_time", Time.get_unix_time_from_system())
-	var now: float = Time.get_unix_time_from_system()
-	var elapsed: float = now - last_visit
-
-	for b_id in buildings:
-		var level: int = buildings[b_id]
-		if level <= 0:
-			continue
-		var b_data := WorldData.get_building_data(b_id)
-		if b_data.is_empty():
-			continue
-		var tiers: Array = b_data.get("tiers", [])
-		if level > tiers.size():
-			continue
-		var tier: Dictionary = tiers[level - 1]
-		var production: Dictionary = tier.get("production", {})
-		var interval: int = tier.get("production_interval", 300)
-		if interval <= 0 or production.is_empty():
-			continue
-
-		var cycles := int(elapsed / interval)
-		if cycles > 0:
-			if not planet_data.has("storage"):
-				planet_data["storage"] = {"ore": 0, "crystal": 0, "scrap": 0}
-			for res_key in production:
-				var produced: int = int(production[res_key]) * cycles
-				planet_data["storage"][res_key] = planet_data["storage"].get(res_key, 0) + produced
-
-	planet_data["last_visit_time"] = now
 
 
 func _clear_tab(tab: ScrollContainer) -> void:
