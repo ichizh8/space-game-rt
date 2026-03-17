@@ -559,14 +559,16 @@ func _refresh_quests() -> void:
 	]
 	for act_info in acts:
 		var act_row := HBoxContainer.new()
-		act_row.custom_minimum_size.y = 26
+		act_row.custom_minimum_size.y = 32
 		vbox.add_child(act_row)
 		var dot := Label.new()
 		var act_label := Label.new()
 		act_label.text = str(act_info[0])
+		act_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		act_label.add_theme_font_size_override("font_size", 13)
 		var act_id: String = str(act_info[1])
 		var act_num: int = int(act_info[2])
+		var is_active_act: bool = false
 		if GameState.is_quest_completed(act_id):
 			dot.text = "  "
 			dot.add_theme_color_override("font_color", Color.GREEN)
@@ -575,6 +577,7 @@ func _refresh_quests() -> void:
 			dot.text = "  "
 			dot.add_theme_color_override("font_color", Color.YELLOW)
 			act_label.add_theme_color_override("font_color", Color.YELLOW)
+			is_active_act = true
 		else:
 			dot.text = "  "
 			dot.add_theme_color_override("font_color", Color(0.3, 0.3, 0.4))
@@ -582,6 +585,29 @@ func _refresh_quests() -> void:
 		dot.add_theme_font_size_override("font_size", 13)
 		act_row.add_child(dot)
 		act_row.add_child(act_label)
+		# NAV button for active story acts
+		if is_active_act:
+			var is_tracked: bool = GameState.tracked_quest_id == act_id
+			var nav_btn := Button.new()
+			nav_btn.text = "NAV"
+			nav_btn.custom_minimum_size = Vector2(42, 28)
+			nav_btn.add_theme_font_size_override("font_size", 11)
+			var nav_style := StyleBoxFlat.new()
+			nav_style.bg_color = Color(0.35, 0.2, 0.0) if not is_tracked else Color(0.55, 0.35, 0.0)
+			nav_style.corner_radius_top_left = 3
+			nav_style.corner_radius_top_right = 3
+			nav_style.corner_radius_bottom_left = 3
+			nav_style.corner_radius_bottom_right = 3
+			nav_btn.add_theme_stylebox_override("normal", nav_style)
+			nav_btn.add_theme_color_override("font_color", Color(1.0, 0.75, 0.2) if not is_tracked else Color.WHITE)
+			var act_id_bind: String = act_id
+			nav_btn.pressed.connect(func():
+				if GameState.tracked_quest_id == act_id_bind:
+					GameState.tracked_quest_id = ""
+				else:
+					GameState.tracked_quest_id = act_id_bind
+				_refresh_quests())
+			act_row.add_child(nav_btn)
 
 
 func _build_crafting_tab() -> void:

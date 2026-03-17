@@ -127,6 +127,10 @@ class MinimapControl extends Control:
 
 
 class CompassControl extends Control:
+	const ORBIT_RADIUS := 82.0   # px from ship screen center
+	const HIDE_DISTANCE := 220.0  # world units — hide when closer than this
+	const ARROW_HALF := 12.0
+
 	var _poll_timer: float = 0.0
 	var _show: bool = false
 	var _direction: Vector2 = Vector2.UP
@@ -136,7 +140,7 @@ class CompassControl extends Control:
 
 	func _process(delta: float) -> void:
 		_poll_timer += delta
-		if _poll_timer >= 0.25:
+		if _poll_timer >= 0.2:
 			_poll_timer = 0.0
 			_update()
 			queue_redraw()
@@ -146,15 +150,21 @@ class CompassControl extends Control:
 		if tracked_id == "":
 			_show = false
 			return
+		# Look in active_quests first
 		var tracked_quest: Dictionary = {}
 		for q in GameState.active_quests:
 			if q.get("id") == tracked_id:
 				tracked_quest = q
 				break
+		# Story quests may not be in active_quests under the same structure —
+		# synthesize a minimal dict so we can still resolve their target
 		if tracked_quest.is_empty():
-			GameState.tracked_quest_id = ""
-			_show = false
-			return
+			if tracked_id in ["story_act1", "story_act2", "story_act3"]:
+				tracked_quest = {"id": tracked_id, "title": "Main Quest", "type": "story"}
+			else:
+				GameState.tracked_quest_id = ""
+				_show = false
+				return
 		_quest_title = tracked_quest.get("title", "Quest")
 		var player_node := get_tree().get_first_node_in_group("player")
 		if not is_instance_valid(player_node):
@@ -186,41 +196,37 @@ class CompassControl extends Control:
 		if target_pos.x > 1e8:
 			_show = false
 			return
-		_direction = (target_pos - player_pos).normalized()
 		_distance = player_pos.distance_to(target_pos)
+		if _distance < HIDE_DISTANCE:
+			_show = false
+			return
+		_direction = (target_pos - player_pos).normalized()
 		_is_story = tracked_quest.get("type", "") == "story"
 		_show = true
 
 	func _draw() -> void:
 		if not _show:
 			return
-		var w: float = size.x
-		var cx: float = w / 2.0
-		var cy: float = size.y / 2.0
-		# Arrow (triangle)
-		var arrow_len := 18.0
-		var arrow_wing := 7.0
-		var tip: Vector2 = Vector2(cx, cy) + _direction * arrow_len
+		var vp_size: Vector2 = get_viewport().get_visible_rect().size
+		var screen_center: Vector2 = vp_size / 2.0
+		# Arrow orbits around ship screen center
+		var arrow_center: Vector2 = screen_center + _direction * ORBIT_RADIUS
+		var tip: Vector2 = arrow_center + _direction * ARROW_HALF
 		var perp: Vector2 = _direction.rotated(PI / 2.0)
-		var base_center: Vector2 = Vector2(cx, cy) - _direction * 4.0
-		var left_pt: Vector2 = base_center + perp * arrow_wing
-		var right_pt: Vector2 = base_center - perp * arrow_wing
-		var acol: Color = Color(0.3, 1.0, 0.5) if not _is_story else Color(1.0, 0.7, 0.2)
-		draw_polygon([tip, left_pt, right_pt],
-			[acol, Color(acol.r * 0.5, acol.g * 0.5, acol.b * 0.5),
-			Color(acol.r * 0.5, acol.g * 0.5, acol.b * 0.5)])
-		# Quest name (truncated)
-		var title_short := _quest_title if _quest_title.length() <= 14 else _quest_title.left(13) + "…"
-		draw_string(ThemeDB.fallback_font, Vector2(cx + 24.0, cy - 6.0), title_short,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.9, 0.0, 0.95))
-		# Distance
-		var dist_text: String
-		if _distance >= 1000.0:
-			dist_text = "%.1fk" % (_distance / 1000.0)
-		else:
-			dist_text = "%.0f" % _distance
-		draw_string(ThemeDB.fallback_font, Vector2(cx + 24.0, cy + 8.0), dist_text,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.6, 0.8, 0.6, 0.85))
+		var bl: Vector2 = arrow_center - _direction * (ARROW_HALF * 0.4) + perp * (ARROW_HALF * 0.55)
+		var br: Vector2 = arrow_center - _direction * (ARROW_HALF * 0.4) - perp * (ARROW_HALF * 0.55)
+		var acol: Color = Color(0.35, 1.0, 0.55, 0.92) if not _is_story else Color(1.0, 0.72, 0.2, 0.92)
+		draw_polygon([tip, bl, br],
+			[acol, Color(acol.r * 0.45, acol.g * 0.45, acol.b * 0.45, 0.8),
+			 Color(acol.r * 0.45, acol.g * 0.45, acol.b * 0.45, 0.8)])
+		# Text just beyond the tip
+		var text_base: Vector2 = tip + _direction * 5.0
+		var title_short := _quest_title if _quest_title.length() <= 13 else _quest_title.left(12) + "…"
+		draw_string(ThemeDB.fallback_font, text_base,
+			title_short, HORIZONTAL_ALIGNMENT_CENTER, -1, 10, Color(1.0, 0.9, 0.0, 0.9))
+		var dist_text: String = ("%.1fk" % (_distance / 1000.0)) if _distance >= 1000.0 else ("%.0f" % _distance)
+		draw_string(ThemeDB.fallback_font, text_base + _direction * 13.0,
+			dist_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 9, Color(0.6, 0.8, 0.65, 0.82))
 
 
 func _build_ui() -> void:
@@ -395,17 +401,10 @@ func _build_ui() -> void:
 	minimap.offset_bottom = 96.0
 	add_child(minimap)
 
-	# Quest compass (center-left, points to tracked quest)
+	# Quest compass — fullscreen overlay, draws arrow orbiting ship center
 	var compass := CompassControl.new()
-	compass.custom_minimum_size = Vector2(160.0, 44.0)
-	compass.anchor_left = 0.0
-	compass.anchor_right = 0.0
-	compass.anchor_top = 0.5
-	compass.anchor_bottom = 0.5
-	compass.offset_left = 8.0
-	compass.offset_right = 168.0
-	compass.offset_top = -22.0
-	compass.offset_bottom = 22.0
+	compass.set_anchors_preset(Control.PRESET_FULL_RECT)
+	compass.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(compass)
 
 	# Zone label is now drawn inside the MinimapControl overlay
