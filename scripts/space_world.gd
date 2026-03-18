@@ -54,7 +54,7 @@ func _give_inherit_quest() -> void:
 	if not GameState.restaurant_owned and not GameState.is_quest_active("quest_inherit_restaurant") and not GameState.is_quest_completed("quest_inherit_restaurant"):
 		var q = WorldData.get_quest_by_id("quest_inherit_restaurant")
 		if not q.is_empty():
-			GameState.accept_quest(q, "world")
+			GameState.accept_quest(q, "drifting_spoon")
 			GameState.tracked_quest_id = "quest_inherit_restaurant"
 			# Show notification after HUD is ready
 			call_deferred("_notify_inherit_quest")

@@ -173,7 +173,7 @@ class CompassControl extends Control:
 		var player_pos: Vector2 = (player_node as Node2D).global_position
 		var target_pos := Vector2(1e9, 1e9)
 		var source_id: String = tracked_quest.get("source_id", "")
-		if source_id != "":
+		if source_id != "" and source_id != "world":
 			for planet in get_tree().get_nodes_in_group("planets"):
 				if is_instance_valid(planet) and str(planet.get("planet_id")) == source_id:
 					target_pos = (planet as Node2D).global_position
@@ -183,6 +183,10 @@ class CompassControl extends Control:
 					if is_instance_valid(station) and str(station.get("station_id")) == source_id:
 						target_pos = (station as Node2D).global_position
 						break
+			# Fallback: check map_discovered_planets (e.g. Drifting Spoon not yet in range)
+			if target_pos.x > 1e8 and GameState.map_discovered_planets.has(source_id):
+				var entry: Dictionary = GameState.map_discovered_planets[source_id]
+				target_pos = Vector2(float(entry.get("pos_x", 1e9)), float(entry.get("pos_y", 1e9)))
 		elif tracked_id == "story_act3":
 			var px = GameState.get_story_flag("command_ship_pos_x")
 			var py_val = GameState.get_story_flag("command_ship_pos_y")
