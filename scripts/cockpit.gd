@@ -220,6 +220,18 @@ func _build_ui() -> void:
 	close_btn.pressed.connect(_on_close)
 	panel.add_child(close_btn)
 
+	var menu_btn := Button.new()
+	menu_btn.text = "MENU"
+	menu_btn.add_theme_font_size_override("font_size", 12)
+	menu_btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	menu_btn.offset_left = 8
+	menu_btn.offset_top = 12
+	menu_btn.offset_right = 70
+	menu_btn.offset_bottom = 50
+	menu_btn.add_theme_color_override("font_color", Color(0.5, 0.6, 0.7))
+	menu_btn.pressed.connect(_on_main_menu)
+	panel.add_child(menu_btn)
+
 	_tab_container = TabContainer.new()
 	_tab_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_tab_container.offset_top = 58
@@ -878,6 +890,11 @@ func _on_close() -> void:
 func _do_close() -> void:
 	get_tree().paused = false
 	queue_free()
+
+func _on_main_menu() -> void:
+	SaveManager.save_game()
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 
 func _make_section_label(text: String) -> Label:
