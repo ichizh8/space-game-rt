@@ -19,7 +19,7 @@ const BIOME_CONFIGS: Array = [
 	# DEEP_SPACE (3): very dark blue near-black, huge faint
 	[Color(0.05, 0.05, 0.2, 0.09), 2, 3, 600.0, 1200.0],
 	# NEBULA (4): bright purple-pink, vibrant dense
-	[Color(0.6, 0.2, 0.9, 0.12), 6, 9, 300.0, 700.0],
+	[Color(0.6, 0.2, 0.9, 0.12), 3, 5, 250.0, 500.0],
 ]
 
 # Hunting zone overlay configs: [color, min_blobs, max_blobs, min_radius, max_radius]
@@ -59,7 +59,7 @@ func _generate_blobs() -> void:
 
 	# NEBULA biome: extra bright accent circles
 	if current_biome == 4:
-		for i in range(randi_range(3, 5)):
+		for i in range(randi_range(2, 3)):
 			var parent_blob: Dictionary = _blobs[randi() % _blobs.size()]
 			var offset: Vector2 = Vector2(randf_range(-200.0, 200.0), randf_range(-200.0, 200.0))
 			var accent_pos: Vector2 = parent_blob["pos"] + offset
@@ -94,6 +94,8 @@ func _generate_zone_blobs(zone_id: String) -> void:
 
 
 func _process(_delta: float) -> void:
+	var _dirty: bool = false
+
 	# Check biome from sector_generator/sector_loader
 	var sg: Node = get_tree().get_first_node_in_group("sector_generator")
 	if is_instance_valid(sg) and sg.get("_current_biome") != null:
@@ -101,14 +103,17 @@ func _process(_delta: float) -> void:
 		if new_biome != current_biome:
 			current_biome = new_biome
 			_generate_blobs()
+			_dirty = true
 
 	# Check hunting zone
 	var active_zone: String = GameState.active_hunting_zone
 	if active_zone != _last_active_zone:
 		_last_active_zone = active_zone
 		_generate_zone_blobs(active_zone)
+		_dirty = true
 
-	queue_redraw()
+	if _dirty:
+		queue_redraw()
 
 
 func _draw() -> void:
