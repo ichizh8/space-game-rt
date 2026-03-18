@@ -165,6 +165,42 @@ class MapControl extends Control:
 					draw_string(ThemeDB.fallback_font, cmp + Vector2(8.0, 4.0), "CMD",
 						HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1.0, 0.3, 0.3, 0.9))
 
+		# Discovered zone map markers (purchased or proximity-found hunting zones)
+		for zone_id in GameState.map_discovered_planets:
+			var entry: Dictionary = GameState.map_discovered_planets[zone_id]
+			# Only draw zones from hunting_zones_sector1 (they have color_h and no planet_color)
+			# Skip stations/planets already drawn as scene nodes above
+			var is_zone: bool = false
+			for z in GameState.hunting_zones_sector1:
+				if z.get("id", "") == zone_id:
+					is_zone = true
+					break
+			if not is_zone:
+				continue
+			var zx: float = float(entry.get("pos_x", 0.0))
+			var zy: float = float(entry.get("pos_y", 0.0))
+			var zname: String = str(entry.get("name", ""))
+			var zh: float = float(entry.get("color_h", 0.3))
+			var world_pos2 := Vector2(zx, zy)
+			var mp2: Vector2 = center + (world_pos2 - _player_pos) * MAP_SCALE
+			if mp2.x < -30.0 or mp2.x > w + 30.0 or mp2.y < -30.0 or mp2.y > h + 30.0:
+				continue
+			var zcol: Color = Color.from_hsv(zh, 0.7, 0.9, 0.9)
+			# Diamond marker for hunting zones
+			var d: float = 6.0
+			draw_colored_polygon(PackedVector2Array([
+				mp2 + Vector2(0, -d), mp2 + Vector2(d, 0),
+				mp2 + Vector2(0, d),  mp2 + Vector2(-d, 0)
+			]), zcol)
+			draw_polyline(PackedVector2Array([
+				mp2 + Vector2(0, -d), mp2 + Vector2(d, 0),
+				mp2 + Vector2(0, d),  mp2 + Vector2(-d, 0),
+				mp2 + Vector2(0, -d)
+			]), Color(1.0, 1.0, 1.0, 0.4), 1.0)
+			if zname != "":
+				draw_string(ThemeDB.fallback_font, mp2 + Vector2(9, 4), zname,
+					HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(zcol.r, zcol.g, zcol.b, 0.95))
+
 		# Player dot
 		draw_circle(center, 4.0, Color.CYAN)
 		draw_arc(center, 7.0, 0.0, TAU, 16, Color(0.0, 1.0, 1.0, 0.4), 1.5)
