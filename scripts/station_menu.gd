@@ -187,43 +187,41 @@ func _refresh_quests_tab() -> void:
 
 	var station_data := GameState.get_planet_data(station_id)
 
-	# Story quest at top
-	if GameState.story_act == 1 and not GameState.is_quest_completed("story_act1") and not GameState.is_quest_active("story_act1") and not GameState.get_story_flag("distress_given"):
-		var story_panel := PanelContainer.new()
-		var sp_style := StyleBoxFlat.new()
-		sp_style.bg_color = Color(0.12, 0.1, 0.05, 0.95)
-		sp_style.border_color = Color(0.8, 0.7, 0.2)
-		sp_style.set_border_width_all(2)
-		sp_style.content_margin_left = 10
-		sp_style.content_margin_right = 10
-		sp_style.content_margin_top = 8
-		sp_style.content_margin_bottom = 8
-		story_panel.add_theme_stylebox_override("panel", sp_style)
-		vbox.add_child(story_panel)
-		var sp_inner := VBoxContainer.new()
-		story_panel.add_child(sp_inner)
-		var sp_title := Label.new()
-		sp_title.text = "PRIORITY: Distress Signal"
-		sp_title.add_theme_font_size_override("font_size", 16)
-		sp_title.add_theme_color_override("font_color", Color.YELLOW)
-		sp_inner.add_child(sp_title)
-		var sq := WorldData.get_quest_by_id("story_act1")
-		var sp_desc := Label.new()
-		sp_desc.text = sq.get("description", "An encrypted distress signal from deep space...")
-		sp_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		sp_desc.add_theme_font_size_override("font_size", 13)
-		sp_desc.add_theme_color_override("font_color", Color(0.8, 0.8, 0.7))
-		sp_inner.add_child(sp_desc)
-		var accept_btn := Button.new()
-		accept_btn.text = "Accept Mission"
-		accept_btn.custom_minimum_size.y = 40
-		accept_btn.add_theme_font_size_override("font_size", 14)
-		accept_btn.pressed.connect(func():
-			GameState.set_story_flag("distress_given", true)
-			var sq2 := WorldData.get_quest_by_id("story_act1")
-			GameState.accept_quest(sq2, station_id)
-			_refresh_quests_tab())
-		sp_inner.add_child(accept_btn)
+	# Active world quests (Dad's Place + any other source_type:world quests)
+	var has_world_quest := false
+	for q in GameState.active_quests:
+		if q.get("source_type", "") == "world":
+			has_world_quest = true
+			var qpanel := PanelContainer.new()
+			var qstyle := StyleBoxFlat.new()
+			qstyle.bg_color = Color(0.08, 0.12, 0.08, 0.95)
+			qstyle.border_color = Color(0.3, 0.9, 0.4)
+			qstyle.set_border_width_all(2)
+			qstyle.content_margin_left = 10
+			qstyle.content_margin_right = 10
+			qstyle.content_margin_top = 8
+			qstyle.content_margin_bottom = 8
+			qpanel.add_theme_stylebox_override("panel", qstyle)
+			vbox.add_child(qpanel)
+			var qinner := VBoxContainer.new()
+			qpanel.add_child(qinner)
+			var qtag := Label.new()
+			qtag.text = "MAIN QUEST"
+			qtag.add_theme_font_size_override("font_size", 11)
+			qtag.add_theme_color_override("font_color", Color(0.3, 0.9, 0.4))
+			qinner.add_child(qtag)
+			var qtitle := Label.new()
+			qtitle.text = q.get("title", "")
+			qtitle.add_theme_font_size_override("font_size", 16)
+			qtitle.add_theme_color_override("font_color", Color.WHITE)
+			qinner.add_child(qtitle)
+			var qdesc := Label.new()
+			qdesc.text = q.get("description", "")
+			qdesc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			qdesc.add_theme_font_size_override("font_size", 13)
+			qdesc.add_theme_color_override("font_color", Color(0.75, 0.75, 0.8))
+			qinner.add_child(qdesc)
+	if has_world_quest:
 		vbox.add_child(HSeparator.new())
 
 	# Board quests

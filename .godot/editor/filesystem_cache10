@@ -34,36 +34,36 @@ PROJECT.md::TextFile/TextFile::-1::1773610574::0::1::::<><><>0<>0<><>::
 2026-03-16-space-station.png::CompressedTexture2D/CompressedTexture2D::6109365355207652556::1773711267::1773713020::1::::<><><>0<>0<>4e5a97f41796b62772faa9807f35d155<>res://.godot/imported/2026-03-16-space-station.png-1f55e3d4e2cabb6577b8e9f1ebee920a.ctex::
 2026-03-16-void-sentinel-ship.png::CompressedTexture2D/CompressedTexture2D::1820095399983065611::1773711235::1773713020::1::::<><><>0<>0<>62dcc67e037430aebcf37e2e70dd4ead<>res://.godot/imported/2026-03-16-void-sentinel-ship.png-da0fc14306a1bc5b95e6f1d7bc1e7027.ctex::
 2026-03-16-warp-gate.png::CompressedTexture2D/CompressedTexture2D::1680392992199787739::1773711347::1773713020::1::::<><><>0<>0<>0748290c806add21da1de6fbb3ff34a2<>res://.godot/imported/2026-03-16-warp-gate.png-61199752db21177e1ffeaaea4f2be54e.ctex::
-::res://balance/::1773799722
-creatures.Burst Max.translation::OptimizedTranslation::5646452222512466058::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Credit Reward.translation::OptimizedTranslation::7989228639896158065::1773800301::0::1::::<><><>0<>0<><>::
-creatures.csv::Translation/Translation::3035612307165329511::1773791095::1773800301::1::::<><><>0<>0<>13e3c0883cc9f3b6c186a2e857425695<>res://balance/creatures.Name.translation<*>res://balance/creatures.HP (base).translation<*>res://balance/creatures.Damage (base).translation<*>res://balance/creatures.Speed.translation<*>res://balance/creatures.Shoot Cooldown.translation<*>res://balance/creatures.Burst Max.translation<*>res://balance/creatures.Credit Reward.translation<*>res://balance/creatures.XP Reward.translation<*>res://balance/creatures.Drop Types.translation<*>res://balance/creatures.Drop Min.translation<*>res://balance/creatures.Drop Max.translation<*>res://balance/creatures.AI / Behavior.translation<*>res://balance/creatures.Notes.translation::
-creatures.Damage (base).translation::OptimizedTranslation::7957005456688068084::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Drop Max.translation::OptimizedTranslation::6314370565681631650::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Drop Min.translation::OptimizedTranslation::1262911121411852904::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Drop Types.translation::OptimizedTranslation::3676777653648914776::1773800301::0::1::::<><><>0<>0<><>::
-creatures.HP (base).translation::OptimizedTranslation::8414715128317967867::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Name.translation::OptimizedTranslation::4281291015505658120::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Notes.translation::OptimizedTranslation::527856715868147742::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Shoot Cooldown.translation::OptimizedTranslation::7918376909528729041::1773800301::0::1::::<><><>0<>0<><>::
-creatures.Speed.translation::OptimizedTranslation::1383640706536927179::1773800301::0::1::::<><><>0<>0<><>::
-creatures.XP Reward.translation::OptimizedTranslation::7474682774158260429::1773800301::0::1::::<><><>0<>0<><>::
-economy.csv::Translation/Translation::6257831477358962753::1773790946::1773800301::1::::<><><>0<>0<>29be9c8dd0e6dc41c6bafd060e85e677<>res://balance/economy.Item.translation<*>res://balance/economy.Cost / Price.translation<*>res://balance/economy.Currency.translation<*>res://balance/economy.Notes.translation::
-economy.Currency.translation::OptimizedTranslation::7902625016498846012::1773800301::0::1::::<><><>0<>0<><>::
-economy.Item.translation::OptimizedTranslation::8985549652654812260::1773800301::0::1::::<><><>0<>0<><>::
-economy.Notes.translation::OptimizedTranslation::608716043895137605::1773800301::0::1::::<><><>0<>0<><>::
+::res://balance/::1773800301
+creatures.Burst Max.translation::OptimizedTranslation::5646452222512466058::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Credit Reward.translation::OptimizedTranslation::7989228639896158065::1773800475::0::1::::<><><>0<>0<><>::
+creatures.csv::Translation/Translation::3035612307165329511::1773791095::1773800475::1::::<><><>0<>0<>13e3c0883cc9f3b6c186a2e857425695<>res://balance/creatures.Name.translation<*>res://balance/creatures.HP (base).translation<*>res://balance/creatures.Damage (base).translation<*>res://balance/creatures.Speed.translation<*>res://balance/creatures.Shoot Cooldown.translation<*>res://balance/creatures.Burst Max.translation<*>res://balance/creatures.Credit Reward.translation<*>res://balance/creatures.XP Reward.translation<*>res://balance/creatures.Drop Types.translation<*>res://balance/creatures.Drop Min.translation<*>res://balance/creatures.Drop Max.translation<*>res://balance/creatures.AI / Behavior.translation<*>res://balance/creatures.Notes.translation::
+creatures.Damage (base).translation::OptimizedTranslation::7957005456688068084::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Drop Max.translation::OptimizedTranslation::6314370565681631650::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Drop Min.translation::OptimizedTranslation::1262911121411852904::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Drop Types.translation::OptimizedTranslation::3676777653648914776::1773800475::0::1::::<><><>0<>0<><>::
+creatures.HP (base).translation::OptimizedTranslation::8414715128317967867::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Name.translation::OptimizedTranslation::4281291015505658120::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Notes.translation::OptimizedTranslation::527856715868147742::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Shoot Cooldown.translation::OptimizedTranslation::7918376909528729041::1773800475::0::1::::<><><>0<>0<><>::
+creatures.Speed.translation::OptimizedTranslation::1383640706536927179::1773800475::0::1::::<><><>0<>0<><>::
+creatures.XP Reward.translation::OptimizedTranslation::7474682774158260429::1773800475::0::1::::<><><>0<>0<><>::
+economy.csv::Translation/Translation::6257831477358962753::1773790946::1773800475::1::::<><><>0<>0<>29be9c8dd0e6dc41c6bafd060e85e677<>res://balance/economy.Item.translation<*>res://balance/economy.Cost / Price.translation<*>res://balance/economy.Currency.translation<*>res://balance/economy.Notes.translation::
+economy.Currency.translation::OptimizedTranslation::7902625016498846012::1773800475::0::1::::<><><>0<>0<><>::
+economy.Item.translation::OptimizedTranslation::8985549652654812260::1773800475::0::1::::<><><>0<>0<><>::
+economy.Notes.translation::OptimizedTranslation::608716043895137605::1773800475::0::1::::<><><>0<>0<><>::
 README.md::TextFile/TextFile::-1::1773791126::0::1::::<><><>0<>0<><>::
 restaurant.Cost.translation::OptimizedTranslation/OptimizedTranslation::7191544676967036230::1773799722::0::1::::<><><>0<>0<><>::
 restaurant.csv::Translation/Translation::48213467728463872::1773798556::1773799722::1::::<><><>0<>0<>957eb2cf7ae30bb28b3701733f25077f<>res://balance/restaurant.ID.translation<*>res://balance/restaurant.Name.translation<*>res://balance/restaurant.Ingredient.translation<*>res://balance/restaurant.Cost.translation<*>res://balance/restaurant.Dish Revenue (cr).translation<*>res://balance/restaurant.Reputation Gain.translation<*>res://balance/restaurant.Unlock Condition.translation<*>res://balance/restaurant.Notes.translation::
-restaurant.Dish Revenue (cr).translation::OptimizedTranslation::4608176139891890754::1773799722::0::1::::<><><>0<>0<><>::
-restaurant.ID.translation::OptimizedTranslation::943249507533032275::1773799722::0::1::::<><><>0<>0<><>::
+restaurant.Dish Revenue (cr).translation::OptimizedTranslation/OptimizedTranslation::4608176139891890754::1773799722::0::1::::<><><>0<>0<><>::
+restaurant.ID.translation::OptimizedTranslation/OptimizedTranslation::943249507533032275::1773799722::0::1::::<><><>0<>0<><>::
 restaurant.Ingredient Source.translation::OptimizedTranslation/OptimizedTranslation::8801268075412716673::1773797536::0::1::::<><><>0<>0<><>::
-restaurant.Ingredient Tier.translation::OptimizedTranslation::2833785137151180067::1773797536::0::1::::<><><>0<>0<><>::
+restaurant.Ingredient Tier.translation::OptimizedTranslation/OptimizedTranslation::2833785137151180067::1773797536::0::1::::<><><>0<>0<><>::
 restaurant.Ingredient.translation::OptimizedTranslation/OptimizedTranslation::2972009731486066136::1773799722::0::1::::<><><>0<>0<><>::
-restaurant.Name.translation::OptimizedTranslation::2822710844635329378::1773799722::0::1::::<><><>0<>0<><>::
-restaurant.Notes.translation::OptimizedTranslation::424088857929977865::1773799722::0::1::::<><><>0<>0<><>::
-restaurant.Reputation Gain.translation::OptimizedTranslation::1348359931280679585::1773799722::0::1::::<><><>0<>0<><>::
-restaurant.Unlock Condition.translation::OptimizedTranslation::4644857756243313348::1773799722::0::1::::<><><>0<>0<><>::
+restaurant.Name.translation::OptimizedTranslation/OptimizedTranslation::2822710844635329378::1773799722::0::1::::<><><>0<>0<><>::
+restaurant.Notes.translation::OptimizedTranslation/OptimizedTranslation::424088857929977865::1773799722::0::1::::<><><>0<>0<><>::
+restaurant.Reputation Gain.translation::OptimizedTranslation/OptimizedTranslation::1348359931280679585::1773799722::0::1::::<><><>0<>0<><>::
+restaurant.Unlock Condition.translation::OptimizedTranslation/OptimizedTranslation::4644857756243313348::1773799722::0::1::::<><><>0<>0<><>::
 wildlife.Behavior.translation::OptimizedTranslation/OptimizedTranslation::5726226152620183861::1773799722::0::1::::<><><>0<>0<><>::
 wildlife.csv::Translation/Translation::1111954543023476242::1773798533::1773799722::1::::<><><>0<>0<>b69c0d691c967c8316346a960b004596<>res://balance/wildlife.Name.translation<*>res://balance/wildlife.Zone.translation<*>res://balance/wildlife.HP.translation<*>res://balance/wildlife.Speed.translation<*>res://balance/wildlife.Damage.translation<*>res://balance/wildlife.Behavior.translation<*>res://balance/wildlife.Ingredient Drop.translation<*>res://balance/wildlife.Drop Amount.translation<*>res://balance/wildlife.XP.translation<*>res://balance/wildlife.Notes.translation::
 wildlife.Damage.translation::OptimizedTranslation/OptimizedTranslation::4711320512064407500::1773799722::0::1::::<><><>0<>0<><>::
@@ -145,7 +145,7 @@ hazard_asteroid.gd::GDScript/GDScript::140940104441337328::1773583655::0::1::::<
 hud.gd::GDScript/GDScript::1858420113232689031::1773709284::0::1::::<>CanvasLayer<><>0<>0<><>::
 interceptor.gd::GDScript/GDScript::3019466697555462762::1773791514::0::1::::<>Node2D<><>0<>0<><>::
 loot_drop.gd::GDScript/GDScript::64529108628595499::1773624145::0::1::::<>Node2D<><>0<>0<><>::
-main_menu.gd::GDScript::1764982572082152261::1773800279::0::1::::<>Control<><>0<>0<><>::
+main_menu.gd::GDScript/GDScript::1764982572082152261::1773800279::0::1::::<>Control<><>0<>0<><>::
 membrane_drifter.gd::GDScript/GDScript::7286449023596376172::1773798750::0::1::::<>Node2D<><>0<>0<><>::
 mine.gd::GDScript/GDScript::76550374689089415::1773621709::0::1::::<>Node2D<><>0<>0<><>::
 minelayer.gd::GDScript/GDScript::186647843889532250::1773791518::0::1::::<>Node2D<><>0<>0<><>::
@@ -154,9 +154,9 @@ nebula_background.gd::GDScript/GDScript::709179530439261648::1773637757::0::1:::
 pack_snarler.gd::GDScript/GDScript::7632879022676648683::1773798740::0::1::::<>Node2D<><>0<>0<><>::
 planet.gd::GDScript/GDScript::4693907266427328966::1773636788::0::1::::<>Node2D<><>0<>0<><>::
 planet_menu.gd::GDScript/GDScript::5271842473902023664::1773717774::0::1::::<>CanvasLayer<><>0<>0<><>::
-save_manager.gd::GDScript::7650306163663500790::1773800294::0::1::::<>Node<><>0<>0<><>::
+save_manager.gd::GDScript/GDScript::7650306163663500790::1773800294::0::1::::<>Node<><>0<>0<><>::
 sector_generator.gd::GDScript/GDScript::7122586594381657071::1773798852::0::1::::<>Node2D<><>0<>0<><>::
-sector_loader.gd::GDScript/GDScript::6336700767300208704::1773796333::0::1::::<>Node2D<><>0<>0<><>::
+sector_loader.gd::GDScript::6336700767300208704::1773800468::0::1::::<>Node2D<><>0<>0<><>::
 ship.gd::GDScript/GDScript::5629838719633451787::1773683114::0::1::::<>CharacterBody2D<><>0<>0<><>::
 skim_ray.gd::GDScript/GDScript::7706078624168481720::1773798722::0::1::::<>Node2D<><>0<>0<><>::
 sniper.gd::GDScript/GDScript::7475074518143974023::1773630576::0::1::::<>Node2D<><>0<>0<><>::
@@ -165,7 +165,7 @@ space_world.gd::GDScript/GDScript::113990473700440012::1773797786::0::1::::<>Nod
 star.gd::GDScript/GDScript::1915472973048615655::1773636782::0::1::::<>Node2D<><>0<>0<><>::
 starfield.gd::GDScript/GDScript::3257456860025844023::1773637743::0::1::::<>Node2D<><>0<>0<><>::
 star_background.gd::GDScript/GDScript::1215044384397328246::1773631351::0::1::::<>Node2D<><>0<>0<><>::
-station_menu.gd::GDScript/GDScript::1486852535772250751::1773798935::0::1::::<>CanvasLayer<><>0<>0<><>::
+station_menu.gd::GDScript::1486852535772250751::1773800457::0::1::::<>CanvasLayer<><>0<>0<><>::
 throttle_slider.gd::GDScript/GDScript::6955374437960013661::1773672196::0::1::::<>Control<><>0<>0<><>::
 turret.gd::GDScript/GDScript::7631576253312281239::1773621838::0::1::::<>Node2D<><>0<>0<><>::
 tutorial_overlay.gd::GDScript/GDScript::6232582661619727581::1773637537::0::1::::<>CanvasLayer<><>0<>0<><>::
@@ -175,7 +175,7 @@ void_leviathan.gd::GDScript/GDScript::2779435897859189924::1773798781::0::1::::<
 void_sentinel.gd::GDScript/GDScript::2147939099636406732::1773791521::0::1::::<>Node2D<><>0<>0<><>::
 warp_gate.gd::GDScript/GDScript::7217366560798320789::1773633642::0::1::::<>Node2D<><>0<>0<><>::
 world_data.gd::GDScript/GDScript::3340492155267611818::1773717796::0::1::::<>Node<><>0<>0<><>::
-::res://web-export/::1773799722
-index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773799722::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
-index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773799722::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
-index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773799722::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::
+::res://web-export/::1773800301
+index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773800301::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
+index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773800301::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
+index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773800301::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::

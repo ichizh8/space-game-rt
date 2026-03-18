@@ -402,17 +402,7 @@ func _check_story_triggers() -> void:
 	var player_pos: Vector2 = player.global_position
 	var dist: float = player_pos.length()
 
-	# Act 1: player traveled far enough with distress quest active
-	if GameState.story_act == 1 and GameState.is_quest_active("story_act1"):
-		if dist >= 1500.0 and not GameState.get_story_flag("distress_found"):
-			GameState.set_story_flag("distress_found", true)
-			call_deferred("_spawn_story_planet_deferred", player_pos + Vector2(300, -150))
-			var hud: Node = get_tree().get_first_node_in_group("hud")
-			if is_instance_valid(hud) and hud.has_method("show_notification"):
-				hud.show_notification("Signal source located! Land on the marked planet.")
-			GameState.complete_quest("story_act1")
-			_apply_reward({"credits": 100})
-			GameState.story_act = 2
+	# Old distress signal arc removed — restaurant story replaced it
 
 	# Act 3: spawn command ship cluster when player is near
 	if GameState.story_act == 3 and not GameState.get_story_flag("command_ship_spawned"):
