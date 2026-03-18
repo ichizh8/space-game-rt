@@ -387,9 +387,9 @@ func _refresh_services() -> void:
 	vbox.add_child(hull_lbl)
 
 	var repair_btn := Button.new()
-	repair_btn.text = "Repair +50 HP  (cost: 15 scrap)"
+	repair_btn.text = "Repair +50 HP  (100 cr)"
 	repair_btn.custom_minimum_size.y = 40
-	repair_btn.disabled = not GameState.has_resources({"scrap": 15})
+	repair_btn.disabled = GameState.credits < 100
 	repair_btn.pressed.connect(_on_service_repair)
 	vbox.add_child(repair_btn)
 
@@ -508,7 +508,9 @@ func _on_upgrade_pressed(kind: int) -> void:
 
 
 func _on_service_repair() -> void:
-	if GameState.remove_resource("scrap", 15):
+	if GameState.credits >= 100:
+		GameState.credits -= 100
+		GameState.credits_changed.emit(GameState.credits)
 		GameState.heal(50.0)
 		_refresh_services()
 

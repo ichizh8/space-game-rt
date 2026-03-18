@@ -102,21 +102,27 @@ func _fill_services(vbox: VBoxContainer) -> void:
 	vbox.add_child(hull_lbl)
 
 	var repair_btn := Button.new()
-	repair_btn.text = "Repair +50 HP  (15 scrap)"
+	repair_btn.text = "Repair +50 HP  (100 cr)"
 	repair_btn.custom_minimum_size.y = 44
-	repair_btn.disabled = not GameState.has_resources({"scrap": 15})
+	repair_btn.disabled = GameState.credits < 100
 	repair_btn.pressed.connect(func():
-		if GameState.remove_resource("scrap", 15):
+		if GameState.credits >= 100:
+			GameState.credits -= 100
+			GameState.credits_changed.emit(GameState.credits)
 			GameState.heal(50.0)
 			_on_close())
 	vbox.add_child(repair_btn)
 
 	var full_repair_btn := Button.new()
-	full_repair_btn.text = "Full Repair  (40 scrap)"
+	var full_repair_cost: int = maxi(0, int((GameState.max_hull - GameState.hull) * 2.5))
+	full_repair_btn.text = "Full Repair  (%d cr)" % full_repair_cost
 	full_repair_btn.custom_minimum_size.y = 44
-	full_repair_btn.disabled = not GameState.has_resources({"scrap": 40})
+	full_repair_btn.disabled = GameState.credits < full_repair_cost or GameState.hull >= GameState.max_hull
 	full_repair_btn.pressed.connect(func():
-		if GameState.remove_resource("scrap", 40):
+		var cost: int = maxi(0, int((GameState.max_hull - GameState.hull) * 2.5))
+		if GameState.credits >= cost and GameState.hull < GameState.max_hull:
+			GameState.credits -= cost
+			GameState.credits_changed.emit(GameState.credits)
 			GameState.heal(GameState.max_hull)
 			_on_close())
 	vbox.add_child(full_repair_btn)
