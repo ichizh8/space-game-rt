@@ -64,8 +64,9 @@ func _ready() -> void:
 	bullet_scene = load("res://scenes/bullet.tscn")
 	match enemy_type:
 		EnemyType.PIRATE:
-			speed = 160.0; hp = 30.0; max_hp = 30.0; damage = 10.0
-			shoot_cooldown = 0.25; burst_max = 3
+			# Balanced: lower base damage, slower, fewer bursts
+			speed = 120.0; hp = 30.0; max_hp = 30.0; damage = 6.0
+			shoot_cooldown = 0.8; burst_max = 2
 			orbit_direction = 1 if randf() > 0.5 else -1
 			# Assign random AI style
 			var roll: int = randi() % 4
@@ -93,25 +94,33 @@ func _apply_ai_style() -> void:
 		return
 	match ai_style:
 		AIStyle.AGGRESSIVE:
-			_aggro_range_override = 250.0
-			_orbit_range_override = 80.0
-			shoot_cooldown = 0.15
-			burst_max = 5
+			# Head-on attacker — charges in, fires, pulls back. No orbit.
+			_aggro_range_override = 280.0
+			_orbit_range_override = 30.0   # basically never orbits — stays in chase
+			shoot_cooldown = 0.6
+			burst_max = 2
 			_no_retreat = true
 		AIStyle.SNIPER:
-			_orbit_range_override = 220.0
-			shoot_cooldown = 2.0
+			# Hangs back and takes single shots — not circling
+			_orbit_range_override = 260.0
+			shoot_cooldown = 2.5
 			burst_max = 1
-			damage *= 1.5
+			damage *= 1.3
 			_deaggro_range_override = 600.0
 		AIStyle.FLANKER:
+			# Tries to get beside you — moderate orbit range
+			_orbit_range_override = 150.0
 			orbit_direction = -1
 			_direction_flip_timer = 0.0
-			speed *= 1.1
-		AIStyle.COWARD:
-			_aggro_range_override = 150.0
-			_orbit_range_override = 160.0
+			speed *= 1.05
+			shoot_cooldown = 1.0
 			burst_max = 2
+		AIStyle.COWARD:
+			# Hit and run — shoot once, retreat, come back
+			_aggro_range_override = 200.0
+			_orbit_range_override = 190.0
+			burst_max = 1
+			shoot_cooldown = 1.5
 
 
 func _get_aggro_range() -> float:
