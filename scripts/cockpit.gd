@@ -7,6 +7,7 @@ var _quests_tab: ScrollContainer
 var _crafting_tab: ScrollContainer
 var _map_tab: ScrollContainer
 var _inventory_tab: ScrollContainer
+var initial_tab: int = -1
 
 
 class MapControl extends Control:
@@ -16,29 +17,70 @@ class MapControl extends Control:
 	const GRID_WORLD := 1000.0
 
 	var _player_pos: Vector2 = Vector2.ZERO
+	var _player_rot: float = 0.0
 	var _poll_timer: float = 0.0
+	var zoom: float = 1.0
+	var _clear_btn: Button = null
+	var _zoom_label: Label = null
+	var _time: float = 0.0
 
 	func _process(delta: float) -> void:
 		_poll_timer += delta
+		_time += delta
 		if _poll_timer >= 0.25:
 			_poll_timer = 0.0
 			var players := get_tree().get_nodes_in_group("player")
 			if players.size() > 0 and is_instance_valid(players[0]):
 				_player_pos = (players[0] as Node2D).global_position
+				_player_rot = (players[0] as Node2D).rotation
 			queue_redraw()
+
+	func zoom_in() -> void:
+		zoom = minf(zoom + 0.25, 4.0)
+		if is_instance_valid(_zoom_label):
+			_zoom_label.text = "%.1fx" % zoom
+		queue_redraw()
+
+	func zoom_out() -> void:
+		zoom = maxf(zoom - 0.25, 0.5)
+		if is_instance_valid(_zoom_label):
+			_zoom_label.text = "%.1fx" % zoom
+		queue_redraw()
+
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton:
+			var mb := event as InputEventMouseButton
+			if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+				_set_waypoint_from_tap(mb.position)
+				accept_event()
+		elif event is InputEventScreenTouch:
+			var st := event as InputEventScreenTouch
+			if st.pressed:
+				_set_waypoint_from_tap(st.position)
+				accept_event()
+
+	func _set_waypoint_from_tap(local_pos: Vector2) -> void:
+		var center := size / 2.0
+		var effective_scale: float = MAP_SCALE * zoom
+		var world_pos: Vector2 = _player_pos + (local_pos - center) / effective_scale
+		GameState.map_waypoint = world_pos
+		if is_instance_valid(_clear_btn):
+			_clear_btn.visible = true
+		queue_redraw()
 
 	func _draw() -> void:
 		var w := size.x
 		var h := size.y
 		var center := size / 2.0
+		var effective_scale: float = MAP_SCALE * zoom
 
 		# Background
 		draw_rect(Rect2(0, 0, w, h), Color(0.02, 0.04, 0.08))
 
 		# Grid
-		var grid_px := GRID_WORLD * MAP_SCALE
-		var ox := fmod(_player_pos.x * MAP_SCALE, grid_px)
-		var oy := fmod(_player_pos.y * MAP_SCALE, grid_px)
+		var grid_px := GRID_WORLD * effective_scale
+		var ox := fmod(_player_pos.x * effective_scale, grid_px)
+		var oy := fmod(_player_pos.y * effective_scale, grid_px)
 		var gc := Color(0.06, 0.11, 0.17)
 		var gx := center.x - ox
 		while gx < w:
@@ -62,7 +104,7 @@ class MapControl extends Control:
 			if not is_instance_valid(planet):
 				continue
 			var world_pos: Vector2 = (planet as Node2D).global_position
-			var mp: Vector2 = center + (world_pos - _player_pos) * MAP_SCALE
+			var mp: Vector2 = center + (world_pos - _player_pos) * effective_scale
 			if mp.x < -20.0 or mp.x > w + 20.0 or mp.y < -20.0 or mp.y > h + 20.0:
 				continue
 			var pcol: Color = Color(0.4, 0.7, 1.0)
@@ -82,7 +124,7 @@ class MapControl extends Control:
 			if not is_instance_valid(station):
 				continue
 			var world_pos: Vector2 = (station as Node2D).global_position
-			var mp: Vector2 = center + (world_pos - _player_pos) * MAP_SCALE
+			var mp: Vector2 = center + (world_pos - _player_pos) * effective_scale
 			if mp.x < -20.0 or mp.x > w + 20.0 or mp.y < -20.0 or mp.y > h + 20.0:
 				continue
 			draw_rect(Rect2(mp - Vector2(4, 4), Vector2(8, 8)), Color(0.9, 0.8, 0.3))
@@ -98,7 +140,7 @@ class MapControl extends Control:
 			if not is_instance_valid(gate):
 				continue
 			var world_pos: Vector2 = (gate as Node2D).global_position
-			var mp: Vector2 = center + (world_pos - _player_pos) * MAP_SCALE
+			var mp: Vector2 = center + (world_pos - _player_pos) * effective_scale
 			if mp.x < -20.0 or mp.x > w + 20.0 or mp.y < -20.0 or mp.y > h + 20.0:
 				continue
 			draw_arc(mp, 6.0, 0.0, TAU, 8, Color(0.4, 0.9, 1.0, 0.9), 2.0)
@@ -130,7 +172,7 @@ class MapControl extends Control:
 						break
 			if target_pos.x > 1e8:
 				continue
-			var qmp: Vector2 = center + (target_pos - _player_pos) * MAP_SCALE
+			var qmp: Vector2 = center + (target_pos - _player_pos) * effective_scale
 			if qmp.x < 0.0 or qmp.x > w or qmp.y < 0.0 or qmp.y > h:
 				continue
 			var is_tracked: bool = (GameState.tracked_quest_id == q.get("id", ""))
@@ -146,7 +188,7 @@ class MapControl extends Control:
 					continue
 				if str(planet.get("planet_id")) == "story_signal_planet":
 					var sp: Vector2 = (planet as Node2D).global_position
-					var smp: Vector2 = center + (sp - _player_pos) * MAP_SCALE
+					var smp: Vector2 = center + (sp - _player_pos) * effective_scale
 					if smp.x >= 0.0 and smp.x <= w and smp.y >= 0.0 and smp.y <= h:
 						draw_circle(smp + Vector2(0.0, -10.0), 5.0, Color(1.0, 0.5, 0.0, 0.9))
 						draw_string(ThemeDB.fallback_font, smp + Vector2(-3.0, -6.0), "!",
@@ -159,7 +201,7 @@ class MapControl extends Control:
 			var py_val = GameState.get_story_flag("command_ship_pos_y")
 			if px != null and py_val != null:
 				var cmd_pos := Vector2(float(px), float(py_val))
-				var cmp: Vector2 = center + (cmd_pos - _player_pos) * MAP_SCALE
+				var cmp: Vector2 = center + (cmd_pos - _player_pos) * effective_scale
 				if cmp.x >= 0.0 and cmp.x <= w and cmp.y >= 0.0 and cmp.y <= h:
 					draw_circle(cmp, 6.0, Color(1.0, 0.2, 0.2, 0.9))
 					draw_string(ThemeDB.fallback_font, cmp + Vector2(8.0, 4.0), "CMD",
@@ -182,7 +224,7 @@ class MapControl extends Control:
 			var zname: String = str(entry.get("name", ""))
 			var zh: float = float(entry.get("color_h", 0.3))
 			var world_pos2 := Vector2(zx, zy)
-			var mp2: Vector2 = center + (world_pos2 - _player_pos) * MAP_SCALE
+			var mp2: Vector2 = center + (world_pos2 - _player_pos) * effective_scale
 			if mp2.x < -30.0 or mp2.x > w + 30.0 or mp2.y < -30.0 or mp2.y > h + 30.0:
 				continue
 			var zcol: Color = Color.from_hsv(zh, 0.7, 0.9, 0.9)
@@ -201,16 +243,54 @@ class MapControl extends Control:
 				draw_string(ThemeDB.fallback_font, mp2 + Vector2(9, 4), zname,
 					HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(zcol.r, zcol.g, zcol.b, 0.95))
 
-		# Player dot
-		draw_circle(center, 4.0, Color.CYAN)
+		# Nearby enemies (red dots, within 2000 world units)
+		for enemy in get_tree().get_nodes_in_group("enemies"):
+			if not is_instance_valid(enemy):
+				continue
+			var epos: Vector2 = (enemy as Node2D).global_position
+			if epos.distance_to(_player_pos) > 2000.0:
+				continue
+			var emp: Vector2 = center + (epos - _player_pos) * effective_scale
+			if emp.x < 0.0 or emp.x > w or emp.y < 0.0 or emp.y > h:
+				continue
+			draw_circle(emp, 2.5, Color(1.0, 0.3, 0.3, 0.8))
+
+		# Loot drops (small yellow dots)
+		for loot in get_tree().get_nodes_in_group("loot_drops"):
+			if not is_instance_valid(loot):
+				continue
+			var lpos: Vector2 = (loot as Node2D).global_position
+			var lmp: Vector2 = center + (lpos - _player_pos) * effective_scale
+			if lmp.x < 0.0 or lmp.x > w or lmp.y < 0.0 or lmp.y > h:
+				continue
+			draw_circle(lmp, 2.0, Color(1.0, 0.85, 0.2, 0.7))
+
+		# Waypoint marker (pulsing orange X)
+		if GameState.map_waypoint.x < 1e8:
+			var wmp: Vector2 = center + (GameState.map_waypoint - _player_pos) * effective_scale
+			if wmp.x >= -10.0 and wmp.x <= w + 10.0 and wmp.y >= -10.0 and wmp.y <= h + 10.0:
+				var pulse: float = 0.6 + 0.4 * sin(_time * 3.0)
+				var wcol := Color(1.0, 0.6, 0.1, pulse)
+				var xs: float = 5.0
+				draw_line(wmp + Vector2(-xs, -xs), wmp + Vector2(xs, xs), wcol, 2.0)
+				draw_line(wmp + Vector2(xs, -xs), wmp + Vector2(-xs, xs), wcol, 2.0)
+
+		# Player arrow (facing direction)
+		var forward: Vector2 = Vector2.UP.rotated(_player_rot)
+		var arrow_sz: float = 6.0
+		var arrow_tip: Vector2 = center + forward * arrow_sz
+		var arrow_left: Vector2 = center + forward.rotated(2.4) * (arrow_sz * 0.7)
+		var arrow_right: Vector2 = center + forward.rotated(-2.4) * (arrow_sz * 0.7)
+		draw_colored_polygon(PackedVector2Array([arrow_tip, arrow_left, arrow_right]), Color.CYAN)
 		draw_arc(center, 7.0, 0.0, TAU, 16, Color(0.0, 1.0, 1.0, 0.4), 1.5)
 
 		# Border
 		draw_rect(Rect2(0, 0, w, h), Color(0.15, 0.35, 0.55), false, 1.5)
 
 		# Coords
+		var zoom_text: String = " (%.1fx)" % zoom if zoom != 1.0 else ""
 		draw_string(ThemeDB.fallback_font, Vector2(6, h - 6),
-			"%.0f, %.0f" % [_player_pos.x, _player_pos.y],
+			"%.0f, %.0f%s" % [_player_pos.x, _player_pos.y, zoom_text],
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.4, 0.6, 0.8, 0.8))
 
 
@@ -282,6 +362,9 @@ func _build_ui() -> void:
 	_build_crafting_tab()
 	_build_inventory_tab()
 	_build_map_tab()
+
+	if initial_tab >= 0 and initial_tab < _tab_container.get_tab_count():
+		_tab_container.current_tab = initial_tab
 
 
 func _build_bridge_tab() -> void:
@@ -854,6 +937,8 @@ func _build_map_tab() -> void:
 	_tab_container.add_child(_map_tab)
 
 	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 4)
 	_map_tab.add_child(vbox)
 
 	# Sector info label
@@ -882,16 +967,85 @@ func _build_map_tab() -> void:
 	biome_lbl.add_theme_color_override("font_color", biome_color)
 	vbox.add_child(biome_lbl)
 
+	# Zoom controls
+	var zoom_row := HBoxContainer.new()
+	zoom_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(zoom_row)
+
+	var zoom_out_btn := Button.new()
+	zoom_out_btn.text = "-"
+	zoom_out_btn.custom_minimum_size = Vector2(36, 28)
+	zoom_out_btn.add_theme_font_size_override("font_size", 16)
+	zoom_row.add_child(zoom_out_btn)
+
+	var zoom_label := Label.new()
+	zoom_label.text = "1.0x"
+	zoom_label.add_theme_font_size_override("font_size", 12)
+	zoom_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	zoom_label.custom_minimum_size.x = 36
+	zoom_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	zoom_row.add_child(zoom_label)
+
+	var zoom_in_btn := Button.new()
+	zoom_in_btn.text = "+"
+	zoom_in_btn.custom_minimum_size = Vector2(36, 28)
+	zoom_in_btn.add_theme_font_size_override("font_size", 16)
+	zoom_row.add_child(zoom_in_btn)
+
+	var zoom_spacer := Control.new()
+	zoom_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	zoom_row.add_child(zoom_spacer)
+
+	# Map control
+	var map_ctrl := MapControl.new()
+	map_ctrl.custom_minimum_size = Vector2(0, 400)
+	map_ctrl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	map_ctrl.mouse_filter = Control.MOUSE_FILTER_STOP
+	map_ctrl._zoom_label = zoom_label
+	vbox.add_child(map_ctrl)
+
+	# Connect zoom buttons
+	zoom_out_btn.pressed.connect(map_ctrl.zoom_out)
+	zoom_in_btn.pressed.connect(map_ctrl.zoom_in)
+
+	# Clear waypoint button
+	var clear_wp_btn := Button.new()
+	clear_wp_btn.text = "Clear Waypoint"
+	clear_wp_btn.custom_minimum_size = Vector2(0, 30)
+	clear_wp_btn.add_theme_font_size_override("font_size", 12)
+	clear_wp_btn.visible = GameState.map_waypoint.x < 1e8
+	var cwp_style := StyleBoxFlat.new()
+	cwp_style.bg_color = Color(0.3, 0.18, 0.05, 0.9)
+	cwp_style.corner_radius_top_left = 3
+	cwp_style.corner_radius_top_right = 3
+	cwp_style.corner_radius_bottom_left = 3
+	cwp_style.corner_radius_bottom_right = 3
+	clear_wp_btn.add_theme_stylebox_override("normal", cwp_style)
+	clear_wp_btn.add_theme_color_override("font_color", Color(1.0, 0.6, 0.2))
+	clear_wp_btn.pressed.connect(func():
+		GameState.map_waypoint = Vector2(1e9, 1e9)
+		clear_wp_btn.visible = false
+		map_ctrl.queue_redraw())
+	vbox.add_child(clear_wp_btn)
+	map_ctrl._clear_btn = clear_wp_btn
+
+	# Legend panel
+	var legend_panel := PanelContainer.new()
+	var leg_style := StyleBoxFlat.new()
+	leg_style.bg_color = Color(0.04, 0.06, 0.12, 0.9)
+	leg_style.content_margin_left = 8
+	leg_style.content_margin_right = 8
+	leg_style.content_margin_top = 6
+	leg_style.content_margin_bottom = 6
+	legend_panel.add_theme_stylebox_override("panel", leg_style)
+	vbox.add_child(legend_panel)
+
 	var legend := Label.new()
-	legend.text = "Cyan = you   Dots = planets   Squares = stations   Rings = warp gates"
+	legend.text = "LEGEND\nCyan arrow = You   Blue dots = Planets   Yellow squares = Stations\nCyan rings = Warp Gates   Yellow ! = Quests   Colored diamonds = Zones\nRed dots = Enemies (nearby)   Yellow dots = Loot   Orange X = Waypoint"
 	legend.add_theme_font_size_override("font_size", 10)
 	legend.add_theme_color_override("font_color", Color(0.45, 0.55, 0.65))
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(legend)
-
-	var map_ctrl := MapControl.new()
-	map_ctrl.custom_minimum_size = Vector2(320, 370)
-	vbox.add_child(map_ctrl)
+	legend_panel.add_child(legend)
 
 
 func _on_craft(kind: String, cost: Dictionary, value: float) -> void:

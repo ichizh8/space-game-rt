@@ -51,6 +51,20 @@ class MinimapControl extends Control:
 				_player_pos = (p as Node2D).global_position
 			queue_redraw()
 
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton:
+			var mb := event as InputEventMouseButton
+			if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+				accept_event()
+				if get_parent().has_method("_open_cockpit_to_map"):
+					get_parent()._open_cockpit_to_map()
+		elif event is InputEventScreenTouch:
+			var st := event as InputEventScreenTouch
+			if st.pressed:
+				accept_event()
+				if get_parent().has_method("_open_cockpit_to_map"):
+					get_parent()._open_cockpit_to_map()
+
 	func _draw() -> void:
 		var c := Vector2(HALF, HALF)
 		draw_rect(Rect2(0.0, 0.0, SIZE_PX, SIZE_PX), Color(0.02, 0.04, 0.08, 0.78))
@@ -122,6 +136,9 @@ class MinimapControl extends Control:
 			_: zcol = Color(1.0, 0.2, 0.2, 0.85)
 		draw_string(ThemeDB.fallback_font, Vector2(3.0, SIZE_PX - 4.0), "Z" + str(zone),
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, zcol)
+		# "MAP" tap hint
+		draw_string(ThemeDB.fallback_font, Vector2(SIZE_PX - 30.0, 12.0), "MAP",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.4, 0.7, 0.9, 0.5))
 		# Border
 		draw_rect(Rect2(0.0, 0.0, SIZE_PX, SIZE_PX), Color(0.15, 0.35, 0.55, 0.85), false, 1.5)
 
@@ -137,6 +154,9 @@ class CompassControl extends Control:
 	var _quest_title: String = ""
 	var _distance: float = 0.0
 	var _is_story: bool = false
+	var _wp_show: bool = false
+	var _wp_direction: Vector2 = Vector2.UP
+	var _wp_distance: float = 0.0
 
 	func _process(delta: float) -> void:
 		_poll_timer += delta
@@ -146,6 +166,17 @@ class CompassControl extends Control:
 			queue_redraw()
 
 	func _update() -> void:
+		# Waypoint arrow
+		_wp_show = false
+		if GameState.map_waypoint.x < 1e8:
+			var wp_player := get_tree().get_first_node_in_group("player")
+			if is_instance_valid(wp_player):
+				var wp_pp: Vector2 = (wp_player as Node2D).global_position
+				var wp_d: float = wp_pp.distance_to(GameState.map_waypoint)
+				if wp_d > 100.0:
+					_wp_direction = (GameState.map_waypoint - wp_pp).normalized()
+					_wp_distance = wp_d
+					_wp_show = true
 		var tracked_id := GameState.tracked_quest_id
 		if tracked_id == "":
 			_show = false
@@ -209,28 +240,44 @@ class CompassControl extends Control:
 		_show = true
 
 	func _draw() -> void:
-		if not _show:
-			return
 		var vp_size: Vector2 = get_viewport().get_visible_rect().size
 		var screen_center: Vector2 = vp_size / 2.0
-		# Arrow orbits around ship screen center
-		var arrow_center: Vector2 = screen_center + _direction * ORBIT_RADIUS
-		var tip: Vector2 = arrow_center + _direction * ARROW_HALF
-		var perp: Vector2 = _direction.rotated(PI / 2.0)
-		var bl: Vector2 = arrow_center - _direction * (ARROW_HALF * 0.4) + perp * (ARROW_HALF * 0.55)
-		var br: Vector2 = arrow_center - _direction * (ARROW_HALF * 0.4) - perp * (ARROW_HALF * 0.55)
-		var acol: Color = Color(0.35, 1.0, 0.55, 0.92) if not _is_story else Color(1.0, 0.72, 0.2, 0.92)
-		draw_polygon([tip, bl, br],
-			[acol, Color(acol.r * 0.45, acol.g * 0.45, acol.b * 0.45, 0.8),
-			 Color(acol.r * 0.45, acol.g * 0.45, acol.b * 0.45, 0.8)])
-		# Text just beyond the tip
-		var text_base: Vector2 = tip + _direction * 5.0
-		var title_short := _quest_title if _quest_title.length() <= 13 else _quest_title.left(12) + "…"
-		draw_string(ThemeDB.fallback_font, text_base,
-			title_short, HORIZONTAL_ALIGNMENT_CENTER, -1, 10, Color(1.0, 0.9, 0.0, 0.9))
-		var dist_text: String = ("%.1fk" % (_distance / 1000.0)) if _distance >= 1000.0 else ("%.0f" % _distance)
-		draw_string(ThemeDB.fallback_font, text_base + _direction * 13.0,
-			dist_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 9, Color(0.6, 0.8, 0.65, 0.82))
+		if _show:
+			# Arrow orbits around ship screen center
+			var arrow_center: Vector2 = screen_center + _direction * ORBIT_RADIUS
+			var tip: Vector2 = arrow_center + _direction * ARROW_HALF
+			var perp: Vector2 = _direction.rotated(PI / 2.0)
+			var bl: Vector2 = arrow_center - _direction * (ARROW_HALF * 0.4) + perp * (ARROW_HALF * 0.55)
+			var br: Vector2 = arrow_center - _direction * (ARROW_HALF * 0.4) - perp * (ARROW_HALF * 0.55)
+			var acol: Color = Color(0.35, 1.0, 0.55, 0.92) if not _is_story else Color(1.0, 0.72, 0.2, 0.92)
+			draw_polygon([tip, bl, br],
+				[acol, Color(acol.r * 0.45, acol.g * 0.45, acol.b * 0.45, 0.8),
+				 Color(acol.r * 0.45, acol.g * 0.45, acol.b * 0.45, 0.8)])
+			# Text just beyond the tip
+			var text_base: Vector2 = tip + _direction * 5.0
+			var title_short := _quest_title if _quest_title.length() <= 13 else _quest_title.left(12) + "…"
+			draw_string(ThemeDB.fallback_font, text_base,
+				title_short, HORIZONTAL_ALIGNMENT_CENTER, -1, 10, Color(1.0, 0.9, 0.0, 0.9))
+			var dist_text: String = ("%.1fk" % (_distance / 1000.0)) if _distance >= 1000.0 else ("%.0f" % _distance)
+			draw_string(ThemeDB.fallback_font, text_base + _direction * 13.0,
+				dist_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 9, Color(0.6, 0.8, 0.65, 0.82))
+		# Waypoint compass arrow (orange)
+		if _wp_show:
+			var wac: Vector2 = screen_center + _wp_direction * ORBIT_RADIUS
+			var wtip: Vector2 = wac + _wp_direction * ARROW_HALF
+			var wperp: Vector2 = _wp_direction.rotated(PI / 2.0)
+			var wbl: Vector2 = wac - _wp_direction * (ARROW_HALF * 0.4) + wperp * (ARROW_HALF * 0.55)
+			var wbr: Vector2 = wac - _wp_direction * (ARROW_HALF * 0.4) - wperp * (ARROW_HALF * 0.55)
+			var wcol := Color(1.0, 0.6, 0.1, 0.9)
+			draw_polygon([wtip, wbl, wbr],
+				[wcol, Color(wcol.r * 0.45, wcol.g * 0.45, wcol.b * 0.45, 0.8),
+				 Color(wcol.r * 0.45, wcol.g * 0.45, wcol.b * 0.45, 0.8)])
+			var wtext: Vector2 = wtip + _wp_direction * 5.0
+			draw_string(ThemeDB.fallback_font, wtext,
+				"WPT", HORIZONTAL_ALIGNMENT_CENTER, -1, 10, Color(1.0, 0.6, 0.1, 0.9))
+			var wdist_text: String = ("%.1fk" % (_wp_distance / 1000.0)) if _wp_distance >= 1000.0 else ("%.0f" % _wp_distance)
+			draw_string(ThemeDB.fallback_font, wtext + _wp_direction * 13.0,
+				wdist_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 9, Color(0.8, 0.5, 0.2, 0.82))
 
 
 func _build_ui() -> void:
@@ -424,6 +471,7 @@ func _build_ui() -> void:
 	minimap.offset_right = -8.0
 	minimap.offset_top = 8.0
 	minimap.offset_bottom = 96.0
+	minimap.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(minimap)
 
 	# Quest compass — fullscreen overlay, draws arrow orbiting ship center
@@ -713,6 +761,13 @@ func _on_cockpit_pressed() -> void:
 	var cockpit_scene: PackedScene = load("res://scenes/cockpit.tscn")
 	var cockpit: Node = cockpit_scene.instantiate()
 	# Use call_deferred for WASM safety
+	call_deferred("_add_cockpit", cockpit)
+
+
+func _open_cockpit_to_map() -> void:
+	var cockpit_scene: PackedScene = load("res://scenes/cockpit.tscn")
+	var cockpit: Node = cockpit_scene.instantiate()
+	cockpit.initial_tab = 5  # Map tab index
 	call_deferred("_add_cockpit", cockpit)
 
 

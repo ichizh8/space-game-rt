@@ -39,6 +39,7 @@ var captain_sell_bonus: float = 0.0       # sell price multiplier: price * (1 + 
 # Map state
 var map_visited_trail: Array[Vector2] = []   # session-only
 var map_discovered_planets: Dictionary = {}   # persistent: planet_id -> {pos_x, pos_y, name, color_h}
+var map_waypoint: Vector2 = Vector2(1e9, 1e9)  # set via cockpit map tap; sentinel = no waypoint
 
 # Faction reputation (0–100)
 var faction_rep: Dictionary = {
