@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://wildlife_drifter01"]
+
+[ext_resource type="Script" path="res://scripts/membrane_drifter.gd" id="1"]
+
+[node name="MembraneDrifter" type="Node2D"]
+script = ExtResource("1")

@@ -1,0 +1,15 @@
+ID,Name,Zone,HP,Speed,Damage,Behavior,Ingredient Drop,Drop Amount,XP,Notes
+void_grub,Void Grub,1,20,40,0,"Flees from player when approached. Only attacks if cornered (player within 60px). Slow moving along asteroid surfaces.",grub_meat,2-3,5,"Docile. Easy intro hunt. Spawns near asteroid clusters."
+skim_ray,Skim Ray,1-2,35,200,8,"Fast erratic movement. Circles player. Flees when below 50% HP. No shooting — deals contact damage.",ray_fillet,1-2,8,"Fragile but fast. Teaches player to lead shots."
+pack_snarler,Pack Snarler,2-3,50,140,12,"Spawns in groups of 3. Alpha has 2x HP. Kill alpha → rest flee. Charges in straight line to ram.",snarler_haunch,1-2,12,"Group hunt mechanic. Kill alpha first."
+membrane_drifter,Membrane Drifter,3-4,120,30,20,"Slow drift. Releases electric pulse every 4s in 150px radius. High HP. Doesn't chase — just drifts and pulses.",drifter_organ,1,20,"Patience hunt. Stay outside pulse range, kite it down."
+crystal_feeder,Crystal Feeder,4-5,200,60,25,"Grazes near crystal asteroids. Ignores player until attacked. When aggroed: charges repeatedly, drops crystal on each hit received.",feeder_flesh,1-2,35,"Also drops 5-10 crystal on death. Premium hunt."
+void_leviathan,Void Leviathan,5,600,25,35,"Rare spawn (1 per deep space zone). Slow. Fires slow homing projectiles. Massive hitbox. Boss-tier.",leviathan_cut,4-6,100,"Rare boss hunt. One kill = full menu supply. Announce spawn with HUD alert."
+
+INGREDIENT QUALITY TIERS,,,,,,,,,,
+grub_meat,Grub Meat,Common,—,—,—,"Void Grub",—,—,—,"Smells like the inside of an asteroid. Guests assume it's synthetic."
+ray_fillet,Ray Fillet,Common,—,—,—,"Skim Ray",—,—,—,"Delicate white meat. First ingredient that doesn't embarrass you."
+snarler_haunch,Snarler Haunch,Uncommon,—,—,—,"Pack Snarler",—,—,—,"Rich, gamey. Regulars start requesting it by name."
+drifter_organ,Drifter Organ,Uncommon,—,—,—,"Membrane Drifter",—,—,—,"Gelatinous. Weird texture. Critics describe it as 'challenging'."
+feeder_flesh,Feeder Flesh,Rare,—,—,—,"Crystal Feeder",—,—,—,"Faintly luminescent. Sells itself."
+leviathan_cut,Leviathan Cut,Exotic,—,—,—,"Void Leviathan",—,—,—,"One cut feeds 20. Sector-famous ingredient."

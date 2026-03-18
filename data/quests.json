@@ -120,6 +120,47 @@
     "source_type": "station"
   },
   {
+    "id": "quest_fresh_ingredients",
+    "type": "gather_ingredient",
+    "title": "Something Fresh",
+    "description": "Old Marta has been coming to the Spoon since your father opened it. She corners you at the bar. 'That patty is an embarrassment to grease. There's void grubs nesting in the asteroid belt east of here. Fat ones. Bring me something real to work with.'",
+    "npc": "Old Marta",
+    "required_ingredient": "grub_meat",
+    "required_amount": 3,
+    "reward": {"credits": 50},
+    "rep_reward": 2,
+    "unlock_dish": "dish_grub_fritters",
+    "source_type": "restaurant"
+  },
+  {
+    "id": "quest_void_thing",
+    "type": "gather_ingredient",
+    "title": "The Void Thing",
+    "description": "A hunter stumbles in, half his suit scorched. 'Hit something out in the nebula. Big. Slow. Pulsed electricity at me for twenty minutes.' He drops coordinates on the bar. 'Cook it. Whatever it is, it'll be better than what you're serving.'",
+    "npc": "Scorched Hunter",
+    "required_ingredient": "drifter_organ",
+    "required_amount": 1,
+    "reward": {"credits": 100},
+    "rep_reward": 5,
+    "unlock_dish": "dish_drifter_soup",
+    "unlock_condition": "restaurant_rep >= 5",
+    "source_type": "restaurant"
+  },
+  {
+    "id": "quest_the_critic",
+    "type": "gather_ingredient",
+    "title": "The Critic",
+    "description": "A man in an expensive coat sits alone and takes notes. He introduces himself as Juno Farris, Sector Herald food correspondent. 'One star. The ambiance smells like regret. I'll return in a cycle. Surprise me — or I'll publish.'",
+    "npc": "Juno Farris",
+    "required_ingredient": "feeder_flesh",
+    "required_amount": 1,
+    "reward": {"credits": 200},
+    "rep_reward": 10,
+    "unlock_dish": "dish_feeder_tartare",
+    "unlock_condition": "restaurant_rep >= 15",
+    "source_type": "restaurant"
+  },
+  {
     "id": "quest_inherit_restaurant",
     "type": "story",
     "title": "Dad's Place",

@@ -118,6 +118,7 @@ func save_game() -> void:
 		"restaurant_rep": GameState.restaurant_rep,
 		"restaurant_owned": GameState.restaurant_owned,
 		"restaurant_ingredients": GameState.restaurant_ingredients.duplicate(),
+		"restaurant_unlocked_dishes": GameState.restaurant_unlocked_dishes.duplicate(),
 		"player_pos_x": px,
 		"player_pos_y": py,
 		"timestamp": Time.get_unix_time_from_system(),
@@ -197,6 +198,10 @@ func load_game(slot: int) -> bool:
 	GameState.restaurant_rep = int(data.get("restaurant_rep", 0))
 	GameState.restaurant_owned = bool(data.get("restaurant_owned", false))
 	GameState.restaurant_ingredients = data.get("restaurant_ingredients", {})
+	var loaded_dishes = data.get("restaurant_unlocked_dishes", ["dish_mystery_patty"])
+	GameState.restaurant_unlocked_dishes = []
+	for d in loaded_dishes:
+		GameState.restaurant_unlocked_dishes.append(str(d))
 	# Restore spawn position
 	var ppx: float = float(data.get("player_pos_x", 0.0))
 	var ppy: float = float(data.get("player_pos_y", 0.0))

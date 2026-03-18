@@ -6,10 +6,10 @@ uid="uid://xmclq6bnmds"
 
 [deps]
 
-files=["res://balance/restaurant.ID.translation", "res://balance/restaurant.Name.translation", "res://balance/restaurant.Ingredient Source.translation", "res://balance/restaurant.Ingredient Tier.translation", "res://balance/restaurant.Dish Revenue (cr).translation", "res://balance/restaurant.Reputation Gain.translation", "res://balance/restaurant.Unlock Condition.translation", "res://balance/restaurant.Notes.translation"]
+files=["res://balance/restaurant.ID.translation", "res://balance/restaurant.Name.translation", "res://balance/restaurant.Ingredient.translation", "res://balance/restaurant.Cost.translation", "res://balance/restaurant.Dish Revenue (cr).translation", "res://balance/restaurant.Reputation Gain.translation", "res://balance/restaurant.Unlock Condition.translation", "res://balance/restaurant.Notes.translation"]
 
 source_file="res://balance/restaurant.csv"
-dest_files=["res://balance/restaurant.ID.translation", "res://balance/restaurant.Name.translation", "res://balance/restaurant.Ingredient Source.translation", "res://balance/restaurant.Ingredient Tier.translation", "res://balance/restaurant.Dish Revenue (cr).translation", "res://balance/restaurant.Reputation Gain.translation", "res://balance/restaurant.Unlock Condition.translation", "res://balance/restaurant.Notes.translation"]
+dest_files=["res://balance/restaurant.ID.translation", "res://balance/restaurant.Name.translation", "res://balance/restaurant.Ingredient.translation", "res://balance/restaurant.Cost.translation", "res://balance/restaurant.Dish Revenue (cr).translation", "res://balance/restaurant.Reputation Gain.translation", "res://balance/restaurant.Unlock Condition.translation", "res://balance/restaurant.Notes.translation"]
 
 [params]
 

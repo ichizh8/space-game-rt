@@ -31,3 +31,9 @@ res://scenes/comet.tscn::513ee31a6002fd8cff3624e9801fc157::1773637073::res://.go
 res://scenes/derelict.tscn::c1be38c11a3d4d09bd4da2fbc5795758::1773637088::res://.godot/exported/133200997/export-afcd149fb8d9f6f41a46011c32b2a4fb-derelict.scn
 res://scenes/miner_npc.tscn::b2835b9ed54417481018d62230c432dd::1773637077::res://.godot/exported/133200997/export-d8342eea4ffb77baa26155f185765aed-miner_npc.scn
 res://scenes/tutorial_overlay.tscn::95933de827813d3212812f2705e0a6e1::1773637542::res://.godot/exported/133200997/export-a59f18f32b53a6d32a5385681f46860b-tutorial_overlay.scn
+res://scenes/crystal_feeder.tscn::52ade2c6075e0dec9fb05418109b6a2c::1773798798::res://.godot/exported/133200997/export-ca3e26af211b1ff25d563408a5d2cf37-crystal_feeder.scn
+res://scenes/membrane_drifter.tscn::a5db6d02e777e04de783cdd7fb64e8cf::1773798797::res://.godot/exported/133200997/export-5dc5b7c7676505394835d59eecdd247c-membrane_drifter.scn
+res://scenes/pack_snarler.tscn::c3f49aaa48a702dda852004545110815::1773798795::res://.godot/exported/133200997/export-161d15fe8b2769d3bd3b609236d25f10-pack_snarler.scn
+res://scenes/skim_ray.tscn::8678ed0b5a8482732ce9cd8b962b3185::1773798794::res://.godot/exported/133200997/export-47a85097b09562604b32caebda1720e3-skim_ray.scn
+res://scenes/void_grub.tscn::4229e7936e3c1f1beed088a5baea0135::1773798793::res://.godot/exported/133200997/export-8d5000d7077a06b6c2223b09dd5c7bfb-void_grub.scn
+res://scenes/void_leviathan.tscn::7f1342ddc0f7d2ac7e68232d8d2f503e::1773798798::res://.godot/exported/133200997/export-b5baf731e567a30c9ee2bea0c04ce63e-void_leviathan.scn

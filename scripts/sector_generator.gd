@@ -37,6 +37,17 @@ var minelayer_scene: PackedScene
 var carrier_scene: PackedScene
 var void_sentinel_scene: PackedScene
 
+# Wildlife scenes
+var void_grub_scene: PackedScene
+var skim_ray_scene: PackedScene
+var pack_snarler_scene: PackedScene
+var membrane_drifter_scene: PackedScene
+var crystal_feeder_scene: PackedScene
+var void_leviathan_scene: PackedScene
+
+const MIN_WILDLIFE := 2
+const MAX_WILDLIFE := 4
+
 var _spawned_objects: Array[Node2D] = []
 var _check_timer: float = 0.0
 var _planet_index: int = 0
@@ -74,6 +85,12 @@ func _ready() -> void:
 	carrier_scene = load("res://scenes/carrier.tscn")
 	void_sentinel_scene = load("res://scenes/void_sentinel.tscn")
 	comet_scene = load("res://scenes/comet.tscn")
+	void_grub_scene = load("res://scenes/void_grub.tscn")
+	skim_ray_scene = load("res://scenes/skim_ray.tscn")
+	pack_snarler_scene = load("res://scenes/pack_snarler.tscn")
+	membrane_drifter_scene = load("res://scenes/membrane_drifter.tscn")
+	crystal_feeder_scene = load("res://scenes/crystal_feeder.tscn")
+	void_leviathan_scene = load("res://scenes/void_leviathan.tscn")
 	_comet_interval = randf_range(45.0, 90.0)
 	call_deferred("_connect_signals_deferred")
 	call_deferred("_spawn_initial")
@@ -238,6 +255,9 @@ func _manage_objects() -> void:
 
 	if station_count < MIN_STATIONS:
 		call_deferred("_spawn_station", _safe_spawn_pos(spawn_center, SPAWN_RADIUS * 0.5, 350.0))
+
+	# Wildlife spawning
+	_spawn_wildlife(player_pos, spawn_center)
 
 
 func _spawn_asteroid(pos: Vector2) -> void:
@@ -482,6 +502,90 @@ func _open_station_menu(s_id: String, s_name: String) -> void:
 	var menu: Node = menu_scene.instantiate()
 	menu.setup(s_id, s_name)
 	get_parent().add_child(menu)
+
+
+func _spawn_wildlife(player_pos: Vector2, spawn_center: Vector2) -> void:
+	var wildlife_count := 0
+	for obj in _spawned_objects:
+		if not is_instance_valid(obj):
+			continue
+		if obj.is_in_group("wildlife") and not obj.get("is_dead"):
+			wildlife_count += 1
+	if wildlife_count >= MAX_WILDLIFE:
+		return
+
+	var diff := _get_zone_difficulty()
+	var to_spawn: int = MIN_WILDLIFE - wildlife_count
+	if to_spawn <= 0:
+		return
+
+	for i in range(to_spawn):
+		var pos := _safe_spawn_pos(spawn_center, SPAWN_RADIUS, 300.0)
+		match _current_biome:
+			Biome.MIXED:
+				var r := randf()
+				if r < 0.35:
+					call_deferred("_spawn_wildlife_single", void_grub_scene, pos, diff)
+				elif r < 0.65:
+					call_deferred("_spawn_wildlife_single", skim_ray_scene, pos, diff)
+				elif r < 0.85:
+					call_deferred("_spawn_snarler_pack", pos, diff)
+				else:
+					call_deferred("_spawn_wildlife_single", crystal_feeder_scene, pos, diff)
+			Biome.ASTEROID_BELT:
+				var r := randf()
+				if r < 0.45:
+					call_deferred("_spawn_wildlife_single", void_grub_scene, pos, diff)
+				elif r < 0.75:
+					call_deferred("_spawn_wildlife_single", skim_ray_scene, pos, diff)
+				else:
+					call_deferred("_spawn_wildlife_single", crystal_feeder_scene, pos, diff)
+			Biome.DEBRIS_FIELD:
+				var r := randf()
+				if r < 0.6:
+					call_deferred("_spawn_snarler_pack", pos, diff)
+				else:
+					call_deferred("_spawn_wildlife_single", void_grub_scene, pos, diff)
+			Biome.NEBULA:
+				call_deferred("_spawn_wildlife_single", membrane_drifter_scene, pos, diff)
+			Biome.DEEP_SPACE:
+				# Leviathan: max 1 at a time, 10% chance
+				var has_leviathan := false
+				for obj in _spawned_objects:
+					if is_instance_valid(obj) and obj.is_in_group("wildlife") and obj.name.begins_with("VoidLeviathan"):
+						has_leviathan = true
+						break
+				if not has_leviathan and randf() < 0.1:
+					call_deferred("_spawn_wildlife_single", void_leviathan_scene, pos, diff)
+				else:
+					call_deferred("_spawn_wildlife_single", crystal_feeder_scene, pos, diff)
+
+
+func _spawn_wildlife_single(scene: PackedScene, pos: Vector2, diff: float) -> void:
+	if scene == null:
+		return
+	var creature := scene.instantiate() as Node2D
+	creature.global_position = pos
+	if creature.has_method("setup"):
+		creature.setup(diff)
+	get_parent().add_child(creature)
+	_spawned_objects.append(creature)
+
+
+func _spawn_snarler_pack(center: Vector2, diff: float) -> void:
+	if pack_snarler_scene == null:
+		return
+	# 1 alpha + 2 normal
+	for i in range(3):
+		var offset := Vector2.from_angle(i * TAU / 3.0) * randf_range(30.0, 60.0)
+		var snarler := pack_snarler_scene.instantiate() as Node2D
+		snarler.global_position = center + offset
+		if i == 0:
+			snarler.set("is_alpha", true)
+		if snarler.has_method("setup"):
+			snarler.setup(diff)
+		get_parent().add_child(snarler)
+		_spawned_objects.append(snarler)
 
 
 func _pick_biome() -> void:

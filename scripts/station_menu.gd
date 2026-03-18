@@ -417,6 +417,11 @@ func _refresh_restaurant_tab() -> void:
 
 	vbox.add_child(HSeparator.new())
 
+	# Restaurant quests section
+	_build_restaurant_quests(vbox)
+
+	vbox.add_child(HSeparator.new())
+
 	# Menu section
 	var menu_title := Label.new()
 	menu_title.text = "MENU"
@@ -426,63 +431,277 @@ func _refresh_restaurant_tab() -> void:
 
 	var rep: int = GameState.restaurant_rep
 	var dishes: Array[Dictionary] = []
-	dishes.append({"name": "Mystery Meat Patty", "desc": "Dad's recipe. Nobody knows what's in it. Nobody asks.", "cost_id": "scrap_protein", "cost_amt": 2, "credits": 25, "rep": 0, "req_rep": 0})
-	dishes.append({"name": "Scrap Protein Bowl", "desc": "Hearty and questionable.", "cost_id": "scrap_protein", "cost_amt": 3, "credits": 40, "rep": 1, "req_rep": 20})
-	dishes.append({"name": "Void Steak", "desc": "Seared void creature meat.", "cost_id": "void_flesh", "cost_amt": 1, "credits": 120, "rep": 3, "req_rep": 20})
-	dishes.append({"name": "Carrier Roast", "desc": "Slow-roasted carrier organ.", "cost_id": "carrier_organ", "cost_amt": 1, "credits": 150, "rep": 4, "req_rep": 40})
-	dishes.append({"name": "Sentinel Tartare", "desc": "Raw sentinel core, thinly sliced.", "cost_id": "sentinel_core", "cost_amt": 1, "credits": 400, "rep": 10, "req_rep": 60})
+	# Base dishes (rep-gated)
+	dishes.append({"id": "dish_mystery_patty", "name": "Mystery Meat Patty", "desc": "Dad's recipe. Nobody knows what's in it. Nobody asks.", "cost_id": "scrap_protein", "cost_amt": 2, "credits": 25, "rep": 0, "req_rep": 0})
+	dishes.append({"id": "dish_scrap_bowl", "name": "Scrap Protein Bowl", "desc": "Hearty and questionable.", "cost_id": "scrap_protein", "cost_amt": 3, "credits": 40, "rep": 1, "req_rep": 20})
+	dishes.append({"id": "dish_void_steak", "name": "Void Steak", "desc": "Seared void creature meat.", "cost_id": "void_flesh", "cost_amt": 1, "credits": 120, "rep": 3, "req_rep": 20})
+	dishes.append({"id": "dish_carrier_roast", "name": "Carrier Roast", "desc": "Slow-roasted carrier organ.", "cost_id": "carrier_organ", "cost_amt": 1, "credits": 150, "rep": 4, "req_rep": 40})
+	dishes.append({"id": "dish_sentinel_tartare", "name": "Sentinel Tartare", "desc": "Raw sentinel core, thinly sliced.", "cost_id": "sentinel_core", "cost_amt": 1, "credits": 400, "rep": 10, "req_rep": 60})
+	# Quest-unlocked dishes
+	dishes.append({"id": "dish_grub_fritters", "name": "Grub Fritters", "desc": "Old Marta's suggestion. Embarrassing but people keep ordering it.", "cost_id": "grub_meat", "cost_amt": 2, "credits": 45, "rep": 1, "req_rep": 0})
+	dishes.append({"id": "dish_drifter_soup", "name": "Drifter Soup", "desc": "Gelatinous. Weird. Somehow works. Hunter's recipe.", "cost_id": "drifter_organ", "cost_amt": 1, "credits": 130, "rep": 4, "req_rep": 0})
+	dishes.append({"id": "dish_feeder_tartare", "name": "Feeder Tartare", "desc": "Raw, luminescent, pretentious. Critics approve.", "cost_id": "feeder_flesh", "cost_amt": 1, "credits": 280, "rep": 8, "req_rep": 0})
+	# Additional rep-gated wildlife dishes
+	dishes.append({"id": "dish_ray_sashimi", "name": "Raw Ray Sashimi", "desc": "Technically just raw fish. The presentation saves it.", "cost_id": "ray_fillet", "cost_amt": 1, "credits": 60, "rep": 2, "req_rep": 10})
+	dishes.append({"id": "dish_snarler_stew", "name": "Snarler Stew", "desc": "Slow cooked. Regulars start coming back for it.", "cost_id": "snarler_haunch", "cost_amt": 1, "credits": 100, "rep": 3, "req_rep": 20})
+	dishes.append({"id": "dish_leviathan_cut", "name": "Leviathan Medallion", "desc": "One medallion per Leviathan. Guests book weeks in advance.", "cost_id": "leviathan_cut", "cost_amt": 1, "credits": 500, "rep": 15, "req_rep": 65})
 
 	for dish in dishes:
-		if rep < int(dish["req_rep"]):
+		var dish_id: String = str(dish["id"])
+		var dish_req_rep: int = int(dish["req_rep"])
+		# Show if: unlocked via quest OR meets rep threshold
+		var is_unlocked: bool = dish_id in GameState.restaurant_unlocked_dishes
+		var meets_rep: bool = rep >= dish_req_rep
+		if not is_unlocked and not meets_rep:
 			continue
-		var container := PanelContainer.new()
-		var cstyle := StyleBoxFlat.new()
-		cstyle.bg_color = Color(0.08, 0.1, 0.18, 0.9)
-		cstyle.set_border_width_all(1)
-		cstyle.border_color = Color(0.3, 0.3, 0.5)
-		cstyle.content_margin_left = 8
-		cstyle.content_margin_right = 8
-		cstyle.content_margin_top = 6
-		cstyle.content_margin_bottom = 6
-		container.add_theme_stylebox_override("panel", cstyle)
-		vbox.add_child(container)
+		_build_dish_row(vbox, dish)
 
-		var inner := VBoxContainer.new()
-		container.add_child(inner)
 
-		var d_name := Label.new()
-		d_name.text = str(dish["name"])
-		d_name.add_theme_font_size_override("font_size", 14)
-		d_name.add_theme_color_override("font_color", Color.WHITE)
-		inner.add_child(d_name)
+func _build_dish_row(vbox: VBoxContainer, dish: Dictionary) -> void:
+	var container := PanelContainer.new()
+	var cstyle := StyleBoxFlat.new()
+	cstyle.bg_color = Color(0.08, 0.1, 0.18, 0.9)
+	cstyle.set_border_width_all(1)
+	cstyle.border_color = Color(0.3, 0.3, 0.5)
+	cstyle.content_margin_left = 8
+	cstyle.content_margin_right = 8
+	cstyle.content_margin_top = 6
+	cstyle.content_margin_bottom = 6
+	container.add_theme_stylebox_override("panel", cstyle)
+	vbox.add_child(container)
 
-		var d_desc := Label.new()
-		d_desc.text = str(dish["desc"])
-		d_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		d_desc.add_theme_font_size_override("font_size", 11)
-		d_desc.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
-		inner.add_child(d_desc)
+	var inner := VBoxContainer.new()
+	container.add_child(inner)
 
-		var cost_id: String = str(dish["cost_id"])
-		var cost_amt: int = int(dish["cost_amt"])
-		var earn_cr: int = int(dish["credits"])
-		var earn_rep: int = int(dish["rep"])
+	var d_name := Label.new()
+	d_name.text = str(dish["name"])
+	d_name.add_theme_font_size_override("font_size", 14)
+	d_name.add_theme_color_override("font_color", Color.WHITE)
+	inner.add_child(d_name)
 
-		var info_lbl := Label.new()
-		info_lbl.text = "Cost: %s x%d  |  Earn: %d cr" % [cost_id.replace("_", " ").capitalize(), cost_amt, earn_cr]
-		if earn_rep > 0:
-			info_lbl.text += ", +%d rep" % earn_rep
-		info_lbl.add_theme_font_size_override("font_size", 12)
-		info_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
-		inner.add_child(info_lbl)
+	var d_desc := Label.new()
+	d_desc.text = str(dish["desc"])
+	d_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	d_desc.add_theme_font_size_override("font_size", 11)
+	d_desc.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+	inner.add_child(d_desc)
 
-		var cook_btn := Button.new()
-		cook_btn.text = "Cook & Serve"
-		cook_btn.custom_minimum_size.y = 38
-		cook_btn.add_theme_font_size_override("font_size", 13)
-		cook_btn.disabled = not GameState.has_ingredient(cost_id, cost_amt)
-		cook_btn.pressed.connect(_on_cook.bind(cost_id, cost_amt, earn_cr, earn_rep))
-		inner.add_child(cook_btn)
+	var cost_id: String = str(dish["cost_id"])
+	var cost_amt: int = int(dish["cost_amt"])
+	var earn_cr: int = int(dish["credits"])
+	var earn_rep: int = int(dish["rep"])
+
+	var info_lbl := Label.new()
+	info_lbl.text = "Cost: %s x%d  |  Earn: %d cr" % [cost_id.replace("_", " ").capitalize(), cost_amt, earn_cr]
+	if earn_rep > 0:
+		info_lbl.text += ", +%d rep" % earn_rep
+	info_lbl.add_theme_font_size_override("font_size", 12)
+	info_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
+	inner.add_child(info_lbl)
+
+	var cook_btn := Button.new()
+	cook_btn.text = "Cook & Serve"
+	cook_btn.custom_minimum_size.y = 38
+	cook_btn.add_theme_font_size_override("font_size", 13)
+	cook_btn.disabled = not GameState.has_ingredient(cost_id, cost_amt)
+	cook_btn.pressed.connect(_on_cook.bind(cost_id, cost_amt, earn_cr, earn_rep))
+	inner.add_child(cook_btn)
+
+
+func _build_restaurant_quests(vbox: VBoxContainer) -> void:
+	var quest_title := Label.new()
+	quest_title.text = "QUESTS"
+	quest_title.add_theme_font_size_override("font_size", 14)
+	quest_title.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+	vbox.add_child(quest_title)
+
+	var restaurant_quests: Array = _get_restaurant_quests()
+	var shown_any := false
+
+	for q in restaurant_quests:
+		var qid: String = q["id"]
+
+		# Completed quests
+		if GameState.is_quest_completed(qid):
+			_build_rquest_completed(vbox, q)
+			shown_any = true
+			continue
+
+		# Active quests — check auto-complete
+		if GameState.is_quest_active(qid):
+			var req_ing: String = q.get("required_ingredient", "")
+			var req_amt: int = int(q.get("required_amount", 0))
+			if GameState.has_ingredient(req_ing, req_amt):
+				# Auto-complete
+				_complete_restaurant_quest(q)
+				_build_rquest_completed(vbox, q)
+			else:
+				_build_rquest_active(vbox, q)
+			shown_any = true
+			continue
+
+		# Available quests — check unlock condition
+		if _check_quest_unlock(q):
+			_build_rquest_available(vbox, q)
+			shown_any = true
+
+	if not shown_any:
+		var none_lbl := Label.new()
+		none_lbl.text = "No quests available yet."
+		none_lbl.add_theme_font_size_override("font_size", 12)
+		none_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
+		vbox.add_child(none_lbl)
+
+
+func _get_restaurant_quests() -> Array:
+	var result: Array = []
+	for q in WorldData.quests_data:
+		if q.get("source_type", "") == "restaurant":
+			result.append(q)
+	return result
+
+
+func _check_quest_unlock(q: Dictionary) -> bool:
+	var cond: String = q.get("unlock_condition", "")
+	if cond.is_empty():
+		return true
+	# Parse "restaurant_rep >= N"
+	if cond.begins_with("restaurant_rep >= "):
+		var threshold: int = int(cond.split(">= ")[1])
+		return GameState.restaurant_rep >= threshold
+	return true
+
+
+func _complete_restaurant_quest(q: Dictionary) -> void:
+	var qid: String = q["id"]
+	var req_ing: String = q.get("required_ingredient", "")
+	var req_amt: int = int(q.get("required_amount", 0))
+	GameState.remove_ingredient(req_ing, req_amt)
+	var reward: Dictionary = q.get("reward", {})
+	for key in reward:
+		if key == "credits":
+			GameState.add_credits(int(reward[key]))
+		else:
+			GameState.add_resource(key, int(reward[key]))
+	var rep_reward: int = int(q.get("rep_reward", 0))
+	if rep_reward > 0:
+		GameState.add_restaurant_rep(rep_reward)
+	var unlock_dish: String = q.get("unlock_dish", "")
+	if not unlock_dish.is_empty() and unlock_dish not in GameState.restaurant_unlocked_dishes:
+		GameState.restaurant_unlocked_dishes.append(unlock_dish)
+	# Remove from active + mark completed
+	GameState.complete_quest(qid)
+
+
+func _build_rquest_completed(vbox: VBoxContainer, q: Dictionary) -> void:
+	var container := PanelContainer.new()
+	var cstyle := StyleBoxFlat.new()
+	cstyle.bg_color = Color(0.06, 0.08, 0.12, 0.9)
+	cstyle.set_border_width_all(1)
+	cstyle.border_color = Color(0.3, 0.5, 0.3)
+	cstyle.content_margin_left = 8
+	cstyle.content_margin_right = 8
+	cstyle.content_margin_top = 4
+	cstyle.content_margin_bottom = 4
+	container.add_theme_stylebox_override("panel", cstyle)
+	vbox.add_child(container)
+	var lbl := Label.new()
+	lbl.text = str(q.get("title", "")) + " — Complete"
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_color_override("font_color", Color(0.4, 0.7, 0.4))
+	container.add_child(lbl)
+
+
+func _build_rquest_active(vbox: VBoxContainer, q: Dictionary) -> void:
+	var container := PanelContainer.new()
+	var cstyle := StyleBoxFlat.new()
+	cstyle.bg_color = Color(0.1, 0.09, 0.04, 0.9)
+	cstyle.set_border_width_all(1)
+	cstyle.border_color = Color(0.8, 0.7, 0.2)
+	cstyle.content_margin_left = 8
+	cstyle.content_margin_right = 8
+	cstyle.content_margin_top = 6
+	cstyle.content_margin_bottom = 6
+	container.add_theme_stylebox_override("panel", cstyle)
+	vbox.add_child(container)
+
+	var inner := VBoxContainer.new()
+	container.add_child(inner)
+
+	var title_lbl := Label.new()
+	title_lbl.text = str(q.get("title", ""))
+	title_lbl.add_theme_font_size_override("font_size", 14)
+	title_lbl.add_theme_color_override("font_color", Color.YELLOW)
+	inner.add_child(title_lbl)
+
+	var npc_lbl := Label.new()
+	npc_lbl.text = "From: " + str(q.get("npc", ""))
+	npc_lbl.add_theme_font_size_override("font_size", 11)
+	npc_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+	inner.add_child(npc_lbl)
+
+	var req_ing: String = q.get("required_ingredient", "")
+	var req_amt: int = int(q.get("required_amount", 0))
+	var have: int = GameState.restaurant_ingredients.get(req_ing, 0)
+	var prog_lbl := Label.new()
+	prog_lbl.text = "%s: %d / %d" % [req_ing.replace("_", " ").capitalize(), have, req_amt]
+	prog_lbl.add_theme_font_size_override("font_size", 13)
+	prog_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.6) if have < req_amt else Color(0.4, 1.0, 0.4))
+	inner.add_child(prog_lbl)
+
+
+func _build_rquest_available(vbox: VBoxContainer, q: Dictionary) -> void:
+	var qid: String = q["id"]
+	var container := PanelContainer.new()
+	var cstyle := StyleBoxFlat.new()
+	cstyle.bg_color = Color(0.08, 0.1, 0.18, 0.9)
+	cstyle.set_border_width_all(1)
+	cstyle.border_color = Color(0.3, 0.3, 0.5)
+	cstyle.content_margin_left = 8
+	cstyle.content_margin_right = 8
+	cstyle.content_margin_top = 6
+	cstyle.content_margin_bottom = 6
+	container.add_theme_stylebox_override("panel", cstyle)
+	vbox.add_child(container)
+
+	var inner := VBoxContainer.new()
+	container.add_child(inner)
+
+	var title_lbl := Label.new()
+	title_lbl.text = str(q.get("title", ""))
+	title_lbl.add_theme_font_size_override("font_size", 14)
+	title_lbl.add_theme_color_override("font_color", Color.WHITE)
+	inner.add_child(title_lbl)
+
+	var desc_lbl := Label.new()
+	desc_lbl.text = str(q.get("description", ""))
+	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_lbl.add_theme_font_size_override("font_size", 12)
+	desc_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+	inner.add_child(desc_lbl)
+
+	var reward: Dictionary = q.get("reward", {})
+	if not reward.is_empty():
+		var parts: Array[String] = []
+		for key in reward:
+			parts.append(key.capitalize() + ": " + str(reward[key]))
+		var rep_r: int = int(q.get("rep_reward", 0))
+		if rep_r > 0:
+			parts.append("+%d rep" % rep_r)
+		var rew_lbl := Label.new()
+		rew_lbl.text = "Reward: " + ", ".join(parts)
+		rew_lbl.add_theme_font_size_override("font_size", 11)
+		rew_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
+		inner.add_child(rew_lbl)
+
+	var accept_btn := Button.new()
+	accept_btn.text = "Accept"
+	accept_btn.custom_minimum_size.y = 36
+	accept_btn.add_theme_font_size_override("font_size", 13)
+	accept_btn.pressed.connect(func():
+		GameState.accept_quest(q, "restaurant")
+		_refresh_restaurant_tab())
+	inner.add_child(accept_btn)
 
 
 func _on_cook(cost_id: String, cost_amt: int, earn_cr: int, earn_rep: int) -> void:

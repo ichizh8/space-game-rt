@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://wildlife_snarler01"]
+
+[ext_resource type="Script" path="res://scripts/pack_snarler.gd" id="1"]
+
+[node name="PackSnarler" type="Node2D"]
+script = ExtResource("1")

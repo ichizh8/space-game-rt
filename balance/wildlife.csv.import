@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://p3vy1tkssac5"
+
+[deps]
+
+files=["res://balance/wildlife.Name.translation", "res://balance/wildlife.Zone.translation", "res://balance/wildlife.HP.translation", "res://balance/wildlife.Speed.translation", "res://balance/wildlife.Damage.translation", "res://balance/wildlife.Behavior.translation", "res://balance/wildlife.Ingredient Drop.translation", "res://balance/wildlife.Drop Amount.translation", "res://balance/wildlife.XP.translation", "res://balance/wildlife.Notes.translation"]
+
+source_file="res://balance/wildlife.csv"
+dest_files=["res://balance/wildlife.Name.translation", "res://balance/wildlife.Zone.translation", "res://balance/wildlife.HP.translation", "res://balance/wildlife.Speed.translation", "res://balance/wildlife.Damage.translation", "res://balance/wildlife.Behavior.translation", "res://balance/wildlife.Ingredient Drop.translation", "res://balance/wildlife.Drop Amount.translation", "res://balance/wildlife.XP.translation", "res://balance/wildlife.Notes.translation"]
+
+[params]
+
+compress=true
+delimiter=0

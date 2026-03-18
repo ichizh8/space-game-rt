@@ -1,28 +1,30 @@
-Category,ID,Name,Ingredient Source,Ingredient Tier,Dish Revenue (cr),Reputation Gain,Unlock Condition,Notes
+Category,ID,Name,Ingredient,Cost,Dish Revenue (cr),Reputation Gain,Unlock Condition,Notes
 
-INGREDIENTS — COMMON,meat_scavenger,Scavenger Meat,Pirate / Drone kill,Common,—,—,Start,"Low quality. Used in cheap dishes."
-INGREDIENTS — COMMON,scrap_protein,Scrap Protein,Minelayer / Interceptor,Common,—,—,Start,"Synthesized from wreckage. Budget ingredient."
-INGREDIENTS — RARE,void_flesh,Void Flesh,Void Sentinel kill,Rare,—,—,Zone 3+,"Rich flavor. Mid-tier dishes."
-INGREDIENTS — RARE,carrier_organ,Carrier Organ,Carrier kill,Rare,—,—,Zone 3+,"Large yield per kill."
-INGREDIENTS — EXOTIC,sentinel_core,Sentinel Core,Void Sentinel (rare drop),Exotic,—,—,Zone 5,"Legendary ingredient. Top-tier dishes only."
-INGREDIENTS — EXOTIC,deep_crystal_growth,Crystal Growth,Deep Space asteroids,Exotic,—,—,Zone 4+,"Not a creature — mined. Used as garnish/spice."
+DISHES — TIER 1 (Shithole Fastfood),dish_mystery_patty,Mystery Meat Patty,scrap_protein x2,—,25,0,Start,"Dad's recipe. Nobody knows what's in it. Nobody asks."
+DISHES — TIER 1 (Shithole Fastfood),dish_grub_fritters,Grub Fritters,grub_meat x2,—,45,1,Quest 1 complete,"Old Marta's suggestion. Embarrassing but people keep ordering it."
+DISHES — TIER 1 (Shithole Fastfood),dish_ray_sashimi,Raw Ray Sashimi,ray_fillet x1,—,60,2,Rep 10,"Technically just raw fish. The presentation saves it."
 
-DISHES — TIER 1 (Fastfood),dish_scavenger_wrap,Scavenger Wrap,Scavenger Meat x2,Common,40,1,Start,"Dad's worst recipe. Barely edible."
-DISHES — TIER 1 (Fastfood),dish_scrap_bowl,Scrap Protein Bowl,Scrap Protein x3,Common,30,1,Start,"The bottom of the menu."
-DISHES — TIER 2 (Casual),dish_void_steak,Void Steak,Void Flesh x1 + Ore x5,Rare,120,3,Rep 20,"Seared. Guests are impressed."
-DISHES — TIER 2 (Casual),dish_carrier_roast,Carrier Roast,Carrier Organ x1,Rare,150,4,Rep 30,"Slow-cooked. Unlocks regulars."
-DISHES — TIER 3 (Fine Dining),dish_sentinel_tartare,Sentinel Tartare,Sentinel Core x1 + Crystal x3,Exotic,400,10,Rep 60,"Critics take notice."
-DISHES — TIER 3 (Fine Dining),dish_deep_crystal_amuse,Crystal Amuse-Bouche,Crystal Growth x2,Exotic,300,8,Rep 50,"One bite. Legendary."
+DISHES — TIER 2 (Decent Joint),dish_snarler_stew,Snarler Stew,snarler_haunch x1,—,100,3,Rep 20,"Slow cooked. Regulars start coming back for it."
+DISHES — TIER 2 (Decent Joint),dish_drifter_soup,Drifter Soup,drifter_organ x1,—,130,4,Quest 2 complete,"Gelatinous. Weird. Somehow works. Hunter's recipe."
+DISHES — TIER 2 (Decent Joint),dish_ray_plate,Pan-Seared Ray,ray_fillet x2,—,110,3,Rep 25,"The upgrade. Same fish, better technique."
 
-RESTAURANT UPGRADES,upgrade_kitchen_1,Basic Kitchen,—,—,—,—,Start,"Unlocks Tier 1 dishes. Starting state."
+DISHES — TIER 3 (Hidden Gem),dish_feeder_tartare,Feeder Tartare,feeder_flesh x1,—,280,8,Quest 3 complete,"Raw, luminescent, pretentious. Critics approve."
+DISHES — TIER 3 (Hidden Gem),dish_snarler_roast,Snarler Roast,snarler_haunch x2,—,220,6,Rep 45,"The upgrade from stew. Now it's fine dining."
+DISHES — TIER 3 (Hidden Gem),dish_drifter_plate,Drifter Degustación,drifter_organ x1 + ray_fillet x1,—,300,9,Rep 55,"Multi-creature dish. First combination recipe."
+
+DISHES — TIER 4 (Renowned),dish_leviathan_cut,Leviathan Medallion,leviathan_cut x1,—,500,15,Rep 65,"One medallion per Leviathan. Guests book weeks in advance."
+DISHES — TIER 4 (Renowned),dish_crystal_glazed,Crystal-Glazed Feeder,feeder_flesh x1 + crystal x5,—,450,12,Rep 70,"Faintly glows. Signature dish. People come from other sectors."
+
+RESTAURANT UPGRADES,upgrade_kitchen_1,Basic Kitchen,—,Start,—,—,Start,"Tier 1 dishes only."
 RESTAURANT UPGRADES,upgrade_kitchen_2,Proper Kitchen,500 cr,—,—,—,Rep 15,"Unlocks Tier 2 dishes."
 RESTAURANT UPGRADES,upgrade_kitchen_3,Gourmet Kitchen,2000 cr,—,—,—,Rep 45,"Unlocks Tier 3 dishes."
-RESTAURANT UPGRADES,upgrade_seating_1,More Tables,300 cr,—,+20% passive income,—,Rep 10,"More customers per cycle."
-RESTAURANT UPGRADES,upgrade_decor_1,Neon Sign,200 cr,—,—,+2 rep/cycle,Rep 5,"Attracts walk-ins."
-RESTAURANT UPGRADES,upgrade_storage,Cold Storage,400 cr,—,—,—,Rep 20,"Hold ingredients between hunts. Without it ingredients expire."
+RESTAURANT UPGRADES,upgrade_kitchen_4,Legendary Kitchen,8000 cr,—,—,—,Rep 65,"Unlocks Tier 4 dishes."
+RESTAURANT UPGRADES,upgrade_cold_storage,Cold Storage,400 cr,—,—,—,Rep 20,"Ingredients survive death."
+RESTAURANT UPGRADES,upgrade_seating,More Tables,300 cr,—,+20% passive income,—,Rep 10,"More customers per cycle."
+RESTAURANT UPGRADES,upgrade_decor,Neon Sign,200 cr,—,—,+2 rep/cycle,Rep 5,"The sign flickers. Still better than nothing."
 
 REPUTATION THRESHOLDS,rep_0,Shithole Fastfood,0–19,—,—,—,—,"Starting state. Dad's legacy."
 REPUTATION THRESHOLDS,rep_1,Decent Joint,20–39,—,—,—,—,"Locals start talking."
 REPUTATION THRESHOLDS,rep_2,Hidden Gem,40–59,—,—,—,—,"Sector food blogs mention you."
 REPUTATION THRESHOLDS,rep_3,Renowned,60–79,—,—,—,—,"Pilots from other sectors make detours."
-REPUTATION THRESHOLDS,rep_4,Galaxy Famous,80–100,—,—,—,—,"Most famous delicacy in the sector. Win state."
+REPUTATION THRESHOLDS,rep_4,Galaxy Famous,80–100,—,—,—,—,"Most famous delicacy in the sector."
