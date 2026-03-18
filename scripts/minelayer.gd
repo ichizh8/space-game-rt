@@ -30,7 +30,7 @@ func _ready() -> void:
 	_patrol_dir = Vector2.from_angle(randf() * TAU)
 	_mine_timer = MINE_INTERVAL
 	queue_redraw()
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 
 func setup(diff_mult: float) -> void:
 	difficulty_mult = diff_mult

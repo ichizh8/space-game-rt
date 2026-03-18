@@ -34,7 +34,7 @@ func _ready() -> void:
 	hp *= difficulty_mult
 	max_hp = hp
 	_wander_dir = Vector2.from_angle(randf() * TAU)
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 	queue_redraw()
 
 

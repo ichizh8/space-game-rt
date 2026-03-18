@@ -42,7 +42,7 @@ func _ready() -> void:
 	_wander_dir = Vector2.from_angle(randf() * TAU)
 	_orbit_angle = randf() * TAU
 	_orbit_direction = 1 if randf() > 0.5 else -1
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 	queue_redraw()
 
 

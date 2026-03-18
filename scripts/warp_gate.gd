@@ -10,7 +10,7 @@ var _sprite_tex: Texture2D = null
 
 func _ready() -> void:
 	add_to_group("warp_gates")
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 
 func _setup_sprite() -> void:
 	var tex := load("res://assets/2026-03-16-warp-gate.png") as Texture2D

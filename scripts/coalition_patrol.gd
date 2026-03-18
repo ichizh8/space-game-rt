@@ -33,7 +33,7 @@ func _ready() -> void:
 	bullet_scene = load("res://scenes/bullet.tscn")
 	orbit_angle = randf() * TAU
 	_pick_station_target()
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 	queue_redraw()
 
 

@@ -18,7 +18,7 @@ func _ready() -> void:
 	add_to_group("npc_scientists")
 	speed = randf_range(30.0, 45.0)
 	_pick_drift_target()
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 	queue_redraw()
 
 

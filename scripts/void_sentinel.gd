@@ -26,7 +26,7 @@ func _ready() -> void:
 	add_to_group("enemies")
 	bullet_scene = load("res://scenes/bullet.tscn")
 	queue_redraw()
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 
 func setup(diff_mult: float) -> void:
 	difficulty_mult = diff_mult

@@ -18,7 +18,7 @@ var _sprite_tex: Texture2D = null
 
 func _ready() -> void:
 	add_to_group("planets")
-	call_deferred("_setup_sprite")
+	_setup_sprite()
 	queue_redraw()
 
 func _setup_sprite() -> void:
