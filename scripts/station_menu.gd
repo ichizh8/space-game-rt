@@ -1583,23 +1583,37 @@ func _build_guest_card(vbox: VBoxContainer, guest: Dictionary, idx: int) -> void
 			inner.add_child(result_lbl)
 		else:
 			var has_dishes: bool = not GameState.prepared_dishes.is_empty()
-			# Show best dish preview
-			if has_dishes:
-				var best_idx: int = GameState.get_best_dish_for_faction(str(guest.get("faction", "drifters")))
-				if best_idx >= 0 and best_idx < GameState.prepared_dishes.size():
-					var preview_lbl := Label.new()
-					preview_lbl.text = "Will serve: %s" % str(GameState.prepared_dishes[best_idx].get("name", "?"))
-					preview_lbl.add_theme_font_size_override("font_size", 11)
-					preview_lbl.add_theme_color_override("font_color", Color(0.7, 0.8, 0.5))
-					inner.add_child(preview_lbl)
-			var serve_btn := Button.new()
-			serve_btn.text = "Serve" if has_dishes else "No dishes in kitchen"
-			serve_btn.disabled = not has_dishes
-			serve_btn.custom_minimum_size.y = 34
-			serve_btn.add_theme_font_size_override("font_size", 13)
-			var guest_idx: int = idx
-			serve_btn.pressed.connect(func(): _on_serve_guest(guest_idx, "auto"))
-			inner.add_child(serve_btn)
+			if not has_dishes:
+				var nd_lbl := Label.new()
+				nd_lbl.text = "No dishes in kitchen"
+				nd_lbl.add_theme_font_size_override("font_size", 12)
+				nd_lbl.add_theme_color_override("font_color", Color(0.5, 0.4, 0.4))
+				inner.add_child(nd_lbl)
+			else:
+				# Show one serve button per unique dish type in queue
+				var shown_names: Dictionary = {}
+				var guest_faction: String = str(guest.get("faction", "drifters"))
+				var loves: Array = GameState.faction_dietary.get(guest_faction, {}).get("loves", [])
+				var hates: Array = GameState.faction_dietary.get(guest_faction, {}).get("hates", [])
+				for di in range(GameState.prepared_dishes.size()):
+					var pd: Dictionary = GameState.prepared_dishes[di]
+					var dname: String = str(pd.get("name", "?"))
+					if shown_names.has(dname):
+						continue
+					shown_names[dname] = true
+					var loved: bool = pd.get("method","") in loves or pd.get("style","") in loves
+					var hated: bool = pd.get("method","") in hates or pd.get("style","") in hates
+					var tag: String = " ★" if loved else (" ✗" if hated else "")
+					var col: Color = Color(0.4, 0.9, 0.4) if loved else (Color(0.9, 0.4, 0.4) if hated else Color(0.8, 0.8, 0.8))
+					var dish_btn := Button.new()
+					dish_btn.text = "Serve: %s%s" % [dname, tag]
+					dish_btn.custom_minimum_size.y = 34
+					dish_btn.add_theme_font_size_override("font_size", 12)
+					dish_btn.add_theme_color_override("font_color", col)
+					var captured_idx: int = idx
+					var captured_name: String = dname
+					dish_btn.pressed.connect(func(): _on_serve_guest_named(captured_idx, captured_name))
+					inner.add_child(dish_btn)
 
 
 func _add_choice_btn(inner: VBoxContainer, guest: Dictionary, idx: int, choice: String, label: String) -> void:
@@ -1612,6 +1626,17 @@ func _add_choice_btn(inner: VBoxContainer, guest: Dictionary, idx: int, choice: 
 	btn.pressed.connect(func(): _on_serve_guest(guest_idx, choice_str))
 	inner.add_child(btn)
 
+
+func _on_serve_guest_named(guest_idx: int, dish_name: String) -> void:
+	# Find first dish in queue matching name, move it to front so auto-serve picks it
+	for i in range(GameState.prepared_dishes.size()):
+		if str(GameState.prepared_dishes[i].get("name","")) == dish_name:
+			if i != 0:
+				var dish = GameState.prepared_dishes[i]
+				GameState.prepared_dishes.remove_at(i)
+				GameState.prepared_dishes.insert(0, dish)
+			break
+	_on_serve_guest(guest_idx, "auto")
 
 func _on_serve_guest(guest_idx: int, choice: String) -> void:
 	if guest_idx >= GameState.pending_guests.size():
