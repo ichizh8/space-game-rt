@@ -7,6 +7,7 @@ var is_dead := false
 var _target_pos: Vector2 = Vector2.ZERO
 var _flash_timer: float = 0.0
 var _despawn_timer: float = -1.0
+var _has_sprite: bool = false
 var _drift_timer: float = 0.0
 
 
@@ -15,6 +16,7 @@ func _ready() -> void:
 	add_to_group("npc_scientists")
 	speed = randf_range(30.0, 45.0)
 	_pick_drift_target()
+	_setup_sprite()
 	queue_redraw()
 
 
@@ -89,7 +91,21 @@ func _spawn_loot() -> void:
 	get_parent().add_child(loot)
 
 
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-18-faction-science-vessel.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	var scale_factor: float = 48.0 / max(tex.get_size().x, tex.get_size().y)
+	sprite.scale = Vector2(scale_factor, scale_factor)
+	sprite.rotation = PI
+	add_child(sprite)
+	_has_sprite = true
+
 func _draw() -> void:
+	if _has_sprite:
+		return
 	if is_dead:
 		return
 	# Teal/white elongated shape

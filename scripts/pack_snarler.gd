@@ -16,6 +16,7 @@ var _patrol_timer: float = 0.0
 var _retreat_timer: float = 0.0
 var _flash_timer: float = 0.0
 var _despawn_timer: float = -1.0
+var _has_sprite: bool = false
 
 const AGGRO_RANGE := 200.0
 const DEAGGRO_RANGE := 400.0
@@ -37,6 +38,7 @@ func _ready() -> void:
 	hp *= difficulty_mult
 	max_hp = hp
 	_patrol_dir = Vector2.from_angle(randf() * TAU)
+	_setup_sprite()
 	queue_redraw()
 
 
@@ -137,7 +139,21 @@ func _get_player() -> Node2D:
 	return null
 
 
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-18-wildlife-pack-snarler.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	var scale_factor: float = 36.0 / max(tex.get_size().x, tex.get_size().y)
+	sprite.scale = Vector2(scale_factor, scale_factor)
+	sprite.rotation = PI
+	add_child(sprite)
+	_has_sprite = true
+
 func _draw() -> void:
+	if _has_sprite:
+		return
 	if is_dead:
 		return
 	# Triangle pointing forward

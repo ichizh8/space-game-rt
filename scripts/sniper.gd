@@ -24,6 +24,7 @@ var _reposition_timer: float = 0.0
 var _reposition_target: Vector2 = Vector2.ZERO
 var _flash_timer: float = 0.0
 var _despawn_timer: float = -1.0
+var _has_sprite: bool = false
 var _charge_dir: Vector2 = Vector2.ZERO
 var bullet_scene: PackedScene
 
@@ -32,6 +33,7 @@ func _ready() -> void:
 	bullet_scene = load("res://scenes/bullet.tscn")
 	_pick_reposition_target()
 	queue_redraw()
+	_setup_sprite()
 
 func setup(diff_mult: float) -> void:
 	difficulty_mult = diff_mult
@@ -165,7 +167,21 @@ func _get_player() -> Node2D:
 		return players[0] as Node2D
 	return null
 
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-16-sniper-ship.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	var scale_factor: float = 48.0 / max(tex.get_size().x, tex.get_size().y)
+	sprite.scale = Vector2(scale_factor, scale_factor)
+	sprite.rotation = PI
+	add_child(sprite)
+	_has_sprite = true
+
 func _draw() -> void:
+	if _has_sprite:
+		return
 	if is_dead:
 		return
 	# Fallback polygon: long thin ship

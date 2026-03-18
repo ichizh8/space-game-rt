@@ -13,8 +13,35 @@ const GRAVITY_STRENGTH := 800.0
 signal landed(p_planet_id: String, p_planet_name: String, p_quest_id: String)
 
 
+var _has_sprite: bool = false
+
 func _ready() -> void:
 	add_to_group("planets")
+	call_deferred("_setup_sprite")
+	queue_redraw()
+
+func _setup_sprite() -> void:
+	# Pick texture based on hue: red/orange=lava, blue=ocean/ice, yellow/brown=rocky, else=gas
+	var tex_path: String
+	if _color_h < 0.08 or _color_h > 0.95:
+		tex_path = "res://assets/2026-03-16-planet-lava.png"
+	elif _color_h < 0.18:
+		tex_path = "res://assets/2026-03-16-planet-rocky.png"
+	elif _color_h < 0.5:
+		tex_path = "res://assets/2026-03-16-planet-gas.png"
+	elif _color_h < 0.65:
+		tex_path = "res://assets/2026-03-16-planet-ocean.png"
+	else:
+		tex_path = "res://assets/2026-03-16-planet-ice.png"
+	var tex := load(tex_path) as Texture2D
+	if not is_instance_valid(tex):
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	var target: float = planet_radius * 2.2
+	sprite.scale = Vector2.ONE * (target / max(tex.get_size().x, tex.get_size().y))
+	add_child(sprite)
+	_has_sprite = true
 	queue_redraw()
 
 
@@ -52,7 +79,13 @@ func land() -> void:
 
 
 func _draw() -> void:
-	# Planet body
+	if _has_sprite:
+		# Just draw the name label, sprite handles visuals
+		var name_width: float = planet_name.length() * 6.0
+		draw_string(ThemeDB.fallback_font, Vector2(-name_width * 0.5, planet_radius + 14.0),
+			planet_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.95, 1.0, 0.9))
+		return
+	# Procedural fallback
 	draw_circle(Vector2.ZERO, planet_radius, planet_color)
 	# Atmosphere ring
 	draw_arc(Vector2.ZERO, planet_radius + 4, 0, TAU, 32, planet_color.lightened(0.3), 2.0)

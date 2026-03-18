@@ -13,6 +13,7 @@ var _mining_duration: float = 0.0
 var _state_timer: float = 0.0
 var _flash_timer: float = 0.0
 var _despawn_timer: float = -1.0
+var _has_sprite: bool = false
 
 const FLEE_SPEED := 100.0
 const FLEE_RANGE := 150.0
@@ -25,6 +26,7 @@ func _ready() -> void:
 	add_to_group("npc_ships")
 	speed = randf_range(40.0, 60.0)
 	_pick_asteroid_target()
+	_setup_sprite()
 	queue_redraw()
 
 
@@ -191,7 +193,21 @@ func _pick_station_target() -> void:
 		_target_pos = global_position + Vector2.from_angle(randf() * TAU) * 600.0
 
 
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-16-miner-npc.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	var scale_factor: float = 50.0 / max(tex.get_size().x, tex.get_size().y)
+	sprite.scale = Vector2(scale_factor, scale_factor)
+	sprite.rotation = PI
+	add_child(sprite)
+	_has_sprite = true
+
 func _draw() -> void:
+	if _has_sprite:
+		return
 	if is_dead:
 		return
 	# Small gray/silver diamond shape
