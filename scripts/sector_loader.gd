@@ -140,6 +140,40 @@ func _load_sector() -> void:
 			"enemies": []
 		}
 		_respawn_zones.append(zone)
+	# Set up wildlife hunting zones
+	var hunt_zone_creature_map: Dictionary = {
+		"hunt_void_grubs": "void_grub",
+		"hunt_skim_rays":  "skim_ray",
+		"hunt_snarlers":   "pack_snarler",
+		"hunt_drifters":   "membrane_drifter",
+		"hunt_feeders":    "crystal_feeder",
+		"hunt_leviathan":  "void_leviathan",
+	}
+	var hunt_zone_counts: Dictionary = {
+		"hunt_void_grubs": 4,
+		"hunt_skim_rays":  3,
+		"hunt_snarlers":   4,
+		"hunt_drifters":   2,
+		"hunt_feeders":    2,
+		"hunt_leviathan":  1,
+	}
+	for hz in GameState.hunting_zones_sector1:
+		var hz_id: String = str(hz.get("id", ""))
+		var creature_type: String = str(hunt_zone_creature_map.get(hz_id, ""))
+		if creature_type == "":
+			continue
+		var max_c: int = int(hunt_zone_counts.get(hz_id, 2))
+		var hz_zone: Dictionary = {
+			"center_x": float(hz.get("pos_x", 0.0)),
+			"center_y": float(hz.get("pos_y", 0.0)),
+			"enemy_type": creature_type,
+			"max_count": max_c,
+			"timer": 0.0,
+			"interval": 60.0,
+			"enemies": []
+		}
+		_respawn_zones.append(hz_zone)
+
 	_pending_initial_spawns = true
 
 	# Spawn civilian NPCs
@@ -344,6 +378,18 @@ func _spawn_zone_enemy(zone_idx: int) -> void:
 			scene_path = INTERCEPTOR_SCENE
 		"carrier":
 			scene_path = "res://scenes/carrier.tscn"
+		"void_grub":
+			scene_path = "res://scenes/void_grub.tscn"
+		"skim_ray":
+			scene_path = "res://scenes/skim_ray.tscn"
+		"pack_snarler":
+			scene_path = "res://scenes/pack_snarler.tscn"
+		"membrane_drifter":
+			scene_path = "res://scenes/membrane_drifter.tscn"
+		"crystal_feeder":
+			scene_path = "res://scenes/crystal_feeder.tscn"
+		"void_leviathan":
+			scene_path = "res://scenes/void_leviathan.tscn"
 		_:
 			scene_path = ENEMY_SCENE
 	var enemy_scene: PackedScene = load(scene_path) as PackedScene
