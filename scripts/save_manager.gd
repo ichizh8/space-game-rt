@@ -18,20 +18,24 @@ func _get_slot_path(slot: int) -> String:
 # ── Web (localStorage) helpers ──────────────────────────────────
 
 func _web_save(slot: int, json_string: String) -> void:
-	var bytes: PackedByteArray = json_string.to_utf8_buffer()
-	var b64: String = Marshalls.raw_to_base64(bytes)
-	# Strip newlines — raw_to_base64 wraps at 76 chars which breaks JS string literals
-	b64 = b64.replace("\n", "").replace("\r", "")
-	JavaScriptBridge.eval("localStorage.setItem('save_slot_%d', '%s');" % [slot, b64], true)
+	# Chunk the JSON into small pieces to avoid JS eval string length issues
+	var key: String = "save_slot_%d" % slot
+	JavaScriptBridge.eval("window.__gs_buf = ''; window.__gs_key = '%s';" % key, true)
+	var chunk_size: int = 500
+	var i: int = 0
+	while i < json_string.length():
+		var chunk: String = json_string.substr(i, chunk_size)
+		chunk = chunk.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")
+		JavaScriptBridge.eval("window.__gs_buf += '%s';" % chunk, true)
+		i += chunk_size
+	JavaScriptBridge.eval("try { localStorage.setItem(window.__gs_key, window.__gs_buf); } catch(e) { console.error('Save error:', e); }", true)
 
 
 func _web_load(slot: int) -> String:
 	var result = JavaScriptBridge.eval("localStorage.getItem('save_slot_%d') || '';" % slot, true)
 	if result == null or str(result).is_empty():
 		return ""
-	var b64: String = str(result)
-	var bytes: PackedByteArray = Marshalls.base64_to_raw(b64)
-	return bytes.get_string_from_utf8()
+	return str(result)
 
 
 func _web_has_save(slot: int) -> bool:
