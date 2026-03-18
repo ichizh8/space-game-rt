@@ -58,24 +58,24 @@ PROJECT.md::TextFile/TextFile::-1::1773610574::0::1::::<><><>0<>0<><>::
 2026-03-18-wildlife-skim-ray.png::CompressedTexture2D/CompressedTexture2D::2166945240815735868::1773872762::1773872793::1::::<><><>0<>0<>6502af1fd06eb598b9bb8eb35f70aa72<>res://.godot/imported/2026-03-18-wildlife-skim-ray.png-225990ca133d67bbbc6edabca0fed344.ctex::
 2026-03-18-wildlife-void-grub.png::CompressedTexture2D/CompressedTexture2D::7496134989490797405::1773872762::1773872793::1::::<><><>0<>0<>0e3905d62f378d7e56861593afc97453<>res://.godot/imported/2026-03-18-wildlife-void-grub.png-005a0b9233efb9a5ea21ad2c3b272884.ctex::
 2026-03-18-wildlife-void-leviathan.png::CompressedTexture2D/CompressedTexture2D::4378086687338968198::1773872762::1773872793::1::::<><><>0<>0<>f071c7fae3115857bd813d61f9ebb562<>res://.godot/imported/2026-03-18-wildlife-void-leviathan.png-ef797dd39d73164056bf647156b44ba5.ctex::
-::res://balance/::1773874804
-creatures.Burst Max.translation::OptimizedTranslation::5646452222512466058::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Credit Reward.translation::OptimizedTranslation::7989228639896158065::1773875584::0::1::::<><><>0<>0<><>::
-creatures.csv::Translation/Translation::3035612307165329511::1773791095::1773875584::1::::<><><>0<>0<>13e3c0883cc9f3b6c186a2e857425695<>res://balance/creatures.Name.translation<*>res://balance/creatures.HP (base).translation<*>res://balance/creatures.Damage (base).translation<*>res://balance/creatures.Speed.translation<*>res://balance/creatures.Shoot Cooldown.translation<*>res://balance/creatures.Burst Max.translation<*>res://balance/creatures.Credit Reward.translation<*>res://balance/creatures.XP Reward.translation<*>res://balance/creatures.Drop Types.translation<*>res://balance/creatures.Drop Min.translation<*>res://balance/creatures.Drop Max.translation<*>res://balance/creatures.AI / Behavior.translation<*>res://balance/creatures.Notes.translation::
-creatures.Damage (base).translation::OptimizedTranslation::7957005456688068084::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Drop Max.translation::OptimizedTranslation::6314370565681631650::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Drop Min.translation::OptimizedTranslation::1262911121411852904::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Drop Types.translation::OptimizedTranslation::3676777653648914776::1773875584::0::1::::<><><>0<>0<><>::
-creatures.HP (base).translation::OptimizedTranslation::8414715128317967867::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Name.translation::OptimizedTranslation::4281291015505658120::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Notes.translation::OptimizedTranslation::527856715868147742::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Shoot Cooldown.translation::OptimizedTranslation::7918376909528729041::1773875584::0::1::::<><><>0<>0<><>::
-creatures.Speed.translation::OptimizedTranslation::1383640706536927179::1773875584::0::1::::<><><>0<>0<><>::
-creatures.XP Reward.translation::OptimizedTranslation::7474682774158260429::1773875584::0::1::::<><><>0<>0<><>::
-economy.csv::Translation/Translation::6257831477358962753::1773790946::1773875584::1::::<><><>0<>0<>29be9c8dd0e6dc41c6bafd060e85e677<>res://balance/economy.Item.translation<*>res://balance/economy.Cost / Price.translation<*>res://balance/economy.Currency.translation<*>res://balance/economy.Notes.translation::
-economy.Currency.translation::OptimizedTranslation::7902625016498846012::1773875584::0::1::::<><><>0<>0<><>::
-economy.Item.translation::OptimizedTranslation::8985549652654812260::1773875584::0::1::::<><><>0<>0<><>::
-economy.Notes.translation::OptimizedTranslation::608716043895137605::1773875584::0::1::::<><><>0<>0<><>::
+::res://balance/::1773875584
+creatures.Burst Max.translation::OptimizedTranslation::5646452222512466058::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Credit Reward.translation::OptimizedTranslation::7989228639896158065::1773875916::0::1::::<><><>0<>0<><>::
+creatures.csv::Translation/Translation::3035612307165329511::1773791095::1773875916::1::::<><><>0<>0<>13e3c0883cc9f3b6c186a2e857425695<>res://balance/creatures.Name.translation<*>res://balance/creatures.HP (base).translation<*>res://balance/creatures.Damage (base).translation<*>res://balance/creatures.Speed.translation<*>res://balance/creatures.Shoot Cooldown.translation<*>res://balance/creatures.Burst Max.translation<*>res://balance/creatures.Credit Reward.translation<*>res://balance/creatures.XP Reward.translation<*>res://balance/creatures.Drop Types.translation<*>res://balance/creatures.Drop Min.translation<*>res://balance/creatures.Drop Max.translation<*>res://balance/creatures.AI / Behavior.translation<*>res://balance/creatures.Notes.translation::
+creatures.Damage (base).translation::OptimizedTranslation::7957005456688068084::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Drop Max.translation::OptimizedTranslation::6314370565681631650::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Drop Min.translation::OptimizedTranslation::1262911121411852904::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Drop Types.translation::OptimizedTranslation::3676777653648914776::1773875916::0::1::::<><><>0<>0<><>::
+creatures.HP (base).translation::OptimizedTranslation::8414715128317967867::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Name.translation::OptimizedTranslation::4281291015505658120::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Notes.translation::OptimizedTranslation::527856715868147742::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Shoot Cooldown.translation::OptimizedTranslation::7918376909528729041::1773875916::0::1::::<><><>0<>0<><>::
+creatures.Speed.translation::OptimizedTranslation::1383640706536927179::1773875916::0::1::::<><><>0<>0<><>::
+creatures.XP Reward.translation::OptimizedTranslation::7474682774158260429::1773875916::0::1::::<><><>0<>0<><>::
+economy.csv::Translation/Translation::6257831477358962753::1773790946::1773875916::1::::<><><>0<>0<>29be9c8dd0e6dc41c6bafd060e85e677<>res://balance/economy.Item.translation<*>res://balance/economy.Cost / Price.translation<*>res://balance/economy.Currency.translation<*>res://balance/economy.Notes.translation::
+economy.Currency.translation::OptimizedTranslation::7902625016498846012::1773875916::0::1::::<><><>0<>0<><>::
+economy.Item.translation::OptimizedTranslation::8985549652654812260::1773875916::0::1::::<><><>0<>0<><>::
+economy.Notes.translation::OptimizedTranslation::608716043895137605::1773875916::0::1::::<><><>0<>0<><>::
 README.md::TextFile/TextFile::-1::1773807565::0::1::::<><><>0<>0<><>::
 restaurant.Cost.translation::OptimizedTranslation/OptimizedTranslation::7191544676967036230::1773799722::0::1::::<><><>0<>0<><>::
 restaurant.csv::Translation/Translation::48213467728463872::1773798556::1773799722::1::::<><><>0<>0<>957eb2cf7ae30bb28b3701733f25077f<>res://balance/restaurant.ID.translation<*>res://balance/restaurant.Name.translation<*>res://balance/restaurant.Ingredient.translation<*>res://balance/restaurant.Cost.translation<*>res://balance/restaurant.Dish Revenue (cr).translation<*>res://balance/restaurant.Reputation Gain.translation<*>res://balance/restaurant.Unlock Condition.translation<*>res://balance/restaurant.Notes.translation::
@@ -160,13 +160,13 @@ black_hole.gd::GDScript/GDScript::4211497730594594793::1773590945::0::1::::<>Nod
 bullet.gd::GDScript/GDScript::4944062554812473694::1773856917::0::1::::<>Node2D<><>0<>0<><>::
 cargo_freighter.gd::GDScript/GDScript::7299867865095654048::1773856962::0::1::::<>Node2D<><>0<>0<><>::
 carrier.gd::GDScript/GDScript::8151336334283822535::1773871673::0::1::::<>Node2D<><>0<>0<><>::
-coalition_patrol.gd::GDScript::2916340607633500346::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+coalition_patrol.gd::GDScript/GDScript::2916340607633500346::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 cockpit.gd::GDScript/GDScript::7778549044109675183::1773873225::0::1::::<>CanvasLayer<><>0<>0<><>::
 comet.gd::GDScript/GDScript::7252436256868338254::1773637010::0::1::::<>Node2D<><>0<>0<><>::
-corsair_raider.gd::GDScript::8543858394054007317::1773875573::0::1::::<>Node2D<><>0<>0<><>::
-crystal_feeder.gd::GDScript::7879424024552619989::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+corsair_raider.gd::GDScript/GDScript::8543858394054007317::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+crystal_feeder.gd::GDScript/GDScript::7879424024552619989::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 derelict.gd::GDScript/GDScript::3351569362693811054::1773637065::0::1::::<>Node2D<><>0<>0<><>::
-drifter_shuttle.gd::GDScript::58169172364390998::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+drifter_shuttle.gd::GDScript/GDScript::58169172364390998::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 effects_manager.gd::GDScript/GDScript::116975078305468455::1773613463::0::1::::<>Node2D<><>0<>0<><>::
 end_screen.gd::GDScript/GDScript::930197457372939919::1773865713::0::1::::<>CanvasLayer<><>0<>0<><>::
 enemy.gd::GDScript/GDScript::3527565857773294411::1773872746::0::1::::<>Node2D<><>0<>0<><>::
@@ -177,38 +177,38 @@ hud.gd::GDScript/GDScript::1858420113232689031::1773866609::0::1::::<>CanvasLaye
 interceptor.gd::GDScript/GDScript::3019466697555462762::1773791514::0::1::::<>Node2D<><>0<>0<><>::
 loot_drop.gd::GDScript/GDScript::64529108628595499::1773624145::0::1::::<>Node2D<><>0<>0<><>::
 main_menu.gd::GDScript/GDScript::1764982572082152261::1773806602::0::1::::<>Control<><>0<>0<><>::
-membrane_drifter.gd::GDScript::7286449023596376172::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+membrane_drifter.gd::GDScript/GDScript::7286449023596376172::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 mine.gd::GDScript/GDScript::76550374689089415::1773621709::0::1::::<>Node2D<><>0<>0<><>::
 minelayer.gd::GDScript/GDScript::186647843889532250::1773871673::0::1::::<>Node2D<><>0<>0<><>::
-miner_npc.gd::GDScript::1778054056484337064::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+miner_npc.gd::GDScript/GDScript::1778054056484337064::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 nebula_background.gd::GDScript/GDScript::709179530439261648::1773872001::0::1::::<>Node2D<><>0<>0<><>::
-pack_snarler.gd::GDScript::7632879022676648683::1773875573::0::1::::<>Node2D<><>0<>0<><>::
-planet.gd::GDScript::4693907266427328966::1773875520::0::1::::<>Node2D<><>0<>0<><>::
+pack_snarler.gd::GDScript/GDScript::7632879022676648683::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+planet.gd::GDScript/GDScript::4693907266427328966::1773875520::0::1::::<>Node2D<><>0<>0<><>::
 planet_menu.gd::GDScript/GDScript::5271842473902023664::1773871896::0::1::::<>CanvasLayer<><>0<>0<><>::
-restaurant_scene.gd::GDScript/GDScript::5544691651849288374::1773873851::0::1::::<>CanvasLayer<><>0<>0<><>::
+restaurant_scene.gd::GDScript::5544691651849288374::1773875885::0::1::::<>CanvasLayer<><>0<>0<><>::
 save_manager.gd::GDScript/GDScript::7650306163663500790::1773864852::0::1::::<>Node<><>0<>0<><>::
-science_vessel.gd::GDScript::4891993485293572034::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+science_vessel.gd::GDScript/GDScript::4891993485293572034::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 sector_generator.gd::GDScript/GDScript::7122586594381657071::1773867540::0::1::::<>Node2D<><>0<>0<><>::
 sector_loader.gd::GDScript/GDScript::6336700767300208704::1773873405::0::1::::<>Node2D<><>0<>0<><>::
 ship.gd::GDScript/GDScript::5629838719633451787::1773867230::0::1::::<>CharacterBody2D<><>0<>0<><>::
-skim_ray.gd::GDScript::7706078624168481720::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+skim_ray.gd::GDScript/GDScript::7706078624168481720::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 sniper.gd::GDScript/GDScript::7475074518143974023::1773871673::0::1::::<>Node2D<><>0<>0<><>::
 space_station.gd::GDScript/GDScript::7841865305012411993::1773583041::0::1::::<>Node2D<><>0<>0<><>::
 space_world.gd::GDScript/GDScript::113990473700440012::1773867782::0::1::::<>Node2D<><>0<>0<><>::
 star.gd::GDScript/GDScript::1915472973048615655::1773867335::0::1::::<>Node2D<><>0<>0<><>::
 starfield.gd::GDScript/GDScript::3257456860025844023::1773637743::0::1::::<>Node2D<><>0<>0<><>::
 star_background.gd::GDScript/GDScript::1215044384397328246::1773631351::0::1::::<>Node2D<><>0<>0<><>::
-station_menu.gd::GDScript/GDScript::1486852535772250751::1773873882::0::1::::<>CanvasLayer<><>0<>0<><>::
+station_menu.gd::GDScript::1486852535772250751::1773875880::0::1::::<>CanvasLayer<><>0<>0<><>::
 throttle_slider.gd::GDScript/GDScript::6955374437960013661::1773672196::0::1::::<>Control<><>0<>0<><>::
 turret.gd::GDScript/GDScript::7631576253312281239::1773621838::0::1::::<>Node2D<><>0<>0<><>::
 tutorial_overlay.gd::GDScript/GDScript::6232582661619727581::1773637537::0::1::::<>CanvasLayer<><>0<>0<><>::
 virtual_joystick.gd::GDScript/GDScript::1020178028105329822::1773542401::0::1::::<>Control<><>0<>0<><>::
-void_grub.gd::GDScript::1588366078408826301::1773875573::0::1::::<>Node2D<><>0<>0<><>::
-void_leviathan.gd::GDScript::2779435897859189924::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+void_grub.gd::GDScript/GDScript::1588366078408826301::1773875573::0::1::::<>Node2D<><>0<>0<><>::
+void_leviathan.gd::GDScript/GDScript::2779435897859189924::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 void_sentinel.gd::GDScript/GDScript::2147939099636406732::1773871673::0::1::::<>Node2D<><>0<>0<><>::
 warp_gate.gd::GDScript/GDScript::7217366560798320789::1773871673::0::1::::<>Node2D<><>0<>0<><>::
 world_data.gd::GDScript/GDScript::3340492155267611818::1773717796::0::1::::<>Node<><>0<>0<><>::
-::res://web-export/::1773874804
-index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773874804::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
-index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773874804::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
-index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773874804::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::
+::res://web-export/::1773875584
+index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1773875584::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
+index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1773875584::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
+index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1773875584::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::

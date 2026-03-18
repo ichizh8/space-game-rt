@@ -1759,7 +1759,8 @@ func _on_open_kitchen() -> void:
 		return
 	var kitchen := CanvasLayer.new()
 	kitchen.set_script(scene_script)
-	call_deferred("add_child", kitchen)
+	# Add synchronously — script _ready fires after add_child completes
+	get_tree().root.add_child(kitchen)
 
 
 func _on_close() -> void:
