@@ -251,8 +251,8 @@ func _rebuild_ui() -> void:
 
 
 func _on_new_game(slot: int) -> void:
-	SaveManager.active_slot = slot
 	SaveManager.delete_save(slot)
+	SaveManager.active_slot = slot  # set AFTER delete so delete doesn't reset it
 	GameState.reset_game()
 	# Clear restaurant ownership + quest history so intro triggers fresh
 	GameState.restaurant_owned = false
