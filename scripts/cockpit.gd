@@ -462,6 +462,23 @@ func _refresh_bridge() -> void:
 	note.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
 	vbox.add_child(note)
 
+	# DEV: quick credits button
+	vbox.add_child(HSeparator.new())
+	var dev_lbl := Label.new()
+	dev_lbl.text = "DEV"
+	dev_lbl.add_theme_font_size_override("font_size", 10)
+	dev_lbl.add_theme_color_override("font_color", Color(0.4, 0.4, 0.4))
+	vbox.add_child(dev_lbl)
+	var dev_btn := Button.new()
+	dev_btn.text = "+10 000 credits"
+	dev_btn.custom_minimum_size.y = 36
+	dev_btn.add_theme_font_size_override("font_size", 12)
+	dev_btn.pressed.connect(func():
+		GameState.credits += 10000
+		GameState.credits_changed.emit(GameState.credits)
+		call_deferred("_refresh_bridge"))
+	vbox.add_child(dev_btn)
+
 
 func _build_captain_tab() -> void:
 	_captain_tab = ScrollContainer.new()
