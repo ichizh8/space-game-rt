@@ -110,7 +110,7 @@ func _fill_services(vbox: VBoxContainer) -> void:
 			GameState.credits -= 100
 			GameState.credits_changed.emit(GameState.credits)
 			GameState.heal(50.0)
-			_on_close())
+			call_deferred("_refresh_ui"))
 	vbox.add_child(repair_btn)
 
 	var full_repair_btn := Button.new()
@@ -124,7 +124,7 @@ func _fill_services(vbox: VBoxContainer) -> void:
 			GameState.credits -= cost
 			GameState.credits_changed.emit(GameState.credits)
 			GameState.heal(GameState.max_hull)
-			_on_close())
+			call_deferred("_refresh_ui"))
 	vbox.add_child(full_repair_btn)
 
 	var fuel_lbl := Label.new()
@@ -141,7 +141,7 @@ func _fill_services(vbox: VBoxContainer) -> void:
 			GameState.credits -= 25
 			GameState.credits_changed.emit(GameState.credits)
 			GameState.add_fuel(50.0)
-			_on_close())
+			call_deferred("_refresh_ui"))
 	vbox.add_child(refuel_btn)
 
 	vbox.add_child(HSeparator.new())
@@ -1589,6 +1589,18 @@ func _on_cook(cost_id: String, cost_amt: int, earn_cr: int, earn_rep: int, dish_
 		GameState.add_prepared_dish(dish_dict)
 		_refresh_restaurant_tab()
 
+
+func _refresh_ui() -> void:
+	# Rebuild services tab content in place (after repair/refuel)
+	var services_tab: Node = _tab_container.get_node_or_null("Services")
+	if services_tab == null:
+		return
+	var vbox: Node = services_tab.get_child(0) if services_tab.get_child_count() > 0 else null
+	if vbox == null:
+		return
+	for ch in vbox.get_children():
+		ch.queue_free()
+	_fill_services(vbox as VBoxContainer)
 
 func _on_close() -> void:
 	SaveManager.save_game()
