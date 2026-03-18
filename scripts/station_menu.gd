@@ -70,6 +70,7 @@ func _build_ui() -> void:
 
 	_build_services_tab()
 	_build_quests_tab()
+	_build_maps_tab()
 	if is_restaurant_station():
 		_build_restaurant_tab()
 		_build_bench_tab()
@@ -168,6 +169,217 @@ func _fill_services(vbox: VBoxContainer) -> void:
 				_on_close())
 		row.add_child(sell_btn)
 		vbox.add_child(row)
+
+
+# ── Maps Tab ─────────────────────────────────────────────────────
+
+var _maps_tab: ScrollContainer
+
+# Station → zone assignments
+const STATION_ZONE_MAP: Dictionary = {
+	"drifting_spoon":     ["hunt_void_grubs", "hunt_skim_rays"],
+	"s1_mining_outpost":  ["hunt_snarlers", "hunt_feeders"],
+	"s1_observation":     ["hunt_drifters", "hunt_leviathan"],
+	"s1_coalition_hub":   ["hunt_snarlers", "hunt_feeders", "hunt_drifters"],
+}
+
+# Zone creature type for rarity pricing
+const ZONE_CREATURE: Dictionary = {
+	"hunt_void_grubs": "void_grub",
+	"hunt_skim_rays":  "skim_ray",
+	"hunt_snarlers":   "pack_snarler",
+	"hunt_feeders":    "crystal_feeder",
+	"hunt_drifters":   "membrane_drifter",
+	"hunt_leviathan":  "void_leviathan",
+}
+
+const RARITY_FACTOR: Dictionary = {
+	"void_grub": 1.0, "skim_ray": 1.0,
+	"pack_snarler": 1.5, "crystal_feeder": 1.5,
+	"membrane_drifter": 2.0, "void_leviathan": 3.0,
+}
+
+const RARITY_LABEL: Dictionary = {
+	"void_grub": "Common", "skim_ray": "Common",
+	"pack_snarler": "Uncommon", "crystal_feeder": "Uncommon",
+	"membrane_drifter": "Rare", "void_leviathan": "Legendary",
+}
+
+const RARITY_COLOR: Dictionary = {
+	"Common": Color(0.7, 0.7, 0.7),
+	"Uncommon": Color(0.3, 0.9, 0.4),
+	"Rare": Color(0.4, 0.6, 1.0),
+	"Legendary": Color(1.0, 0.7, 0.2),
+}
+
+
+func _get_zone_price(zone_id: String, station_pos: Vector2) -> int:
+	var base_price: float = 200.0
+	var zone_pos := Vector2.ZERO
+	for z in GameState.hunting_zones_sector1:
+		if z.get("id", "") == zone_id:
+			zone_pos = Vector2(float(z.get("pos_x", 0.0)), float(z.get("pos_y", 0.0)))
+			break
+	var dist: float = station_pos.distance_to(zone_pos)
+	var dist_factor: float = maxf(dist / 500.0, 1.0)
+	var creature: String = ZONE_CREATURE.get(zone_id, "void_grub")
+	var rarity: float = RARITY_FACTOR.get(creature, 1.0)
+	var raw: float = base_price * dist_factor * rarity
+	return int(roundf(raw / 50.0) * 50.0)
+
+
+func _get_station_pos() -> Vector2:
+	var sector_script = load("res://data/sector_%d.gd" % GameState.current_sector)
+	if sector_script == null:
+		return Vector2.ZERO
+	var sector_node := Node.new()
+	sector_node.set_script(sector_script)
+	var stations: Array = sector_node.get("STATIONS")
+	sector_node.free()
+	if stations == null:
+		return Vector2.ZERO
+	for s in stations:
+		if s.get("station_id", "") == station_id:
+			return Vector2(float(s.get("pos_x", 0)), float(s.get("pos_y", 0)))
+	return Vector2.ZERO
+
+
+func _build_maps_tab() -> void:
+	_maps_tab = ScrollContainer.new()
+	_maps_tab.name = "Maps"
+	_tab_container.add_child(_maps_tab)
+	_refresh_maps_tab()
+
+
+func _refresh_maps_tab() -> void:
+	for c in _maps_tab.get_children():
+		c.queue_free()
+
+	var vbox := VBoxContainer.new()
+	vbox.custom_minimum_size.x = 330
+	vbox.add_theme_constant_override("separation", 8)
+	_maps_tab.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "ZONE MAPS FOR SALE"
+	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
+	vbox.add_child(title)
+
+	var spos: Vector2 = _get_station_pos()
+
+	# Free starter maps at Drifting Spoon during intro quest
+	if is_restaurant_station() and not GameState.starter_maps_claimed:
+		var is_early_quest: bool = (
+			GameState.is_quest_active("quest_first_day_open")
+			or GameState.is_quest_active("quest_something_worth_eating")
+			or GameState.is_quest_active("quest_inherit_restaurant")
+			or (not GameState.is_quest_completed("quest_something_worth_eating") and GameState.restaurant_owned)
+		)
+		if is_early_quest:
+			var free_title := Label.new()
+			free_title.text = "STARTER MAPS — FREE"
+			free_title.add_theme_font_size_override("font_size", 13)
+			free_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.4))
+			vbox.add_child(free_title)
+
+			var free_desc := Label.new()
+			free_desc.text = "Dad left these in the back. Might be useful."
+			free_desc.add_theme_font_size_override("font_size", 11)
+			free_desc.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+			free_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			vbox.add_child(free_desc)
+
+			var claim_btn := Button.new()
+			claim_btn.text = "Claim Starter Maps"
+			claim_btn.custom_minimum_size.y = 40
+			claim_btn.add_theme_font_size_override("font_size", 14)
+			claim_btn.pressed.connect(func():
+				GameState.starter_maps_claimed = true
+				GameState.reveal_zone_map("hunt_void_grubs")
+				GameState.reveal_zone_map("hunt_skim_rays")
+				_refresh_maps_tab())
+			vbox.add_child(claim_btn)
+
+			vbox.add_child(HSeparator.new())
+
+	# Zone maps for sale at this station
+	var zone_ids: Array = STATION_ZONE_MAP.get(station_id, [])
+	if zone_ids.is_empty():
+		var none_lbl := Label.new()
+		none_lbl.text = "No maps available at this station."
+		none_lbl.add_theme_font_size_override("font_size", 12)
+		none_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
+		vbox.add_child(none_lbl)
+		return
+
+	for zid in zone_ids:
+		_build_map_row(vbox, zid, spos)
+
+
+func _build_map_row(vbox: VBoxContainer, zone_id: String, station_pos: Vector2) -> void:
+	var zone_label: String = ""
+	for z in GameState.hunting_zones_sector1:
+		if z.get("id", "") == zone_id:
+			zone_label = str(z.get("label", zone_id))
+			break
+	if zone_label.is_empty():
+		zone_label = zone_id
+
+	var creature: String = ZONE_CREATURE.get(zone_id, "void_grub")
+	var tier_label: String = RARITY_LABEL.get(creature, "Common")
+	var tier_color: Color = RARITY_COLOR.get(tier_label, Color.WHITE)
+	var price: int = _get_zone_price(zone_id, station_pos)
+	var owned: bool = zone_id in GameState.purchased_zone_maps
+
+	var container := PanelContainer.new()
+	var cstyle := StyleBoxFlat.new()
+	cstyle.bg_color = Color(0.08, 0.1, 0.18, 0.9)
+	cstyle.set_border_width_all(1)
+	cstyle.border_color = tier_color * 0.5 if not owned else Color(0.3, 0.5, 0.3)
+	cstyle.content_margin_left = 8
+	cstyle.content_margin_right = 8
+	cstyle.content_margin_top = 6
+	cstyle.content_margin_bottom = 6
+	container.add_theme_stylebox_override("panel", cstyle)
+	vbox.add_child(container)
+
+	var inner := VBoxContainer.new()
+	container.add_child(inner)
+
+	var name_lbl := Label.new()
+	name_lbl.text = zone_label
+	name_lbl.add_theme_font_size_override("font_size", 14)
+	name_lbl.add_theme_color_override("font_color", Color.WHITE if not owned else Color(0.5, 0.7, 0.5))
+	inner.add_child(name_lbl)
+
+	var tier_lbl := Label.new()
+	tier_lbl.text = tier_label
+	tier_lbl.add_theme_font_size_override("font_size", 12)
+	tier_lbl.add_theme_color_override("font_color", tier_color)
+	inner.add_child(tier_lbl)
+
+	if owned:
+		var owned_lbl := Label.new()
+		owned_lbl.text = "Owned"
+		owned_lbl.add_theme_font_size_override("font_size", 13)
+		owned_lbl.add_theme_color_override("font_color", Color(0.4, 0.7, 0.4))
+		inner.add_child(owned_lbl)
+	else:
+		var buy_btn := Button.new()
+		buy_btn.text = "Buy — %d credits" % price
+		buy_btn.custom_minimum_size.y = 38
+		buy_btn.add_theme_font_size_override("font_size", 13)
+		buy_btn.disabled = GameState.credits < price
+		var captured_zid: String = zone_id
+		var captured_price: int = price
+		buy_btn.pressed.connect(func():
+			if GameState.credits >= captured_price:
+				GameState.credits -= captured_price
+				GameState.credits_changed.emit(GameState.credits)
+				GameState.reveal_zone_map(captured_zid)
+				_refresh_maps_tab())
+		inner.add_child(buy_btn)
 
 
 func _build_quests_tab() -> void:

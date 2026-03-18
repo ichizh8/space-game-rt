@@ -132,6 +132,8 @@ func save_game() -> void:
 		"pending_guests": GameState.pending_guests.duplicate(true),
 		"cooksta_rating": GameState.cooksta_rating,
 		"cooksta_posts": GameState.cooksta_posts.duplicate(),
+		"purchased_zone_maps": GameState.purchased_zone_maps.duplicate(),
+		"starter_maps_claimed": GameState.starter_maps_claimed,
 		"player_pos_x": px,
 		"player_pos_y": py,
 		"timestamp": Time.get_unix_time_from_system(),
@@ -239,6 +241,11 @@ func load_game(slot: int) -> bool:
 	GameState.cooksta_posts = []
 	for p in loaded_posts:
 		GameState.cooksta_posts.append(str(p))
+	var loaded_zone_maps = data.get("purchased_zone_maps", [])
+	GameState.purchased_zone_maps = []
+	for zm in loaded_zone_maps:
+		GameState.purchased_zone_maps.append(str(zm))
+	GameState.starter_maps_claimed = bool(data.get("starter_maps_claimed", false))
 	# Restore spawn position
 	var ppx: float = float(data.get("player_pos_x", 0.0))
 	var ppy: float = float(data.get("player_pos_y", 0.0))

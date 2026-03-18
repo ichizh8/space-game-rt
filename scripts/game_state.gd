@@ -99,6 +99,10 @@ var ingredient_tiers: Dictionary = {
 }
 var zone_depth: int = 1  # 1=shallow, 2=mid, 3=deep
 
+# Zone maps purchased at stations (persistent)
+var purchased_zone_maps: Array = []
+var starter_maps_claimed: bool = false
+
 # Hunting zone definitions for sector 1
 var hunting_zones_sector1: Array = [
 	{"id": "hunt_void_grubs",  "label": "Void Grub Nesting Area",            "pos_x": 600.0,   "pos_y": 1400.0,  "color_h": 0.25, "radius": 400.0},
@@ -411,6 +415,24 @@ func map_discover_planet(planet_id: String, pos: Vector2, p_name: String, color_
 			"pos_x": pos.x, "pos_y": pos.y,
 			"name": p_name, "color_h": color_h
 		}
+
+
+func reveal_zone_map(zone_key: String) -> void:
+	if zone_key in purchased_zone_maps:
+		return
+	purchased_zone_maps.append(zone_key)
+	for zone in hunting_zones_sector1:
+		if zone.get("id", "") == zone_key:
+			var zpos_x: float = float(zone.get("pos_x", 0.0))
+			var zpos_y: float = float(zone.get("pos_y", 0.0))
+			var zlabel: String = str(zone.get("label", ""))
+			var zcolor: float = float(zone.get("color_h", 0.3))
+			if not map_discovered_planets.has(zone_key):
+				map_discovered_planets[zone_key] = {
+					"pos_x": zpos_x, "pos_y": zpos_y,
+					"name": zlabel, "color_h": zcolor
+				}
+			return
 
 
 func map_note_biome(_pos: Vector2, _biome_id: int) -> void:
