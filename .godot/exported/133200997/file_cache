@@ -37,3 +37,7 @@ res://scenes/pack_snarler.tscn::c3f49aaa48a702dda852004545110815::1773798795::re
 res://scenes/skim_ray.tscn::8678ed0b5a8482732ce9cd8b962b3185::1773798794::res://.godot/exported/133200997/export-47a85097b09562604b32caebda1720e3-skim_ray.scn
 res://scenes/void_grub.tscn::4229e7936e3c1f1beed088a5baea0135::1773798793::res://.godot/exported/133200997/export-8d5000d7077a06b6c2223b09dd5c7bfb-void_grub.scn
 res://scenes/void_leviathan.tscn::7f1342ddc0f7d2ac7e68232d8d2f503e::1773798798::res://.godot/exported/133200997/export-b5baf731e567a30c9ee2bea0c04ce63e-void_leviathan.scn
+res://scenes/coalition_patrol.tscn::e6994b3bb9df2bb75d483d36bff0151c::1773857041::res://.godot/exported/133200997/export-b29806d111825a4cc0a71b1f17fbbc32-coalition_patrol.scn
+res://scenes/corsair_raider.tscn::1554f5ebd6301264f43c931fb363b110::1773857042::res://.godot/exported/133200997/export-08e9a66bb292bd12da7ddf303138eaca-corsair_raider.scn
+res://scenes/drifter_shuttle.tscn::997ca2da115ef7cb79fd46b12551d9a5::1773857044::res://.godot/exported/133200997/export-047cd9f7cc5812a34c46d37c6973de6d-drifter_shuttle.scn
+res://scenes/science_vessel.tscn::a285cff75810a47856a1ba87f066dae5::1773857043::res://.godot/exported/133200997/export-5c57bbc1238e931ddae620a0459c3848-science_vessel.scn

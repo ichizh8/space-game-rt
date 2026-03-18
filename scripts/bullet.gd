@@ -34,6 +34,18 @@ func _process(delta: float) -> void:
 				_hit = true
 				queue_redraw()
 				return
+		# Check attackable NPC ships
+		for npc in get_tree().get_nodes_in_group("npc_ships"):
+			if not is_instance_valid(npc):
+				continue
+			if npc.get("is_dead") == true:
+				continue
+			if global_position.distance_to(npc.global_position) < HIT_RADIUS_ENEMY:
+				if npc.has_method("take_damage"):
+					npc.take_damage(damage)
+				_hit = true
+				queue_redraw()
+				return
 		# Check hazard asteroids
 		for haz in get_tree().get_nodes_in_group("hazard_asteroids"):
 			if not is_instance_valid(haz):

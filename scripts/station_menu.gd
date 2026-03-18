@@ -1194,7 +1194,9 @@ func _build_guest_card(vbox: VBoxContainer, guest: Dictionary, idx: int) -> void
 			inner.add_child(result_lbl)
 		else:
 			var serve_btn := Button.new()
-			serve_btn.text = "Serve"
+			var has_food: bool = not GameState.restaurant_ingredients.is_empty()
+			serve_btn.text = "Serve" if has_food else "Serve (no ingredients)"
+			serve_btn.disabled = not has_food
 			serve_btn.custom_minimum_size.y = 34
 			serve_btn.add_theme_font_size_override("font_size", 13)
 			var guest_idx: int = idx

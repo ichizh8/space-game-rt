@@ -22,6 +22,10 @@ const BATTLESHIP_SCENE: String = "res://scenes/battleship.tscn"
 const MINER_SCENE: String = "res://scenes/miner_npc.tscn"
 const FREIGHTER_SCENE: String = "res://scenes/cargo_freighter.tscn"
 const DERELICT_SCENE: String = "res://scenes/derelict.tscn"
+const COALITION_SCENE: String = "res://scenes/coalition_patrol.tscn"
+const CORSAIR_SCENE: String = "res://scenes/corsair_raider.tscn"
+const SCIENCE_SCENE: String = "res://scenes/science_vessel.tscn"
+const DRIFTER_SCENE: String = "res://scenes/drifter_shuttle.tscn"
 
 
 func _ready() -> void:
@@ -564,3 +568,47 @@ func _spawn_civilian_npcs() -> void:
 			derelict.global_position = Vector2.from_angle(angle) * randf_range(800.0, 2500.0)
 			parent.add_child(derelict)
 			_spawned_objects.append(derelict)
+
+	# Coalition patrol: 1-2 per sector, near stations
+	var coalition_scene: PackedScene = load(COALITION_SCENE) as PackedScene
+	if is_instance_valid(coalition_scene):
+		var coalition_count: int = randi_range(1, 2)
+		for i in range(coalition_count):
+			var npc: Node2D = coalition_scene.instantiate() as Node2D
+			var angle: float = randf() * TAU
+			npc.global_position = Vector2.from_angle(angle) * randf_range(400.0, 800.0)
+			parent.add_child(npc)
+			_spawned_objects.append(npc)
+
+	# Corsair raider: 1-3 per sector, near asteroid belt
+	var corsair_scene: PackedScene = load(CORSAIR_SCENE) as PackedScene
+	if is_instance_valid(corsair_scene):
+		var corsair_count: int = randi_range(1, 3)
+		for i in range(corsair_count):
+			var npc: Node2D = corsair_scene.instantiate() as Node2D
+			var angle: float = randf() * TAU
+			npc.global_position = Vector2.from_angle(angle) * randf_range(800.0, 2000.0)
+			parent.add_child(npc)
+			_spawned_objects.append(npc)
+
+	# Science vessel: 0-1 per sector
+	var science_scene: PackedScene = load(SCIENCE_SCENE) as PackedScene
+	if is_instance_valid(science_scene):
+		var science_count: int = randi_range(0, 1)
+		for i in range(science_count):
+			var npc: Node2D = science_scene.instantiate() as Node2D
+			var angle: float = randf() * TAU
+			npc.global_position = Vector2.from_angle(angle) * randf_range(600.0, 1500.0)
+			parent.add_child(npc)
+			_spawned_objects.append(npc)
+
+	# Drifter shuttle: 1-2 per sector
+	var drifter_scene: PackedScene = load(DRIFTER_SCENE) as PackedScene
+	if is_instance_valid(drifter_scene):
+		var drifter_count: int = randi_range(1, 2)
+		for i in range(drifter_count):
+			var npc: Node2D = drifter_scene.instantiate() as Node2D
+			var angle: float = randf() * TAU
+			npc.global_position = Vector2.from_angle(angle) * randf_range(300.0, 1200.0)
+			parent.add_child(npc)
+			_spawned_objects.append(npc)

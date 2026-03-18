@@ -861,8 +861,29 @@ func resolve_guest(guest: Dictionary, choice: String) -> Dictionary:
 				result["message"] = "He's vague. Something about 'ingredient provenance standards.' Watch for Coalition patrols."
 				set_story_flag("drath_warned", true)
 	else:
-		# Procedural guest
-		var base_credits: int = 80 + randi() % 120
+		# Procedural guest — requires at least one ingredient in storage
+		if restaurant_ingredients.is_empty():
+			result["credits"] = 0
+			result["faction_deltas"] = {faction: -1}
+			result["message"] = "%s (%s) — nothing to serve. They leave hungry." % [guest.get("name", "Guest"), faction.capitalize()]
+			add_restaurant_rep(-1)
+			add_credits(0)
+			for f in result["faction_deltas"]:
+				add_faction_rep(f, result["faction_deltas"][f])
+			return result
+		# Pick the best available ingredient by tier
+		var best_ing: String = ""
+		var best_tier: int = 0
+		for ing_id in restaurant_ingredients:
+			if restaurant_ingredients[ing_id] > 0:
+				var t: int = ingredient_tiers.get(ing_id, {}).get("tier", 1)
+				if t > best_tier:
+					best_tier = t
+					best_ing = ing_id
+		# Consume one ingredient
+		if not best_ing.is_empty():
+			remove_ingredient(best_ing, 1)
+		var base_credits: int = 40 + best_tier * 40 + randi() % 60
 		var satisfaction: float = 1.0
 		var trait_val: String = guest.get("trait", "")
 		if trait_val == "generous":
@@ -872,6 +893,8 @@ func resolve_guest(guest: Dictionary, choice: String) -> Dictionary:
 		elif trait_val == "snobbish":
 			if restaurant_rep < 40:
 				satisfaction -= 0.4
+		# Dietary preference bonus
+		satisfaction *= get_satisfaction_modifier(faction, "char_grill", "diner")
 		var earned: int = int(base_credits * satisfaction)
 		var rep_delta: int = 1 if satisfaction >= 1.0 else (0 if satisfaction >= 0.6 else -1)
 		result["credits"] = earned

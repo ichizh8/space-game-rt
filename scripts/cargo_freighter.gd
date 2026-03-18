@@ -13,6 +13,7 @@ const AGGRO_PIRATE_RANGE := 300.0
 
 func _ready() -> void:
 	add_to_group("npc_freighters")
+	add_to_group("npc_ships")
 	speed = randf_range(55.0, 70.0)
 	_pick_station_target()
 	queue_redraw()
@@ -63,7 +64,8 @@ func _die() -> void:
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):
 		em.add_explosion(global_position, 1.5)
-		em.add_float("FREIGHTER DESTROYED", global_position + Vector2(0, -20), Color.ORANGE)
+		em.add_float("INDEPENDENTS REP -5", global_position + Vector2(0, -20), Color.ORANGE)
+	GameState.add_faction_rep("independents", -5)
 	call_deferred("_spawn_loot")
 	_despawn_timer = 1.5
 
