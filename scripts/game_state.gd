@@ -99,6 +99,16 @@ var ingredient_tiers: Dictionary = {
 }
 var zone_depth: int = 1  # 1=shallow, 2=mid, 3=deep
 
+# Hunting zone definitions for sector 1
+var hunting_zones_sector1: Array = [
+	{"id": "hunt_void_grubs",  "label": "Void Grub Nesting Area",            "pos_x": 600.0,   "pos_y": 1400.0,  "color_h": 0.25, "radius": 400.0},
+	{"id": "hunt_skim_rays",   "label": "Skim Ray Feeding Zone",              "pos_x": -400.0,  "pos_y": 1800.0,  "color_h": 0.55, "radius": 400.0},
+	{"id": "hunt_snarlers",    "label": "Pack Snarler Debris Field",          "pos_x": 1600.0,  "pos_y": 600.0,   "color_h": 0.08, "radius": 350.0},
+	{"id": "hunt_drifters",    "label": "Nebula — Membrane Drifter Territory","pos_x": -1800.0, "pos_y": 2200.0,  "color_h": 0.65, "radius": 500.0},
+	{"id": "hunt_feeders",     "label": "Crystal Feeder Cluster",             "pos_x": -1200.0, "pos_y": -800.0,  "color_h": 0.45, "radius": 400.0},
+	{"id": "hunt_leviathan",   "label": "Deep Space — Leviathan Waters",      "pos_x": 3000.0,  "pos_y": 1500.0,  "color_h": 0.78, "radius": 600.0},
+]
+
 # Cooking / experiment system
 var cooking_methods: Array = [
 	{"id": "char_grill",       "name": "Char-Grill",               "desc": "Fast, smoky. Miners approve."},
@@ -422,6 +432,7 @@ func accept_quest(quest_data: Dictionary, source_id: String = "") -> bool:
 	if source_id != "":
 		q_copy["source_id"] = source_id
 	active_quests.append(q_copy)
+	apply_quest_map_markers(quest_data)
 	return true
 
 
@@ -457,6 +468,13 @@ func complete_quest(quest_id: String) -> Dictionary:
 			active_quests.remove_at(i)
 			if quest_id not in completed_quests:
 				completed_quests.append(quest_id)
+			# Look up full quest data for bonus rewards
+			var full_quest: Dictionary = {}
+			if is_instance_valid(WorldData):
+				full_quest = WorldData.get_quest_by_id(quest_id)
+			if not full_quest.is_empty():
+				apply_quest_map_markers(full_quest)
+				apply_quest_gives_recipe(full_quest)
 			return q.get("reward", {})
 	return {}
 
@@ -644,6 +662,34 @@ func drop_ingredients(creature_type: String) -> void:
 			add_ingredient(ing_id, 1)
 			var info: Dictionary = ingredient_tiers.get(ing_id, {})
 			ingredient_dropped.emit(info.get("name", ing_id))
+
+
+# ── Quest Map Markers & Recipe Rewards ───────────────────────────
+
+func apply_quest_map_markers(quest: Dictionary) -> void:
+	var markers: Array = quest.get("map_markers", [])
+	for marker in markers:
+		var mid: String = str(marker.get("id", ""))
+		var mpos_x: float = float(marker.get("pos_x", 0.0))
+		var mpos_y: float = float(marker.get("pos_y", 0.0))
+		var mname: String = str(marker.get("label", ""))
+		var mcolor: float = float(marker.get("color_h", 0.3))
+		if mid != "" and not map_discovered_planets.has(mid):
+			map_discovered_planets[mid] = {"pos_x": mpos_x, "pos_y": mpos_y, "name": mname, "color_h": mcolor}
+
+
+func apply_quest_gives_recipe(quest: Dictionary) -> void:
+	var recipe: Dictionary = quest.get("gives_recipe", {})
+	if recipe.is_empty():
+		return
+	var rname: String = str(recipe.get("name", ""))
+	var recipe_key: String = "quest_recipe:" + rname
+	if not discovered_recipes.has(recipe_key):
+		var full_recipe: Dictionary = recipe.duplicate()
+		full_recipe["key"] = recipe_key
+		if not full_recipe.has("ingredients"):
+			full_recipe["ingredients"] = []
+		discovered_recipes[recipe_key] = full_recipe
 
 
 # ── Faction Satisfaction ─────────────────────────────────────────

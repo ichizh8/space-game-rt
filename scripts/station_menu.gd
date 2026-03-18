@@ -378,6 +378,12 @@ func _refresh_restaurant_tab() -> void:
 		var sep := HSeparator.new()
 		vbox.add_child(sep)
 
+	# Auto-accept intro quest on first visit
+	if not GameState.is_quest_active("quest_first_day_open") and not GameState.is_quest_completed("quest_first_day_open"):
+		var intro_q: Dictionary = WorldData.get_quest_by_id("quest_first_day_open")
+		if not intro_q.is_empty():
+			GameState.accept_quest(intro_q, "drifting_spoon")
+
 	# Header
 	var name_lbl := Label.new()
 	name_lbl.text = GameState.restaurant_name
@@ -591,14 +597,19 @@ func _build_restaurant_quests(vbox: VBoxContainer) -> void:
 
 		# Active quests — check auto-complete
 		if GameState.is_quest_active(qid):
-			var req_ing: String = q.get("required_ingredient", "")
-			var req_amt: int = int(q.get("required_amount", 0))
-			if GameState.has_ingredient(req_ing, req_amt):
-				# Auto-complete
-				_complete_restaurant_quest(q)
-				_build_rquest_completed(vbox, q)
-			else:
+			var qtype: String = q.get("type", "")
+			if qtype == "tutorial_cook":
+				# Tutorial cook completes via serving a guest, no ingredient check
 				_build_rquest_active(vbox, q)
+			else:
+				var req_ing: String = q.get("required_ingredient", "")
+				var req_amt: int = int(q.get("required_amount", 0))
+				if GameState.has_ingredient(req_ing, req_amt):
+					# Auto-complete
+					_complete_restaurant_quest(q)
+					_build_rquest_completed(vbox, q)
+				else:
+					_build_rquest_active(vbox, q)
 			shown_any = true
 			continue
 
@@ -631,6 +642,11 @@ func _check_quest_unlock(q: Dictionary) -> bool:
 	if cond.begins_with("restaurant_rep >= "):
 		var threshold: int = int(cond.split(">= ")[1])
 		return GameState.restaurant_rep >= threshold
+	# Quest completion conditions
+	if cond == "quest_first_day_open_complete":
+		return GameState.is_quest_completed("quest_first_day_open")
+	if cond == "quest_something_worth_eating_complete":
+		return GameState.is_quest_completed("quest_something_worth_eating")
 	return true
 
 
@@ -702,13 +718,19 @@ func _build_rquest_active(vbox: VBoxContainer, q: Dictionary) -> void:
 	npc_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
 	inner.add_child(npc_lbl)
 
-	var req_ing: String = q.get("required_ingredient", "")
-	var req_amt: int = int(q.get("required_amount", 0))
-	var have: int = GameState.restaurant_ingredients.get(req_ing, 0)
 	var prog_lbl := Label.new()
-	prog_lbl.text = "%s: %d / %d" % [req_ing.replace("_", " ").capitalize(), have, req_amt]
-	prog_lbl.add_theme_font_size_override("font_size", 13)
-	prog_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.6) if have < req_amt else Color(0.4, 1.0, 0.4))
+	if q.get("type", "") == "tutorial_cook":
+		prog_lbl.text = "Cook a dish in the Bench tab, then serve a guest in the Guests tab."
+		prog_lbl.add_theme_font_size_override("font_size", 13)
+		prog_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.6))
+	else:
+		var req_ing: String = q.get("required_ingredient", "")
+		var req_amt: int = int(q.get("required_amount", 0))
+		var have: int = GameState.restaurant_ingredients.get(req_ing, 0)
+		prog_lbl.text = "%s: %d / %d" % [req_ing.replace("_", " ").capitalize(), have, req_amt]
+		prog_lbl.add_theme_font_size_override("font_size", 13)
+		prog_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.6) if have < req_amt else Color(0.4, 1.0, 0.4))
+	prog_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	inner.add_child(prog_lbl)
 
 
@@ -1287,6 +1309,9 @@ func _on_serve_guest(guest_idx: int, choice: String) -> void:
 	var result: Dictionary = GameState.resolve_guest(guest, choice)
 	guest["_resolved"] = true
 	guest["_result_message"] = result.get("message", "Served.")
+	# Complete tutorial cook quest if active
+	if GameState.is_quest_active("quest_first_day_open"):
+		_complete_restaurant_quest(WorldData.get_quest_by_id("quest_first_day_open"))
 	# Check if all guests resolved
 	var all_done: bool = true
 	var outcomes: Array = []

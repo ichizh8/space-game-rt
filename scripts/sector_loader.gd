@@ -7,6 +7,8 @@ var _respawn_zones: Array = []
 
 var _story_check_timer: float = 0.0
 const STORY_CHECK_INTERVAL: float = 0.5
+var _hunt_zone_timer: float = 0.0
+const HUNT_ZONE_CHECK_INTERVAL: float = 2.0
 var _pending_initial_spawns: bool = false
 
 # Scene paths
@@ -45,6 +47,10 @@ func _process(delta: float) -> void:
 		_story_check_timer = 0.0
 		_check_story_triggers()
 		_discover_nearby_planets()
+	_hunt_zone_timer += delta
+	if _hunt_zone_timer >= HUNT_ZONE_CHECK_INTERVAL:
+		_hunt_zone_timer = 0.0
+		_check_hunting_zone_discovery()
 
 func _do_initial_spawns() -> void:
 	for i in range(_respawn_zones.size()):
@@ -397,6 +403,31 @@ func _discover_nearby_planets() -> void:
 			var pcol: float = float(obj.get("_color_h") if obj.get("_color_h") != null else 0.3)
 			if pid != "":
 				GameState.map_discover_planet(pid, obj.global_position, pname, pcol)
+
+
+func _check_hunting_zone_discovery() -> void:
+	if GameState.current_sector != 1:
+		return
+	var player: Node2D = _get_player()
+	if not is_instance_valid(player):
+		return
+	var zones: Array = GameState.hunting_zones_sector1
+	for zone in zones:
+		var zid: String = str(zone.get("id", ""))
+		if zid.is_empty() or GameState.map_discovered_planets.has(zid):
+			continue
+		var zpos: Vector2 = Vector2(float(zone.get("pos_x", 0.0)), float(zone.get("pos_y", 0.0)))
+		var discovery_radius: float = float(zone.get("radius", 400.0)) + 300.0
+		if player.global_position.distance_to(zpos) <= discovery_radius:
+			GameState.map_discovered_planets[zid] = {
+				"pos_x": zone.get("pos_x", 0.0),
+				"pos_y": zone.get("pos_y", 0.0),
+				"name": str(zone.get("label", "")),
+				"color_h": float(zone.get("color_h", 0.3))
+			}
+			var hud: Node = get_tree().get_first_node_in_group("hud")
+			if is_instance_valid(hud) and hud.has_method("show_notification"):
+				hud.show_notification("Hunting zone discovered: " + str(zone.get("label", "")))
 
 
 # --- Story triggers (from sector_generator) ---

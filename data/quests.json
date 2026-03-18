@@ -120,6 +120,84 @@
     "source_type": "station"
   },
   {
+    "id": "quest_first_day_open",
+    "type": "tutorial_cook",
+    "title": "First Day Open",
+    "description": "The kitchen equipment works, barely. Your father left a handwritten note: 'The scrap protein cans are under the counter. Good enough to open. Not good enough to stay open.' Cook one dish and serve it to a guest to see how the restaurant works.",
+    "npc": "Dad (note)",
+    "source_type": "restaurant",
+    "unlock_condition": "",
+    "reward": {"credits": 30},
+    "rep_reward": 1,
+    "gives_recipe": {
+      "name": "Mystery Meat Patty",
+      "method": "char_grill",
+      "style": "fast_food",
+      "credits_value": 25,
+      "rep_value": 1,
+      "tier": 1,
+      "menu_story": "Dad's recipe. Nobody knows what's in it. Nobody asks."
+    },
+    "map_markers": [
+      {"id": "hunt_void_grubs", "label": "Void Grub Nesting Area", "pos_x": 600.0, "pos_y": 1400.0, "color_h": 0.25}
+    ]
+  },
+  {
+    "id": "quest_something_worth_eating",
+    "type": "gather_ingredient",
+    "title": "Something Worth Eating",
+    "description": "Old Marta has been sitting at the bar since you opened. She watches you cook, takes one bite, sets it down. 'I've eaten ration packs with more dignity. There's void grubs in the asteroid belt \u2014 I'll show you where. Bring back real meat and I'll teach you a recipe.'",
+    "npc": "Old Marta",
+    "required_ingredient": "grub_meat",
+    "required_amount": 2,
+    "source_type": "restaurant",
+    "unlock_condition": "quest_first_day_open_complete",
+    "reward": {"credits": 60},
+    "rep_reward": 3,
+    "unlock_dish": "dish_grub_fritters",
+    "gives_recipe": {
+      "name": "Grub Fritters",
+      "method": "char_grill",
+      "style": "fast_food",
+      "credits_value": 45,
+      "rep_value": 2,
+      "tier": 1,
+      "menu_story": "Old Marta's suggestion. Embarrassing but people keep ordering it."
+    },
+    "map_markers": [
+      {"id": "hunt_void_grubs", "label": "Void Grub Nesting Area", "pos_x": 600.0, "pos_y": 1400.0, "color_h": 0.25},
+      {"id": "hunt_skim_rays", "label": "Skim Ray Feeding Zone", "pos_x": -400.0, "pos_y": 1800.0, "color_h": 0.55}
+    ]
+  },
+  {
+    "id": "quest_into_the_nebula",
+    "type": "gather_ingredient",
+    "title": "Into the Nebula",
+    "description": "A hunter stumbles in with a scorched suit. 'Hit something in the nebula. Big. Pulsed electricity at me for twenty minutes.' He drops a napkin with rough coordinates. 'Whatever it is, cook it.' He leaves without paying.",
+    "npc": "Scorched Hunter",
+    "required_ingredient": "drifter_organ",
+    "required_amount": 1,
+    "source_type": "restaurant",
+    "unlock_condition": "quest_something_worth_eating_complete",
+    "reward": {"credits": 120},
+    "rep_reward": 5,
+    "unlock_dish": "dish_drifter_soup",
+    "gives_recipe": {
+      "name": "Drifter Soup",
+      "method": "slow_boil",
+      "style": "diner",
+      "credits_value": 130,
+      "rep_value": 4,
+      "tier": 2,
+      "menu_story": "Gelatinous. Weird. Somehow works. Hunter's recipe."
+    },
+    "map_markers": [
+      {"id": "hunt_void_grubs", "label": "Void Grub Nesting Area", "pos_x": 600.0, "pos_y": 1400.0, "color_h": 0.25},
+      {"id": "hunt_skim_rays", "label": "Skim Ray Feeding Zone", "pos_x": -400.0, "pos_y": 1800.0, "color_h": 0.55},
+      {"id": "hunt_drifters", "label": "Nebula \u2014 Membrane Drifter Territory", "pos_x": -1800.0, "pos_y": 2200.0, "color_h": 0.65}
+    ]
+  },
+  {
     "id": "quest_fresh_ingredients",
     "type": "gather_ingredient",
     "title": "Something Fresh",
