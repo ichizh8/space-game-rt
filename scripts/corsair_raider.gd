@@ -193,7 +193,7 @@ func _get_player() -> Node2D:
 
 
 func _setup_sprite() -> void:
-	var tex := load("res://assets/2026-03-15-enemy-pirate.png") as Texture2D
+	var tex := load("res://assets/2026-03-18-corsair-raider.png") as Texture2D
 	if not is_instance_valid(tex):
 		return
 	_sprite_tex = tex
