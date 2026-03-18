@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cvfltndh7jyhl"
+
+[deps]
+
+files=["res://balance/economy.Item.translation", "res://balance/economy.Cost / Price.translation", "res://balance/economy.Currency.translation", "res://balance/economy.Notes.translation"]
+
+source_file="res://balance/economy.csv"
+dest_files=["res://balance/economy.Item.translation", "res://balance/economy.Cost / Price.translation", "res://balance/economy.Currency.translation", "res://balance/economy.Notes.translation"]
+
+[params]
+
+compress=true
+delimiter=0

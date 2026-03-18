@@ -308,6 +308,15 @@ func _spawn_loot(cr: int) -> void:
 	if loot.has_method("setup"):
 		loot.setup(cr, res)
 	get_parent().add_child(loot)
+	_ingredient_drop()
+
+
+func _ingredient_drop() -> void:
+	match enemy_type:
+		EnemyType.PIRATE:
+			GameState.add_ingredient("scrap_protein", randi_range(1, 2))
+		EnemyType.DRONE:
+			GameState.add_ingredient("void_flesh", 1)
 
 
 func _get_player() -> Node2D:

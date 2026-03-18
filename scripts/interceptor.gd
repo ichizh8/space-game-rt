@@ -124,6 +124,7 @@ func _spawn_loot() -> void:
 	if loot.has_method("setup"):
 		loot.setup(CREDIT_REWARD, res)
 	get_parent().add_child(loot)
+	GameState.add_ingredient("scrap_protein", 1)
 
 
 func take_damage(amount: float) -> void:

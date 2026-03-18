@@ -69,6 +69,11 @@ var saved_player_pos: Vector2 = Vector2.ZERO
 # Sector system
 var current_sector: int = 1
 
+# Restaurant system
+var restaurant_rep: int = 0
+var restaurant_ingredients: Dictionary = {}
+var restaurant_name: String = "The Drifting Spoon"
+
 signal hull_changed(new_value: float)
 signal fuel_changed(new_value: float)
 signal credits_changed(new_value: int)
@@ -76,6 +81,8 @@ signal resources_changed()
 signal player_died()
 signal xp_gained(new_total: int)
 signal perk_unlocked(perk_id: String)
+signal restaurant_rep_changed(new_value: int)
+signal restaurant_ingredients_changed()
 
 
 func add_resource(type: String, amount: int) -> void:
@@ -194,6 +201,9 @@ func on_player_death() -> void:
 	resources_changed.emit()
 	hull_changed.emit(hull)
 	fuel_changed.emit(fuel)
+	# Lose ingredients on death
+	restaurant_ingredients = {}
+	restaurant_ingredients_changed.emit()
 	# Respawn at nearest station
 	var respawn: Vector2 = _find_nearest_station_pos()
 	if respawn != Vector2.ZERO:
@@ -461,3 +471,41 @@ func reset_game() -> void:
 	active_quests = []
 	faction_rep = {"coalition": 50, "pirates": 0}
 	# completed_quests is NOT reset (persistent history)
+	# do NOT reset restaurant_rep or restaurant_ingredients (persistent like captain XP)
+
+
+func add_ingredient(id: String, amount: int) -> void:
+	restaurant_ingredients[id] = restaurant_ingredients.get(id, 0) + amount
+	restaurant_ingredients_changed.emit()
+
+
+func remove_ingredient(id: String, amount: int) -> bool:
+	if restaurant_ingredients.get(id, 0) < amount:
+		return false
+	restaurant_ingredients[id] -= amount
+	if restaurant_ingredients[id] <= 0:
+		restaurant_ingredients.erase(id)
+	restaurant_ingredients_changed.emit()
+	return true
+
+
+func has_ingredient(id: String, amount: int) -> bool:
+	return restaurant_ingredients.get(id, 0) >= amount
+
+
+func add_restaurant_rep(amount: int) -> void:
+	restaurant_rep = clampi(restaurant_rep + amount, 0, 100)
+	restaurant_rep_changed.emit(restaurant_rep)
+
+
+func get_restaurant_tier() -> String:
+	if restaurant_rep < 20:
+		return "Shithole Fastfood"
+	elif restaurant_rep < 40:
+		return "Decent Joint"
+	elif restaurant_rep < 60:
+		return "Hidden Gem"
+	elif restaurant_rep < 80:
+		return "Renowned"
+	else:
+		return "Galaxy Famous"

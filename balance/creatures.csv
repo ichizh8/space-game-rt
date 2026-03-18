@@ -1,0 +1,14 @@
+ID,Name,HP (base),Damage (base),Speed,Shoot Cooldown,Burst Max,Credit Reward,XP Reward,Drop Types,Drop Min,Drop Max,AI / Behavior,Notes
+pirate,Pirate,30,10,160,0.25,3,20,15,"ore/crystal/scrap",3,8,"Random: aggressive/sniper/flanker/coward","Aggressive: orbit 80 burst 5 no retreat. Sniper: orbit 220 dmg x1.5. Flanker: flips orbit dir. Coward: flees at 50% hp stops shooting after hit."
+drone,Drone,60,18,80,1.5,1,35,25,"ore/crystal/scrap",3,8,"Standard orbit","Tanky slow. No AI style variants."
+interceptor,Interceptor,20,30 (explosion on contact),240,—,—,10,8,"ore/crystal/scrap",3,8,"Kamikaze ram","No shooting. Explodes on player contact. Very fast."
+battleship,Battleship,180,14,55,—,—,80,60,"ore/crystal/scrap",3,8,"Slow patrol + turret fire","Tanky. HP overridden to 120 * diff_mult in _apply_difficulty. Slow but high reward."
+sniper,Sniper,25,28,60,—,—,30,20,"ore/crystal/scrap",3,8,"Long range retreat","Keeps max distance. Bullet dmg scales with diff_mult. Fragile."
+minelayer,Minelayer,35,— (mines),110,—,—,25,18,"ore/crystal/scrap",3,8,"Arc movement + mine drops","No direct shooting. Lays proximity mines."
+carrier,Carrier,80,— (spawns drones),45,—,—,60,40,"ore/crystal/scrap",3,8,"Slow spawner","Spawns smaller enemies. Very slow. Medium reward."
+void_sentinel,Void Sentinel,90,20,50,—,—,50,35,"ore/crystal/scrap",3,8,"Deep Space elite","Bullet dmg scales with diff_mult. Slow but tough. Deep space only."
+
+NPC — Miner,Miner NPC,—,—,0 (stationary),—,—,—,—,—,—,—,"Passive","Does not move. Friendly. Not killable (no hp logic found)."
+NPC — Freighter,Cargo Freighter,80,—,0 (stationary),—,—,—,—,—,—,—,"Passive","Has HP but no combat. Likely can be damaged/destroyed. Check cargo_freighter.gd for loot."
+
+PLAYER REFERENCE,Player Ship,300 (base),varies,280 MAX (+ speed bonus),—,—,—,—,—,—,—,—,"MAX_SPEED = 280. speed_cap = 280 + player_speed_bonus. player_speed_bonus starts at 120 in GameState — effective cap = 400 at start (likely dev value)."

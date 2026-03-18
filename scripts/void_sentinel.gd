@@ -125,6 +125,7 @@ func _spawn_loot() -> void:
 	var parent := get_parent()
 	if is_instance_valid(parent):
 		parent.add_child(loot)
+	GameState.add_ingredient("void_flesh", randi_range(1, 2))
 
 func _get_player() -> Node2D:
 	var players := get_tree().get_nodes_in_group("player")

@@ -18,9 +18,10 @@ var PLANETS: Array = [
 ]
 
 var STATIONS: Array = [
-	{"name": "Coalition Hub",        "pos_x": -1350.0, "pos_y": -300.0, "faction": "coalition"},
-	{"name": "Mining Outpost Alpha", "pos_x": 1700.0,  "pos_y": -750.0, "faction": "neutral"},
-	{"name": "Observation Post",     "pos_x": 2600.0,  "pos_y": 800.0,  "faction": "coalition"},
+	{"name": "Coalition Hub",        "station_id": "s1_coalition_hub",   "pos_x": -1350.0, "pos_y": -300.0, "faction": "coalition"},
+	{"name": "Mining Outpost Alpha", "station_id": "s1_mining_outpost",  "pos_x": 1700.0,  "pos_y": -750.0, "faction": "neutral"},
+	{"name": "Observation Post",     "station_id": "s1_observation",     "pos_x": 2600.0,  "pos_y": 800.0,  "faction": "coalition"},
+	{"name": "The Drifting Spoon",   "station_id": "drifting_spoon",     "pos_x": -800.0,  "pos_y": 600.0,  "faction": "neutral", "is_restaurant": true},
 ]
 
 var ASTEROID_CLUSTERS: Array = [

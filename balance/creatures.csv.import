@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bjiqddoffh43t"
+
+[deps]
+
+files=["res://balance/creatures.Name.translation", "res://balance/creatures.HP (base).translation", "res://balance/creatures.Damage (base).translation", "res://balance/creatures.Speed.translation", "res://balance/creatures.Shoot Cooldown.translation", "res://balance/creatures.Burst Max.translation", "res://balance/creatures.Credit Reward.translation", "res://balance/creatures.XP Reward.translation", "res://balance/creatures.Drop Types.translation", "res://balance/creatures.Drop Min.translation", "res://balance/creatures.Drop Max.translation", "res://balance/creatures.AI / Behavior.translation", "res://balance/creatures.Notes.translation"]
+
+source_file="res://balance/creatures.csv"
+dest_files=["res://balance/creatures.Name.translation", "res://balance/creatures.HP (base).translation", "res://balance/creatures.Damage (base).translation", "res://balance/creatures.Speed.translation", "res://balance/creatures.Shoot Cooldown.translation", "res://balance/creatures.Burst Max.translation", "res://balance/creatures.Credit Reward.translation", "res://balance/creatures.XP Reward.translation", "res://balance/creatures.Drop Types.translation", "res://balance/creatures.Drop Min.translation", "res://balance/creatures.Drop Max.translation", "res://balance/creatures.AI / Behavior.translation", "res://balance/creatures.Notes.translation"]
+
+[params]
+
+compress=true
+delimiter=0

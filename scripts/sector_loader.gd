@@ -187,7 +187,7 @@ func _place_station(s: Dictionary, parent: Node) -> void:
 		return
 	station.global_position = Vector2(float(s.get("pos_x", 0.0)), float(s.get("pos_y", 0.0)))
 	var s_name: String = str(s.get("name", "Station"))
-	var s_id: String = s_name.replace(" ", "_").to_lower()
+	var s_id: String = str(s.get("station_id", s_name.replace(" ", "_").to_lower()))
 	if station.has_method("setup"):
 		station.setup(s_id, s_name)
 	parent.add_child(station)

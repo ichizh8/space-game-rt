@@ -1,0 +1,34 @@
+Category,Item,Cost / Price,Currency,Notes
+
+SELL PRICES,Ore,4,credits per unit,Modified by faction_rep coalition + captain_sell_bonus
+SELL PRICES,Crystal,10,credits per unit,Same modifiers
+SELL PRICES,Scrap,2,credits per unit,Same modifiers
+
+SERVICES,Repair +50 HP,15,scrap,"Fixed cost. No scaling."
+SERVICES,Refuel +50 fuel,30,credits,"Fixed cost. No scaling."
+
+SHIP UPGRADES — WEAPONS,Level 0→1,80,credits,+5 damage bonus
+SHIP UPGRADES — WEAPONS,Level 1→2,200,credits,+5 damage bonus
+SHIP UPGRADES — WEAPONS,Level 2→3,500,credits,+10 damage bonus
+
+SHIP UPGRADES — ENGINES,Level 0→1,60,credits,+20 speed bonus
+SHIP UPGRADES — ENGINES,Level 1→2,150,credits,+20 speed bonus
+SHIP UPGRADES — ENGINES,Level 2→3,400,credits,+40 speed bonus
+
+SHIP UPGRADES — HULL PLATING,Level 0→1,100,credits,+25 max HP
+SHIP UPGRADES — HULL PLATING,Level 1→2,250,credits,+25 max HP
+SHIP UPGRADES — HULL PLATING,Level 2→3,600,credits,+50 max HP
+
+DEATH PENALTY,Credits lost,25%,—,"credits = credits * 0.75"
+DEATH PENALTY,Resources lost,50%,—,"Each resource *= 0.5"
+
+CAPTAIN XP,XP per perk point,100,xp,"1 perk point per 100 XP"
+CAPTAIN XP,XP per kill (session bonus on death),5,xp per kill,Awarded at death
+CAPTAIN XP,XP per artifact (session bonus on death),20,xp per artifact,Awarded at death
+CAPTAIN XP,XP per pirate kill (in-run),15,xp,Awarded immediately
+CAPTAIN XP,XP per drone kill (in-run),25,xp,Awarded immediately
+
+PLAYER START,Hull,300,HP,Base. +captain_hull_bonus on respawn
+PLAYER START,Fuel,500,units,Base
+PLAYER START,Credits,9999,credits,Dev/test value — tune before release
+PLAYER START,Speed (base),120,+ player_speed_bonus,player_speed_bonus starts at 120 (check game_state line)
