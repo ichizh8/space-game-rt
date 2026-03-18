@@ -464,7 +464,7 @@ func _add_upgrade_row(vbox: VBoxContainer, uname: String, kind: int, level: int,
 	name_lbl.add_theme_font_size_override("font_size", 13)
 	row.add_child(name_lbl)
 
-	if level < 10:
+	if level < 20:
 		var btn := Button.new()
 		btn.text = labels[level] + " (" + str(costs[level]) + " cr)"
 		btn.custom_minimum_size = Vector2(140, 36)
