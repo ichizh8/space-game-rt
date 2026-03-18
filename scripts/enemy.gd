@@ -210,24 +210,34 @@ func _do_chase(player: Node2D, _delta: float) -> void:
 
 
 func _do_orbit(player: Node2D, delta: float) -> void:
-	# Flanker direction flip
-	if ai_style == AIStyle.FLANKER:
-		_direction_flip_timer += delta
-		if _direction_flip_timer > randf_range(3.0, 5.0):
-			_direction_flip_timer = 0.0
-			orbit_direction *= -1
-	# Sniper orbits slower
-	var orbit_speed_mult: float = 0.4 if ai_style == AIStyle.SNIPER else 1.0
-	var cur_orbit_range: float = _get_orbit_range()
-	orbit_angle += orbit_direction * delta * (speed / cur_orbit_range) * 0.8 * orbit_speed_mult
-	var target_pos := player.global_position + Vector2.from_angle(orbit_angle) * cur_orbit_range
-	var dir := (target_pos - global_position).normalized()
-	velocity = dir * speed
-	var face_dir := (player.global_position - global_position).normalized()
-	rotation = face_dir.angle() + PI / 2.0
-	# Coward stops shooting after being hit
-	if ai_style == AIStyle.COWARD and _coward_hit:
+	# Pirates don't circle — they do strafe passes
+	# SNIPER: just hold range and face player
+	if ai_style == AIStyle.SNIPER:
+		var cur_range: float = _get_orbit_range()
+		var dist: float = global_position.distance_to(player.global_position)
+		var dir_to_player := (player.global_position - global_position).normalized()
+		if dist < cur_range * 0.85:
+			# Back away
+			velocity = -dir_to_player * speed * 0.5
+		elif dist > cur_range * 1.15:
+			# Drift in
+			velocity = dir_to_player * speed * 0.4
+		else:
+			velocity = Vector2.ZERO
+		rotation = dir_to_player.angle() + PI / 2.0
 		return
+
+	# AGGRESSIVE / FLANKER / COWARD: strafe pass
+	# Use orbit_angle as a sweep direction — move perpendicular to player, then pull away
+	orbit_angle += orbit_direction * delta * 0.6  # slow sweep angle, not fast orbit
+	var cur_range: float = _get_orbit_range()
+	var dist: float = global_position.distance_to(player.global_position)
+	var dir_to_player := (player.global_position - global_position).normalized()
+	# Move sideways relative to player + slightly toward/away
+	var perp := Vector2(-dir_to_player.y, dir_to_player.x) * orbit_direction
+	var radial: float = (cur_range - dist) / cur_range  # positive = too close, negative = too far
+	velocity = (perp * 0.7 + dir_to_player * -radial * 0.5) * speed
+	rotation = dir_to_player.angle() + PI / 2.0
 	_handle_shooting(delta)
 
 
