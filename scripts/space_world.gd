@@ -24,6 +24,15 @@ const RAID_WARNING_DURATION := 3.0
 
 
 func _ready() -> void:
+	# Dev cheat: ?cheat_credits=N in URL sets credits on load
+	if OS.get_name() == "Web":
+		var raw = JavaScriptBridge.eval("new URLSearchParams(window.location.search).get('cheat_credits')", true)
+		if raw != null and str(raw) != "" and str(raw) != "null":
+			var amt: int = int(str(raw))
+			if amt > 0:
+				GameState.credits = amt
+				GameState.credits_changed.emit(GameState.credits)
+
 	# Add parallax starfield as background
 	var sf_scene := load("res://scenes/starfield.tscn") as PackedScene
 	if is_instance_valid(sf_scene):
