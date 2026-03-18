@@ -426,8 +426,12 @@ func _refresh_bridge() -> void:
 	var sec4 := _make_section_label("FACTION STANDING")
 	vbox.add_child(sec4)
 	var faction_data := [
-		["Coalition", GameState.faction_rep.get("coalition", 50), Color(0.3, 0.7, 1.0)],
-		["Pirates", GameState.faction_rep.get("pirates", 0), Color(0.9, 0.3, 0.3)],
+		["Coalition",    GameState.faction_rep.get("coalition",   50), Color(0.3, 0.7, 1.0)],
+		["Corsairs",     GameState.faction_rep.get("corsairs",    30), Color(0.9, 0.3, 0.3)],
+		["Miners Guild", GameState.faction_rep.get("miners",      50), Color(0.8, 0.6, 0.2)],
+		["Scientists",   GameState.faction_rep.get("scientists",  50), Color(0.2, 0.9, 0.7)],
+		["Drifters",     GameState.faction_rep.get("drifters",    50), Color(0.7, 0.5, 0.9)],
+		["Independents", GameState.faction_rep.get("independents",50), Color(0.6, 0.6, 0.6)],
 	]
 	for fd in faction_data:
 		var f_row := HBoxContainer.new()
