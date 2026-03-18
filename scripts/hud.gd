@@ -367,6 +367,27 @@ func _build_ui() -> void:
 	cockpit_btn.pressed.connect(_on_cockpit_pressed)
 	add_child(cockpit_btn)
 
+	# Save button (top-left, next to cockpit)
+	var save_btn := Button.new()
+	save_btn.text = "SAVE"
+	save_btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	save_btn.offset_left = 94
+	save_btn.offset_top = 6
+	save_btn.offset_right = 152
+	save_btn.offset_bottom = 34
+	save_btn.add_theme_font_size_override("font_size", 12)
+	var save_style := StyleBoxFlat.new()
+	save_style.bg_color = Color(0.05, 0.28, 0.12, 0.88)
+	save_style.corner_radius_top_left = 4
+	save_style.corner_radius_top_right = 4
+	save_style.corner_radius_bottom_left = 4
+	save_style.corner_radius_bottom_right = 4
+	save_btn.add_theme_stylebox_override("normal", save_style)
+	save_btn.add_theme_stylebox_override("pressed", save_style)
+	save_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+	save_btn.pressed.connect(_on_save_pressed.bind(save_btn))
+	add_child(save_btn)
+
 	# Action button (center of screen, above controls)
 	_action_button = Button.new()
 	_action_button.set_anchors_preset(Control.PRESET_CENTER)
@@ -659,6 +680,16 @@ func reset_fire() -> void:
 
 func _draw_fire_button() -> void:
 	pass  # Drawn by fire_button.gd
+
+func _on_save_pressed(btn: Button) -> void:
+	SaveManager.save_game()
+	btn.text = "SAVED ✓"
+	btn.add_theme_color_override("font_color", Color(1.0, 1.0, 0.3))
+	await get_tree().create_timer(1.5).timeout
+	if is_instance_valid(btn):
+		btn.text = "SAVE"
+		btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+
 
 func _on_cockpit_pressed() -> void:
 	var cockpit_scene: PackedScene = load("res://scenes/cockpit.tscn")
