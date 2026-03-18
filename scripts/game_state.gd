@@ -320,7 +320,8 @@ func reset_run() -> void:
 	# Reset run-specific state but keep captain progression
 	hull = max_hull
 	fuel = max_fuel
-	credits = 0
+	# credits intentionally NOT reset here — death penalty already applied in on_player_death()
+	# New game resets credits via reset_game() instead
 	resources = {"ore": 0, "crystal": 0, "scrap": 0}
 	inventory = []
 	artifacts_collected = []

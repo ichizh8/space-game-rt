@@ -115,13 +115,13 @@ func _build_ui() -> void:
 
 func _on_try_again() -> void:
 	GameState.reset_run()
-	SaveManager.delete_save(SaveManager.active_slot)
+	# do NOT delete save — death already saved state via space_world._on_player_died()
 	call_deferred("_change_to_game")
 
 
 func _on_main_menu() -> void:
 	GameState.reset_run()
-	SaveManager.delete_save(SaveManager.active_slot)
+	# do NOT delete save — preserve persistent progress (captain XP, maps, recipes, etc.)
 	call_deferred("_change_to_menu")
 
 
