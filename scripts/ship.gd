@@ -108,6 +108,9 @@ func _setup_sprite() -> void:
 	else:
 		# Fallback: keep procedural draw if texture fails
 		return
+	# Draw sprite BELOW the trail (trail uses _draw on parent which renders before children)
+	# Use z_index -1 so trail (drawn in parent _draw) appears on top
+	sprite.z_index = -1
 	add_child(sprite)
 
 
