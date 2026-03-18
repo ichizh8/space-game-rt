@@ -905,9 +905,38 @@ func _generate_procedural_guest() -> Dictionary:
 
 func _weighted_faction_pick() -> String:
 	var factions: Array = ["coalition", "corsairs", "miners", "scientists", "drifters", "independents"]
+
+	# Determine what the player can actually make
+	var has_t2: bool = false
+	var has_t3: bool = false
+	for ing_id in restaurant_ingredients.keys():
+		if restaurant_ingredients[ing_id] > 0:
+			var tier: int = int(ingredient_tiers.get(ing_id, {}).get("tier", 1))
+			if tier >= 2:
+				has_t2 = true
+			if tier >= 3:
+				has_t3 = true
+	# Also count any prepared dishes
+	for pd in prepared_dishes:
+		var ptier: int = int(pd.get("tier", 1))
+		if ptier >= 2:
+			has_t2 = true
+		if ptier >= 3:
+			has_t3 = true
+
 	var weights: Array = []
 	for f in factions:
-		weights.append(max(10, faction_rep.get(f, 30)))
+		var base_weight: int = max(10, faction_rep.get(f, 30))
+		# Scientists love molecular deconstruction + rare ingredients — penalise until T2 unlocked
+		if f == "scientists":
+			if not has_t2:
+				base_weight = 2   # nearly excluded early game
+			elif not has_t3:
+				base_weight = base_weight / 2
+		# Corsairs love cold press + raw — fine early, but some high-end prefs need T2+
+		# No penalty, cold press works on any ingredient
+		weights.append(base_weight)
+
 	var total: int = 0
 	for w in weights:
 		total += w
