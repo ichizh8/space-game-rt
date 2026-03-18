@@ -1,10 +1,11 @@
 # Balance Sheets
 
-Open in Apple Numbers. Three files:
+Open in Apple Numbers. Files:
 
 - **creatures.csv** — all enemy types: HP, damage, speed, rewards, drops
+- **wildlife.csv** — huntable creatures: behaviors, ingredient drops, zones
 - **economy.csv** — sell prices, repair/refuel costs, upgrade costs, death penalties, XP
-- **restaurant.csv** — ingredients (from creature drops), dishes, revenue, reputation tiers, upgrades
+- **restaurant.csv** — ingredients, dishes, revenue, reputation tiers, upgrades
 
 ## Workflow
 
@@ -19,7 +20,5 @@ Open in Apple Numbers. Three files:
 ## Flagged Items
 
 - `credits: 9999` start value in `game_state.gd` — dev value, needs tuning before release
-- `player_speed_bonus` starts at `120.0` in `game_state.gd` (line ~13) — looks intentional but unusually high, verify
-- Carrier HP not confirmed — check `carrier.gd` directly
-- Void Sentinel HP not confirmed — check `void_sentinel.gd` directly
-- Restaurant system does not exist in code yet — this tab is the design spec
+- `player_speed_bonus` starts at `0.0` now (was 120.0 — fixed)
+- Debug save line still visible in main menu — remove before release
