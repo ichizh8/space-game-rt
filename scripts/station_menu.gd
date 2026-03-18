@@ -73,8 +73,7 @@ func _build_ui() -> void:
 	_build_maps_tab()
 	if is_restaurant_station():
 		_build_restaurant_tab()
-		_build_bench_tab()
-		_build_guests_tab()
+		# Bench and Guests tabs replaced by visual restaurant scene (Open Kitchen button)
 
 
 func _build_services_tab() -> void:
@@ -670,6 +669,14 @@ func _refresh_restaurant_tab() -> void:
 	tier_lbl.add_theme_font_size_override("font_size", 13)
 	tier_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
 	vbox.add_child(tier_lbl)
+
+	# Open Kitchen button — launches visual restaurant scene
+	var kitchen_btn := Button.new()
+	kitchen_btn.text = "Open Kitchen"
+	kitchen_btn.custom_minimum_size.y = 48
+	kitchen_btn.add_theme_font_size_override("font_size", 16)
+	kitchen_btn.pressed.connect(_on_open_kitchen)
+	vbox.add_child(kitchen_btn)
 
 	# Cooksta section
 	if GameState.cooksta_rating > 0 or not GameState.cooksta_posts.is_empty():
@@ -1745,6 +1752,15 @@ func _refresh_ui() -> void:
 	for ch in vbox.get_children():
 		ch.queue_free()
 	_fill_services(vbox as VBoxContainer)
+
+func _on_open_kitchen() -> void:
+	var scene_script = load("res://scripts/restaurant_scene.gd")
+	if scene_script == null:
+		return
+	var kitchen := CanvasLayer.new()
+	kitchen.set_script(scene_script)
+	call_deferred("add_child", kitchen)
+
 
 func _on_close() -> void:
 	SaveManager.save_game()
