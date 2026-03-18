@@ -4,6 +4,9 @@ var resource_type: String = "ore"
 var amount: int = 10
 var is_being_mined := false
 var _shape_points: PackedVector2Array
+var _has_sprite: bool = false
+var _sprite_tex: Texture2D = null
+var _sprite_size: float = 40.0
 
 signal mining_complete()
 
@@ -14,7 +17,16 @@ func _ready() -> void:
 	resource_type = types[randi() % types.size()]
 	amount = randi_range(5, 20)
 	_generate_shape()
+	_setup_sprite()
 	queue_redraw()
+
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-18-asteroid.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	_sprite_tex = tex
+	_sprite_size = randf_range(28.0, 45.0)
+	_has_sprite = true
 
 
 func _generate_shape() -> void:
@@ -57,6 +69,13 @@ func get_resource_color() -> Color:
 
 func _draw() -> void:
 	if is_being_mined:
+		return
+	if _has_sprite and is_instance_valid(_sprite_tex):
+		var sz: float = _sprite_size
+		# Tint asteroid by resource type
+		var tint: Color = get_resource_color().lerp(Color.WHITE, 0.5)
+		draw_texture_rect_region(_sprite_tex, Rect2(-sz*0.5, -sz*0.5, sz, sz),
+			Rect2(Vector2.ZERO, _sprite_tex.get_size()), tint)
 		return
 	if _shape_points.is_empty():
 		return

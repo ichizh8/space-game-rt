@@ -682,12 +682,35 @@ func _refresh_restaurant_tab() -> void:
 		empty_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
 		vbox.add_child(empty_lbl)
 	else:
+		var _ing_icons: Dictionary = {
+			"grub_meat": "res://assets/2026-03-18-ingredient-grub-meat.png",
+			"ray_fillet": "res://assets/2026-03-18-ingredient-ray-fillet.png",
+			"snarler_haunch": "res://assets/2026-03-18-ingredient-snarler-haunch.png",
+			"drifter_organ": "res://assets/2026-03-18-ingredient-drifter-organ.png",
+			"drifter_gel": "res://assets/2026-03-18-ingredient-drifter-gel.png",
+			"feeder_flesh": "res://assets/2026-03-18-ingredient-feeder-flesh.png",
+			"crystal_extract": "res://assets/2026-03-18-ingredient-crystal-extract.png",
+			"leviathan_cut": "res://assets/2026-03-18-ingredient-leviathan-cut.png",
+		}
 		for ing_id in GameState.restaurant_ingredients:
 			var count: int = GameState.restaurant_ingredients[ing_id]
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 6)
+			vbox.add_child(row)
+			var icon_path: String = str(_ing_icons.get(ing_id, ""))
+			if not icon_path.is_empty():
+				var tex := load(icon_path) as Texture2D
+				if is_instance_valid(tex):
+					var trect := TextureRect.new()
+					trect.texture = tex
+					trect.custom_minimum_size = Vector2(24, 24)
+					trect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+					row.add_child(trect)
 			var lbl := Label.new()
-			lbl.text = "%s: %d" % [ing_id.replace("_", " ").capitalize(), count]
+			var info: Dictionary = GameState.ingredient_tiers.get(ing_id, {})
+			lbl.text = "%s: %d" % [info.get("name", ing_id.replace("_", " ").capitalize()), count]
 			lbl.add_theme_font_size_override("font_size", 13)
-			vbox.add_child(lbl)
+			row.add_child(lbl)
 
 	vbox.add_child(HSeparator.new())
 
@@ -1430,18 +1453,58 @@ func _build_guest_card(vbox: VBoxContainer, guest: Dictionary, idx: int) -> void
 	var inner := VBoxContainer.new()
 	container.add_child(inner)
 
-	var name_lbl := Label.new()
-	name_lbl.text = str(guest.get("name", "Unknown"))
-	name_lbl.add_theme_font_size_override("font_size", 14)
-	name_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4) if is_special else Color.WHITE)
-	inner.add_child(name_lbl)
+	# Portrait row for special guests
+	if is_special:
+		var portrait_map: Dictionary = {
+			"velka_orin": "res://assets/2026-03-18-guest-velka-orin.png",
+			"commissioner_drath": "res://assets/2026-03-18-guest-drath.png",
+		}
+		var guest_id: String = str(guest.get("id", ""))
+		var portrait_path: String = str(portrait_map.get(guest_id, ""))
+		if not portrait_path.is_empty():
+			var hrow := HBoxContainer.new()
+			hrow.add_theme_constant_override("separation", 8)
+			inner.add_child(hrow)
+			var tex := load(portrait_path) as Texture2D
+			if is_instance_valid(tex):
+				var trect := TextureRect.new()
+				trect.texture = tex
+				trect.custom_minimum_size = Vector2(56, 56)
+				trect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				hrow.add_child(trect)
+			var name_col := VBoxContainer.new()
+			name_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			hrow.add_child(name_col)
+			var name_lbl2 := Label.new()
+			name_lbl2.text = str(guest.get("name", "Unknown"))
+			name_lbl2.add_theme_font_size_override("font_size", 14)
+			name_lbl2.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+			name_col.add_child(name_lbl2)
+			var role_lbl := Label.new()
+			role_lbl.text = str(guest.get("role", ""))
+			role_lbl.add_theme_font_size_override("font_size", 11)
+			role_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+			name_col.add_child(role_lbl)
+		else:
+			var name_lbl := Label.new()
+			name_lbl.text = str(guest.get("name", "Unknown"))
+			name_lbl.add_theme_font_size_override("font_size", 14)
+			name_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+			inner.add_child(name_lbl)
+	else:
+		var name_lbl := Label.new()
+		name_lbl.text = str(guest.get("name", "Unknown"))
+		name_lbl.add_theme_font_size_override("font_size", 14)
+		name_lbl.add_theme_color_override("font_color", Color.WHITE)
+		inner.add_child(name_lbl)
 
-	var info_lbl := Label.new()
-	var trait_str: String = str(guest.get("trait", ""))
-	info_lbl.text = "%s | %s%s" % [str(guest.get("faction", "")).capitalize(), str(guest.get("role", "")), " | " + trait_str if not trait_str.is_empty() else ""]
-	info_lbl.add_theme_font_size_override("font_size", 11)
-	info_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
-	inner.add_child(info_lbl)
+	if not is_special:
+		var info_lbl := Label.new()
+		var trait_str: String = str(guest.get("trait", ""))
+		info_lbl.text = "%s | %s%s" % [str(guest.get("faction", "")).capitalize(), str(guest.get("role", "")), " | " + trait_str if not trait_str.is_empty() else ""]
+		info_lbl.add_theme_font_size_override("font_size", 11)
+		info_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
+		inner.add_child(info_lbl)
 
 	# Preference hint derived from faction dietary profile
 	var _pref_name_map: Dictionary = {
