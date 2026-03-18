@@ -1,9 +1,9 @@
 res://balance/creatures.Name.translation
 res://balance/economy.Item.translation
-res://balance/economy.Currency.translation
 res://balance/creatures.HP (base).translation
-res://balance/economy.Notes.translation
+res://balance/economy.Currency.translation
 res://balance/creatures.Damage (base).translation
+res://balance/economy.Notes.translation
 res://balance/creatures.Speed.translation
 res://balance/creatures.Shoot Cooldown.translation
 res://balance/creatures.Burst Max.translation

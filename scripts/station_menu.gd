@@ -1443,6 +1443,38 @@ func _build_guest_card(vbox: VBoxContainer, guest: Dictionary, idx: int) -> void
 	info_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
 	inner.add_child(info_lbl)
 
+	# Preference hint derived from faction dietary profile
+	var _pref_name_map: Dictionary = {
+		"char_grill": "char-grill", "slow_boil": "slow boil", "plasma_roast": "plasma roast",
+		"cold_press": "raw/cold press", "molecular_decon": "molecular deconstruction",
+		"deep_freeze": "deep freeze", "fast_food": "fast food tray", "diner": "diner plate",
+		"high_cuisine": "high cuisine", "street_cart": "street cart", "the_experiment": "the experiment",
+	}
+	var _faction: String = str(guest.get("faction", "drifters"))
+	var _dp: Dictionary = GameState.faction_dietary.get(_faction, {})
+	var _loves: Array = _dp.get("loves", [])
+	var _hates: Array = _dp.get("hates", [])
+	var _pref_parts: Array = []
+	if _loves.is_empty() and _hates.is_empty():
+		_pref_parts.append("Eats anything")
+	else:
+		if not _loves.is_empty():
+			var _love_names: Array = []
+			for _k in _loves:
+				_love_names.append(str(_pref_name_map.get(_k, _k)))
+			_pref_parts.append("Wants: " + ", ".join(_love_names))
+		if not _hates.is_empty():
+			var _hate_names: Array = []
+			for _k in _hates:
+				_hate_names.append(str(_pref_name_map.get(_k, _k)))
+			_pref_parts.append("Dislikes: " + ", ".join(_hate_names))
+	var pref_lbl := Label.new()
+	pref_lbl.text = " · ".join(_pref_parts)
+	pref_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pref_lbl.add_theme_font_size_override("font_size", 11)
+	pref_lbl.add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
+	inner.add_child(pref_lbl)
+
 	if is_special:
 		var intro_lbl := Label.new()
 		intro_lbl.text = str(guest.get("intro", ""))
