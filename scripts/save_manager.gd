@@ -20,6 +20,8 @@ func _get_slot_path(slot: int) -> String:
 func _web_save(slot: int, json_string: String) -> void:
 	var bytes: PackedByteArray = json_string.to_utf8_buffer()
 	var b64: String = Marshalls.raw_to_base64(bytes)
+	# Strip newlines — raw_to_base64 wraps at 76 chars which breaks JS string literals
+	b64 = b64.replace("\n", "").replace("\r", "")
 	JavaScriptBridge.eval("localStorage.setItem('save_slot_%d', '%s');" % [slot, b64], true)
 
 
