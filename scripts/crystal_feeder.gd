@@ -70,6 +70,8 @@ func _process(delta: float) -> void:
 				state = State.GRAZE
 				_been_attacked = false
 
+	const MIN_DIST := 60.0   # feeder stops and bounces at this distance
+
 	match state:
 		State.GRAZE:
 			_wander_timer += delta
@@ -79,13 +81,29 @@ func _process(delta: float) -> void:
 			velocity = _wander_dir * speed * 0.4
 		State.CHARGE:
 			if is_instance_valid(player):
-				var dir := (player.global_position - global_position).normalized()
-				velocity = dir * speed * 2.0
+				if dist <= MIN_DIST:
+					# Ram damage and bounce away
+					call_deferred("_deal_ram_damage")
+					var away := (global_position - player.global_position).normalized()
+					if away == Vector2.ZERO:
+						away = Vector2.from_angle(randf() * TAU)
+					velocity = away * speed * 3.0
+					state = State.GRAZE
+					_been_attacked = false
+				else:
+					var dir := (player.global_position - global_position).normalized()
+					velocity = dir * speed * 2.0
 
 	if velocity.length() > 0.1:
 		rotation = velocity.angle() + PI / 2.0
 	position += velocity * delta
 
+
+func _deal_ram_damage() -> void:
+	GameState.take_damage(15.0)
+	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
+	if is_instance_valid(em) and em.has_method("add_float"):
+		em.add_float("RAM! -15", global_position + Vector2(0, -30), Color(0.4, 0.9, 0.8))
 
 func take_damage(amount: float) -> void:
 	if is_dead:
