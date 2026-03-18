@@ -25,6 +25,8 @@ var _reposition_target: Vector2 = Vector2.ZERO
 var _flash_timer: float = 0.0
 var _despawn_timer: float = -1.0
 var _has_sprite: bool = false
+var _sprite_tex: Texture2D = null
+var _sprite_size: float = 40.0
 var _charge_dir: Vector2 = Vector2.ZERO
 var bullet_scene: PackedScene
 
@@ -171,16 +173,24 @@ func _setup_sprite() -> void:
 	var tex := load("res://assets/2026-03-16-sniper-ship.png") as Texture2D
 	if not is_instance_valid(tex):
 		return
-	var sprite := Sprite2D.new()
-	sprite.texture = tex
-	var scale_factor: float = 48.0 / max(tex.get_size().x, tex.get_size().y)
-	sprite.scale = Vector2(scale_factor, scale_factor)
-	sprite.rotation = PI
-	add_child(sprite)
+	_sprite_tex = tex
+	_sprite_size = 48.0
 	_has_sprite = true
+	queue_redraw()
 
 func _draw() -> void:
-	if _has_sprite:
+	if _has_sprite and is_instance_valid(_sprite_tex):
+		if is_dead:
+			return
+		var sz: float = _sprite_size
+		draw_texture_rect(_sprite_tex, Rect2(-sz * 0.5, -sz * 0.5, sz, sz), false)
+		if hp < max_hp:
+			var bw: float = sz
+			var by: float = -sz * 0.5 - 5.0
+			var pct: float = hp / max_hp
+			draw_rect(Rect2(-bw*0.5, by, bw, 3.0), Color(0.2,0.2,0.2,0.8))
+			var fc := Color(0.2,0.9,0.2) if pct>0.5 else (Color(0.9,0.7,0.1) if pct>0.25 else Color(0.9,0.1,0.1))
+			draw_rect(Rect2(-bw*0.5, by, bw*pct, 3.0), fc)
 		return
 	if is_dead:
 		return

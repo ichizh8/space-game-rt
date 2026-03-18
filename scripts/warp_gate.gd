@@ -6,6 +6,7 @@ var fuel_cost: int = 50
 
 var _phase: float = 0.0
 var _has_sprite: bool = false
+var _sprite_tex: Texture2D = null
 
 func _ready() -> void:
 	add_to_group("warp_gates")
@@ -15,11 +16,9 @@ func _setup_sprite() -> void:
 	var tex := load("res://assets/2026-03-16-warp-gate.png") as Texture2D
 	if not is_instance_valid(tex):
 		return
-	var sprite := Sprite2D.new()
-	sprite.texture = tex
-	sprite.scale = Vector2.ONE * (100.0 / max(tex.get_size().x, tex.get_size().y))
-	add_child(sprite)
+	_sprite_tex = tex
 	_has_sprite = true
+	queue_redraw()
 
 func _process(delta: float) -> void:
 	_phase += delta * 2.0
@@ -37,6 +36,15 @@ func activate() -> void:
 	GameState.call_deferred("travel_to_sector", dest_sector)
 
 func _draw() -> void:
+	if _has_sprite and is_instance_valid(_sprite_tex):
+		draw_texture_rect(_sprite_tex, Rect2(-50, -50, 100, 100), false)
+		var outer_r: float = 55.0
+		draw_string(ThemeDB.fallback_font, Vector2(-30, outer_r + 20), gate_name,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.9, 1.0, 0.9))
+		if fuel_cost > 0:
+			draw_string(ThemeDB.fallback_font, Vector2(-20, outer_r + 32), str(fuel_cost) + " fuel",
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.5, 0.8, 0.5, 0.8))
+		return
 	var pulse: float = 0.7 + 0.3 * sin(_phase)
 	var outer_r: float = 55.0
 	var inner_r: float = 38.0

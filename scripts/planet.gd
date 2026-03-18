@@ -14,6 +14,7 @@ signal landed(p_planet_id: String, p_planet_name: String, p_quest_id: String)
 
 
 var _has_sprite: bool = false
+var _sprite_tex: Texture2D = null
 
 func _ready() -> void:
 	add_to_group("planets")
@@ -21,7 +22,6 @@ func _ready() -> void:
 	queue_redraw()
 
 func _setup_sprite() -> void:
-	# Pick texture based on hue: red/orange=lava, blue=ocean/ice, yellow/brown=rocky, else=gas
 	var tex_path: String
 	if _color_h < 0.08 or _color_h > 0.95:
 		tex_path = "res://assets/2026-03-16-planet-lava.png"
@@ -36,11 +36,7 @@ func _setup_sprite() -> void:
 	var tex := load(tex_path) as Texture2D
 	if not is_instance_valid(tex):
 		return
-	var sprite := Sprite2D.new()
-	sprite.texture = tex
-	var target: float = planet_radius * 2.2
-	sprite.scale = Vector2.ONE * (target / max(tex.get_size().x, tex.get_size().y))
-	add_child(sprite)
+	_sprite_tex = tex
 	_has_sprite = true
 	queue_redraw()
 
@@ -79,8 +75,9 @@ func land() -> void:
 
 
 func _draw() -> void:
-	if _has_sprite:
-		# Just draw the name label, sprite handles visuals
+	if _has_sprite and is_instance_valid(_sprite_tex):
+		var sz: float = planet_radius * 2.2
+		draw_texture_rect(_sprite_tex, Rect2(-sz * 0.5, -sz * 0.5, sz, sz), false)
 		var name_width: float = planet_name.length() * 6.0
 		draw_string(ThemeDB.fallback_font, Vector2(-name_width * 0.5, planet_radius + 14.0),
 			planet_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.95, 1.0, 0.9))
