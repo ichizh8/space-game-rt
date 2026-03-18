@@ -41,7 +41,10 @@ var map_visited_trail: Array[Vector2] = []   # session-only
 var map_discovered_planets: Dictionary = {}   # persistent: planet_id -> {pos_x, pos_y, name, color_h}
 
 # Faction reputation (0–100)
-var faction_rep: Dictionary = {"coalition": 50, "pirates": 0}
+var faction_rep: Dictionary = {
+	"coalition": 50, "corsairs": 20, "miners": 40,
+	"scientists": 30, "drifters": 60, "independents": 50
+}
 
 # Quest system
 var active_quests: Array = []
@@ -76,6 +79,63 @@ var restaurant_name: String = "The Drifting Spoon"
 var restaurant_owned: bool = false    # unlocked by intro quest, persistent
 var restaurant_unlocked_dishes: Array = ["dish_mystery_patty"]
 
+# Ingredient tier system
+var ingredient_tiers: Dictionary = {
+	"grub_meat":      {"tier": 1, "name": "Grub Meat",                    "creature": "void_grub"},
+	"grub_fat":       {"tier": 1, "name": "Grub Fat",                     "creature": "void_grub"},
+	"ray_fillet":     {"tier": 1, "name": "Skim Ray Fillet",              "creature": "skim_ray"},
+	"ray_membrane":   {"tier": 1, "name": "Ray Membrane",                 "creature": "skim_ray"},
+	"snarler_haunch": {"tier": 1, "name": "Snarler Haunch",               "creature": "pack_snarler"},
+	"scrap_protein":  {"tier": 1, "name": "Scrap Protein",                "creature": "any"},
+	"drifter_organ":  {"tier": 2, "name": "Drifter Organ",                "creature": "membrane_drifter"},
+	"drifter_gel":    {"tier": 2, "name": "Drifter Bioluminescent Gel",   "creature": "membrane_drifter"},
+	"feeder_flesh":   {"tier": 2, "name": "Crystal Feeder Flesh",         "creature": "crystal_feeder"},
+	"crystal_extract":{"tier": 2, "name": "Crystal Extract",              "creature": "crystal_feeder"},
+	"snarler_gland":  {"tier": 2, "name": "Snarler Venom Gland",         "creature": "pack_snarler"},
+	"leviathan_cut":  {"tier": 3, "name": "Leviathan Medallion Cut",      "creature": "void_leviathan"},
+	"leviathan_marrow":{"tier": 3, "name": "Leviathan Marrow",            "creature": "void_leviathan"},
+	"void_crystal_blood":{"tier": 3, "name": "Void-Crystallized Blood",   "creature": "void_leviathan"},
+	"feeder_bioluminescence":{"tier": 3, "name": "Bioluminescent Secretion","creature": "crystal_feeder"},
+}
+var zone_depth: int = 1  # 1=shallow, 2=mid, 3=deep
+
+# Cooking / experiment system
+var cooking_methods: Array = [
+	{"id": "char_grill",       "name": "Char-Grill",               "desc": "Fast, smoky. Miners approve."},
+	{"id": "slow_boil",        "name": "Slow Boil",                "desc": "Safe. Unremarkable."},
+	{"id": "plasma_roast",     "name": "Plasma Roast",             "desc": "Repurposed weapon tech. Caramelizes void components."},
+	{"id": "cold_press",       "name": "Cold Press",               "desc": "Raw preparation. Corsairs respect the commitment."},
+	{"id": "molecular_decon",  "name": "Molecular Deconstruction", "desc": "Technically a weapon. Produces foam and a very small plate."},
+	{"id": "deep_freeze",      "name": "Deep Freeze Flash",        "desc": "Locks in bioluminescence. Dish glows. Safety unclear."},
+]
+var serving_styles: Array = [
+	{"id": "fast_food",     "name": "Fast Food Tray",    "desc": "Volume play. Miners and Corsair grunts approve."},
+	{"id": "diner",         "name": "Diner Plate",        "desc": "Default. Works for everyone. Peaks nowhere."},
+	{"id": "high_cuisine",  "name": "High Cuisine",       "desc": "Small portions, large plates. Critics pay triple."},
+	{"id": "street_cart",   "name": "Street Cart Style",  "desc": "Corsairs feel at home. Scientists ask about the wrapper."},
+	{"id": "the_experiment","name": "The Experiment",     "desc": "Served with a card: we don't know what this is."},
+]
+var discovered_recipes: Dictionary = {}
+
+# Faction dietary profiles
+var faction_dietary: Dictionary = {
+	"coalition":   {"loves": ["slow_boil", "diner"],              "hates": ["the_experiment", "cold_press"]},
+	"corsairs":    {"loves": ["cold_press", "char_grill", "street_cart"], "hates": ["molecular_decon", "high_cuisine"]},
+	"miners":      {"loves": ["char_grill", "fast_food"],         "hates": ["molecular_decon", "high_cuisine"]},
+	"scientists":  {"loves": ["molecular_decon", "cold_press"],   "hates": ["char_grill"]},
+	"drifters":    {"loves": [],                                   "hates": []},
+	"independents":{"loves": [],                                   "hates": []},
+}
+
+# Guest log
+var guest_log: Array = []           # past sessions, max 20
+var special_guests_seen: Array = [] # IDs of specials who visited
+var pending_guests: Array = []      # generated on departure, resolved on dock
+
+# Cooksta
+var cooksta_rating: int = 0
+var cooksta_posts: Array = []  # max 10
+
 signal hull_changed(new_value: float)
 signal fuel_changed(new_value: float)
 signal credits_changed(new_value: int)
@@ -85,6 +145,8 @@ signal xp_gained(new_total: int)
 signal perk_unlocked(perk_id: String)
 signal restaurant_rep_changed(new_value: int)
 signal restaurant_ingredients_changed()
+signal ingredient_dropped(ing_name: String)
+signal guests_generated()
 
 
 func add_resource(type: String, amount: int) -> void:
@@ -258,7 +320,7 @@ func reset_run() -> void:
 	story_act = 1
 	story_flags = {}
 	active_quests = []
-	faction_rep = {"coalition": 50, "pirates": 0}
+	faction_rep = {"coalition": 50, "corsairs": 20, "miners": 40, "scientists": 30, "drifters": 60, "independents": 50}
 	_dying = false
 	hull_changed.emit(hull)
 	fuel_changed.emit(fuel)
@@ -471,7 +533,7 @@ func reset_game() -> void:
 	story_act = 1
 	story_flags = {}
 	active_quests = []
-	faction_rep = {"coalition": 50, "pirates": 0}
+	faction_rep = {"coalition": 50, "corsairs": 20, "miners": 40, "scientists": 30, "drifters": 60, "independents": 50}
 	# completed_quests is NOT reset (persistent history)
 	# do NOT reset restaurant_rep or restaurant_ingredients (persistent like captain XP)
 
@@ -511,3 +573,321 @@ func get_restaurant_tier() -> String:
 		return "Renowned"
 	else:
 		return "Galaxy Famous"
+
+
+# ── Ingredient Drop System ──────────────────────────────────────
+
+func get_ingredient_drop_chance(tier: int) -> float:
+	match tier:
+		1: return 1.0
+		2: return 0.3 + (zone_depth - 1) * 0.25
+		3: return 0.05 + (zone_depth - 1) * 0.1
+	return 0.0
+
+
+func drop_ingredients(creature_type: String) -> void:
+	var drops: Dictionary = {
+		"void_grub":        [["grub_meat", 1, 1.0], ["grub_fat", 1, 0.4]],
+		"skim_ray":         [["ray_fillet", 1, 1.0], ["ray_membrane", 2, 0.35]],
+		"pack_snarler":     [["snarler_haunch", 1, 1.0], ["snarler_gland", 2, 0.3]],
+		"membrane_drifter": [["drifter_organ", 2, 0.7], ["drifter_gel", 2, 0.4]],
+		"crystal_feeder":   [["feeder_flesh", 2, 0.8], ["crystal_extract", 2, 0.5], ["feeder_bioluminescence", 3, 0.15]],
+		"void_leviathan":   [["leviathan_cut", 3, 0.9], ["leviathan_marrow", 3, 0.5], ["void_crystal_blood", 3, 0.3]],
+	}
+	var creature_drops = drops.get(creature_type, [])
+	for drop in creature_drops:
+		var ing_id: String = drop[0]
+		var ing_tier: int = drop[1]
+		var base_chance: float = drop[2]
+		var roll_chance: float = base_chance * get_ingredient_drop_chance(ing_tier)
+		if randf() <= roll_chance:
+			add_ingredient(ing_id, 1)
+			var info: Dictionary = ingredient_tiers.get(ing_id, {})
+			ingredient_dropped.emit(info.get("name", ing_id))
+
+
+# ── Faction Satisfaction ─────────────────────────────────────────
+
+func get_satisfaction_modifier(faction: String, method: String, style: String) -> float:
+	var profile: Dictionary = faction_dietary.get(faction, {})
+	var loves: Array = profile.get("loves", [])
+	var hates: Array = profile.get("hates", [])
+	var mod: float = 1.0
+	if method in loves or style in loves:
+		mod += 0.5
+	if method in hates or style in hates:
+		mod -= 0.5
+	return clampf(mod, 0.2, 2.0)
+
+
+# ── Experiment Bench ─────────────────────────────────────────────
+
+func get_bench_slots() -> int:
+	if restaurant_rep >= 80:
+		return 6
+	elif restaurant_rep >= 40:
+		return 5
+	return 3
+
+
+func resolve_experiment(ingredients: Array, method: String, style: String) -> Dictionary:
+	var sorted_ings: Array = ingredients.duplicate()
+	sorted_ings.sort()
+	var recipe_key: String = "|".join(sorted_ings) + ":" + method + ":" + style
+	if discovered_recipes.has(recipe_key):
+		var recipe: Dictionary = discovered_recipes[recipe_key]
+		for ing in ingredients:
+			remove_ingredient(ing, 1)
+		add_credits(int(recipe.get("credits", 50)))
+		add_restaurant_rep(int(recipe.get("rep", 1)))
+		return {"result": "known", "recipe": recipe}
+	var max_tier: int = 1
+	for ing in ingredients:
+		var t: int = ingredient_tiers.get(ing, {}).get("tier", 1)
+		if t > max_tier:
+			max_tier = t
+	var success_chance: float = 0.5 + (max_tier - 1) * 0.15
+	if method == "plasma_roast" and max_tier >= 3:
+		success_chance += 0.2
+	if method == "molecular_decon" and max_tier >= 2:
+		success_chance += 0.25
+	if style == "the_experiment":
+		success_chance = 1.0
+	var roll: float = randf()
+	if roll > success_chance:
+		for i in range(int(ceil(float(ingredients.size()) / 2.0))):
+			remove_ingredient(ingredients[i], 1)
+		return {"result": "fail", "message": "Inedible. The smoke detector is now a smoke suggester."}
+	var credits_val: int = 30 + max_tier * 40
+	if style == "high_cuisine":
+		credits_val += 100
+	var rep_val: int = max_tier
+	var dish_name: String = _generate_dish_name(ingredients, method, style)
+	var story: String = _build_menu_story(method, style, "First cooked at The Drifting Spoon.")
+	var recipe: Dictionary = {
+		"key": recipe_key,
+		"name": dish_name,
+		"ingredients": ingredients.duplicate(),
+		"method": method,
+		"style": style,
+		"credits": credits_val,
+		"rep": rep_val,
+		"menu_story": story,
+	}
+	discovered_recipes[recipe_key] = recipe
+	for ing in ingredients:
+		remove_ingredient(ing, 1)
+	add_credits(credits_val)
+	add_restaurant_rep(rep_val)
+	if style == "the_experiment" and roll < 0.2:
+		return {"result": "catastrophe", "recipe": recipe, "message": "Someone is ill. Data logged. Worth it."}
+	return {"result": "discovered", "recipe": recipe}
+
+
+func _generate_dish_name(ingredients: Array, method: String, style: String) -> String:
+	var primary: String = ingredients[0] if ingredients.size() > 0 else "mystery"
+	var ing_info: Dictionary = ingredient_tiers.get(primary, {})
+	var ing_name: String = ing_info.get("name", primary.replace("_", " ").capitalize())
+	var method_words: Dictionary = {
+		"char_grill": "Charred", "slow_boil": "Braised", "plasma_roast": "Plasma-Seared",
+		"cold_press": "Raw-Pressed", "molecular_decon": "Deconstructed", "deep_freeze": "Luminescent"
+	}
+	var style_words: Dictionary = {
+		"fast_food": "", "diner": "", "high_cuisine": " en Vide",
+		"street_cart": " Wrap", "the_experiment": " (Unknown)"
+	}
+	var prefix: String = method_words.get(method, "Cooked")
+	var suffix: String = style_words.get(style, "")
+	if ingredients.size() > 1:
+		var second_info: Dictionary = ingredient_tiers.get(ingredients[1], {})
+		var second_name: String = second_info.get("name", "").split(" ")[0]
+		if not second_name.is_empty():
+			return "%s %s with %s%s" % [prefix, ing_name, second_name, suffix]
+	return "%s %s%s" % [prefix, ing_name, suffix]
+
+
+func _build_menu_story(method: String, style: String, context: String) -> String:
+	var method_name: String = method.replace("_", " ").capitalize()
+	var style_name: String = style.replace("_", " ").capitalize()
+	for m in cooking_methods:
+		if m["id"] == method:
+			method_name = m["name"]
+	for s in serving_styles:
+		if s["id"] == style:
+			style_name = s["name"]
+	return "%s. %s presentation. %s" % [method_name, style_name, context]
+
+
+# ── Guest System ─────────────────────────────────────────────────
+
+func generate_guest_session() -> void:
+	if not pending_guests.is_empty():
+		return  # already waiting
+	var guests: Array = []
+	var count: int = randi_range(2, 5)
+	var eligible_specials: Array = _get_eligible_special_guests()
+	if not eligible_specials.is_empty() and randf() < 0.35:
+		guests.append(eligible_specials[randi() % eligible_specials.size()])
+	while guests.size() < count:
+		guests.append(_generate_procedural_guest())
+	pending_guests = guests
+	guests_generated.emit()
+
+
+func _get_eligible_special_guests() -> Array:
+	var specials: Array = []
+	if faction_rep.get("corsairs", 0) >= 40 and "velka_orin" not in special_guests_seen:
+		specials.append({
+			"id": "velka_orin", "special": true, "name": "Velka Orin",
+			"faction": "corsairs", "role": "Food Critic",
+			"intro": "She doesn't sit — she surveys. Then sits.",
+			"wants": "leviathan_cut", "choice_id": "velka_first_visit"
+		})
+	if faction_rep.get("coalition", 0) >= 60 and "commissioner_drath" not in special_guests_seen:
+		specials.append({
+			"id": "commissioner_drath", "special": true, "name": "Commissioner Drath",
+			"faction": "coalition", "role": "Trade Inspector",
+			"intro": "He has a clipboard. He is using it.",
+			"wants": "", "choice_id": "drath_first_visit"
+		})
+	return specials
+
+
+func _generate_procedural_guest() -> Dictionary:
+	var archetypes: Array = ["Hungry Spacer", "Supply Runner", "Off-Duty Soldier", "Debt Runner", "Tourist", "Passing Through"]
+	var traits: Array = ["suspicious", "generous", "chatty", "paranoid", "snobbish", "adventurous"]
+	var faction: String = _weighted_faction_pick()
+	var archetype: String = archetypes[randi() % archetypes.size()]
+	var trait_val: String = traits[randi() % traits.size()]
+	var first_names: Array = ["Korr", "Vex", "Mira", "Taln", "Desh", "Yura", "Brenn", "Solek", "Ash", "Calix", "Driva", "Finn"]
+	var last_names: Array = ["of Sector 4", "the Wanderer", "ex-Coalition", "no-name", "Drifter", "Outpost-born", "void-touched"]
+	var name_str: String = first_names[randi() % first_names.size()] + " " + last_names[randi() % last_names.size()]
+	return {
+		"id": "proc_" + str(randi()),
+		"special": false,
+		"name": name_str,
+		"faction": faction,
+		"role": archetype,
+		"trait": trait_val,
+	}
+
+
+func _weighted_faction_pick() -> String:
+	var factions: Array = ["coalition", "corsairs", "miners", "scientists", "drifters", "independents"]
+	var weights: Array = []
+	for f in factions:
+		weights.append(max(10, faction_rep.get(f, 30)))
+	var total: int = 0
+	for w in weights:
+		total += w
+	var roll: int = randi() % total
+	var cumulative: int = 0
+	for i in range(factions.size()):
+		cumulative += weights[i]
+		if roll < cumulative:
+			return factions[i]
+	return "drifters"
+
+
+func log_guest_session(guests: Array, outcomes: Array) -> void:
+	var entry: Dictionary = {
+		"session": guest_log.size() + 1,
+		"guests": guests.duplicate(true),
+		"outcomes": outcomes.duplicate(true),
+	}
+	guest_log.append(entry)
+	if guest_log.size() > 20:
+		guest_log.pop_front()
+	pending_guests = []
+	if cooksta_posts.size() > 10:
+		cooksta_posts = cooksta_posts.slice(-10)
+
+
+func resolve_guest(guest: Dictionary, choice: String) -> Dictionary:
+	var faction: String = guest.get("faction", "drifters")
+	var is_special: bool = guest.get("special", false)
+	var result: Dictionary = {"credits": 0, "faction_deltas": {}, "message": ""}
+
+	if is_special:
+		var choice_id: String = guest.get("choice_id", "")
+		if choice_id == "velka_first_visit":
+			if not "velka_orin" in special_guests_seen:
+				special_guests_seen.append("velka_orin")
+			if choice == "serve_leviathan":
+				remove_ingredient("leviathan_cut", 1)
+				result["credits"] = 500
+				result["faction_deltas"] = {"corsairs": 5}
+				result["message"] = "Velka Orin eats in silence. Then: 'Adequate.' From her, that's a rave review."
+				cooksta_rating = clampi(cooksta_rating + 3, 0, 100)
+				cooksta_posts.append("Velka Orin writes: 'The Drifting Spoon. Go. Leviathan cut. Don't ask questions.'")
+			elif choice == "overcharge":
+				remove_ingredient("leviathan_cut", 1)
+				if randf() < 0.4:
+					result["credits"] = 1500
+					result["faction_deltas"] = {"corsairs": 2}
+					result["message"] = "She pays without blinking. 'You know what it's worth.' Corsair rep."
+				else:
+					result["credits"] = 0
+					result["faction_deltas"] = {"corsairs": -3}
+					result["message"] = "She leaves the credits on the table and walks out. Slower than she arrived."
+			elif choice == "honest":
+				result["faction_deltas"] = {"corsairs": 2}
+				result["message"] = "She nods. 'I'll be back.' She means it."
+				cooksta_rating = clampi(cooksta_rating + 1, 0, 100)
+			elif choice == "bluff":
+				if randf() < 0.45:
+					result["credits"] = 200
+					result["faction_deltas"] = {"corsairs": 3}
+					result["message"] = "She buys it. Or pretends to. Either way, she leaves satisfied."
+				else:
+					result["faction_deltas"] = {"corsairs": -5}
+					result["message"] = "She sets down her fork. 'This is Drifter organ.' A statement, not a question. She leaves."
+					cooksta_rating = clampi(cooksta_rating - 3, 0, 100)
+			elif choice == "defer":
+				result["faction_deltas"] = {"corsairs": 1}
+				result["message"] = "She accepts the drink. Bookmarks the place."
+		elif choice_id == "drath_first_visit":
+			if not "commissioner_drath" in special_guests_seen:
+				special_guests_seen.append("commissioner_drath")
+			if choice == "cooperate":
+				result["faction_deltas"] = {"coalition": 3}
+				result["message"] = "He makes notes. 'Unusual menu.' He pays and leaves. The notes are probably fine."
+			elif choice == "bribe_food":
+				add_credits(-100)
+				result["faction_deltas"] = {"coalition": 5}
+				result["message"] = "He accepts. 'On official business, I can't accept gifts.' He eats it anyway."
+			elif choice == "probe":
+				result["faction_deltas"] = {"coalition": 1}
+				result["message"] = "He's vague. Something about 'ingredient provenance standards.' Watch for Coalition patrols."
+				set_story_flag("drath_warned", true)
+	else:
+		# Procedural guest
+		var base_credits: int = 80 + randi() % 120
+		var satisfaction: float = 1.0
+		var trait_val: String = guest.get("trait", "")
+		if trait_val == "generous":
+			satisfaction += 0.3
+		elif trait_val == "suspicious" or trait_val == "paranoid":
+			satisfaction -= 0.2
+		elif trait_val == "snobbish":
+			if restaurant_rep < 40:
+				satisfaction -= 0.4
+		var earned: int = int(base_credits * satisfaction)
+		var rep_delta: int = 1 if satisfaction >= 1.0 else (0 if satisfaction >= 0.6 else -1)
+		result["credits"] = earned
+		result["faction_deltas"] = {faction: rep_delta}
+		if satisfaction >= 1.2:
+			result["message"] = "%s (%s) — impressed. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), earned]
+		elif satisfaction >= 0.8:
+			result["message"] = "%s (%s) — satisfied. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), earned]
+		else:
+			result["message"] = "%s (%s) — unimpressed. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), earned]
+		add_restaurant_rep(rep_delta)
+		# Corsair retaliation check
+		if faction == "corsairs" and satisfaction < 0.5 and faction_rep.get("corsairs", 0) < 30:
+			set_story_flag("corsair_retaliation_pending", true)
+
+	add_credits(result["credits"])
+	for f in result["faction_deltas"]:
+		add_faction_rep(f, result["faction_deltas"][f])
+	return result

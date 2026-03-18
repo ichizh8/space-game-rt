@@ -113,6 +113,7 @@ func _die() -> void:
 	is_dead = true
 	GameState.record_kill()
 	GameState.add_xp(12)
+	GameState.drop_ingredients("pack_snarler")
 	var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 	if is_instance_valid(em) and em.has_method("add_explosion"):
 		em.add_explosion(global_position, 1.0 if is_alpha else 0.8)

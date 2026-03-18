@@ -81,6 +81,11 @@ func _process(delta: float) -> void:
 	else:
 		camera.offset = Vector2.ZERO
 
+	# Corsair retaliation check
+	if GameState.story_flags.get("corsair_retaliation_pending", false):
+		GameState.set_story_flag("corsair_retaliation_pending", false)
+		call_deferred("_spawn_corsair_retaliation")
+
 	# Periodic autosave
 	_autosave_timer += delta
 	if _autosave_timer >= AUTOSAVE_INTERVAL:
@@ -215,6 +220,18 @@ func _check_raid_complete() -> void:
 			var em := get_tree().get_first_node_in_group("effects_manager") as Node2D
 			if is_instance_valid(em) and em.has_method("add_float") and is_instance_valid(ship):
 				em.add_float("+ARTIFACT", ship.global_position + Vector2(0, -30), Color.GOLD)
+
+
+func _spawn_corsair_retaliation() -> void:
+	if not is_instance_valid(ship):
+		return
+	var hud: Node = get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("CORSAIR RETALIATION!", 3.0)
+	for i in range(2):
+		var angle: float = randf() * TAU
+		var spawn_pos: Vector2 = ship.global_position + Vector2.from_angle(angle) * randf_range(400.0, 600.0)
+		call_deferred("_spawn_raid_enemy", spawn_pos, "res://scenes/enemy.tscn")
 
 
 func _on_player_died() -> void:

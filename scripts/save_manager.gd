@@ -124,6 +124,13 @@ func save_game() -> void:
 		"restaurant_owned": GameState.restaurant_owned,
 		"restaurant_ingredients": GameState.restaurant_ingredients.duplicate(),
 		"restaurant_unlocked_dishes": GameState.restaurant_unlocked_dishes.duplicate(),
+		"zone_depth": GameState.zone_depth,
+		"discovered_recipes": GameState.discovered_recipes.duplicate(true),
+		"guest_log": GameState.guest_log.duplicate(true),
+		"special_guests_seen": GameState.special_guests_seen.duplicate(),
+		"pending_guests": GameState.pending_guests.duplicate(true),
+		"cooksta_rating": GameState.cooksta_rating,
+		"cooksta_posts": GameState.cooksta_posts.duplicate(),
 		"player_pos_x": px,
 		"player_pos_y": py,
 		"timestamp": Time.get_unix_time_from_system(),
@@ -182,7 +189,17 @@ func load_game(slot: int) -> bool:
 	for p in loaded_perks:
 		GameState.captain_perks.append(str(p))
 	GameState.reapply_all_perks()
-	GameState.faction_rep = data.get("faction_rep", {"coalition": 50, "pirates": 0})
+	var loaded_faction_rep: Dictionary = data.get("faction_rep", {"coalition": 50})
+	# Migrate old saves: pirates -> corsairs
+	if loaded_faction_rep.has("pirates") and not loaded_faction_rep.has("corsairs"):
+		loaded_faction_rep["corsairs"] = loaded_faction_rep["pirates"]
+		loaded_faction_rep.erase("pirates")
+	# Ensure all 6 factions present
+	var faction_defaults: Dictionary = {"coalition": 50, "corsairs": 20, "miners": 40, "scientists": 30, "drifters": 60, "independents": 50}
+	for f in faction_defaults:
+		if not loaded_faction_rep.has(f):
+			loaded_faction_rep[f] = faction_defaults[f]
+	GameState.faction_rep = loaded_faction_rep
 	GameState.active_quests = data.get("active_quests", [])
 	GameState.completed_quests = data.get("completed_quests", [])
 	GameState.session_kills = int(data.get("session_kills", 0))
@@ -207,6 +224,19 @@ func load_game(slot: int) -> bool:
 	GameState.restaurant_unlocked_dishes = []
 	for d in loaded_dishes:
 		GameState.restaurant_unlocked_dishes.append(str(d))
+	GameState.zone_depth = int(data.get("zone_depth", 1))
+	GameState.discovered_recipes = data.get("discovered_recipes", {})
+	GameState.guest_log = data.get("guest_log", [])
+	var loaded_specials = data.get("special_guests_seen", [])
+	GameState.special_guests_seen = []
+	for s in loaded_specials:
+		GameState.special_guests_seen.append(str(s))
+	GameState.pending_guests = data.get("pending_guests", [])
+	GameState.cooksta_rating = int(data.get("cooksta_rating", 0))
+	var loaded_posts = data.get("cooksta_posts", [])
+	GameState.cooksta_posts = []
+	for p in loaded_posts:
+		GameState.cooksta_posts.append(str(p))
 	# Restore spawn position
 	var ppx: float = float(data.get("player_pos_x", 0.0))
 	var ppy: float = float(data.get("player_pos_y", 0.0))

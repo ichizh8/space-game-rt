@@ -441,6 +441,7 @@ func _connect_signals() -> void:
 	GameState.fuel_changed.connect(_on_fuel_changed)
 	GameState.credits_changed.connect(_on_credits_changed)
 	GameState.resources_changed.connect(_on_resources_changed)
+	GameState.ingredient_dropped.connect(_on_ingredient_dropped)
 
 
 func _input(event: InputEvent) -> void:
@@ -680,6 +681,23 @@ func reset_fire() -> void:
 
 func _draw_fire_button() -> void:
 	pass  # Drawn by fire_button.gd
+
+func _on_ingredient_dropped(ing_name: String) -> void:
+	var drop_lbl := Label.new()
+	drop_lbl.text = "+ " + ing_name
+	drop_lbl.add_theme_font_size_override("font_size", 14)
+	drop_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
+	drop_lbl.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	drop_lbl.offset_top = 60
+	drop_lbl.offset_left = -100
+	drop_lbl.offset_right = 100
+	drop_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	add_child(drop_lbl)
+	var tw := create_tween()
+	tw.tween_property(drop_lbl, "offset_top", 30.0, 2.0)
+	tw.parallel().tween_property(drop_lbl, "modulate:a", 0.0, 2.0)
+	tw.tween_callback(drop_lbl.queue_free)
+
 
 func _on_save_pressed(btn: Button) -> void:
 	SaveManager.save_game()
