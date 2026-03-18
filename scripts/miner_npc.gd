@@ -26,7 +26,7 @@ func _ready() -> void:
 	add_to_group("npc_ships")
 	speed = randf_range(40.0, 60.0)
 	_pick_asteroid_target()
-	_setup_sprite()
+	call_deferred("_setup_sprite")
 	queue_redraw()
 
 

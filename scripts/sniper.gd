@@ -33,7 +33,7 @@ func _ready() -> void:
 	bullet_scene = load("res://scenes/bullet.tscn")
 	_pick_reposition_target()
 	queue_redraw()
-	_setup_sprite()
+	call_deferred("_setup_sprite")
 
 func setup(diff_mult: float) -> void:
 	difficulty_mult = diff_mult

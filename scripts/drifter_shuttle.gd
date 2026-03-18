@@ -15,7 +15,7 @@ func _ready() -> void:
 	add_to_group("npc_drifters")
 	speed = randf_range(60.0, 80.0)
 	_pick_wander_target()
-	_setup_sprite()
+	call_deferred("_setup_sprite")
 	queue_redraw()
 
 

@@ -44,7 +44,7 @@ func _ready() -> void:
 	var hud := get_tree().get_first_node_in_group("hud")
 	if is_instance_valid(hud) and hud.has_method("show_notification"):
 		hud.show_notification("VOID LEVIATHAN DETECTED!", 3.0)
-	_setup_sprite()
+	call_deferred("_setup_sprite")
 	queue_redraw()
 
 
