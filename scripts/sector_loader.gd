@@ -390,6 +390,16 @@ func _spawn_zone_enemy(zone_idx: int) -> void:
 			scene_path = "res://scenes/crystal_feeder.tscn"
 		"void_leviathan":
 			scene_path = "res://scenes/void_leviathan.tscn"
+		"miner_npc":
+			scene_path = MINER_SCENE
+		"coalition_patrol":
+			scene_path = COALITION_SCENE
+		"corsair_raider":
+			scene_path = CORSAIR_SCENE
+		"science_vessel":
+			scene_path = SCIENCE_SCENE
+		"drifter_shuttle":
+			scene_path = DRIFTER_SCENE
 		_:
 			scene_path = ENEMY_SCENE
 	var enemy_scene: PackedScene = load(scene_path) as PackedScene
@@ -658,6 +668,28 @@ func _get_player() -> Node2D:
 
 func _spawn_civilian_npcs() -> void:
 	var parent: Node = get_parent()
+	# Register civilian NPC types as respawn zones so they repopulate when killed/gone
+	var civilian_types: Array = [
+		{"type": "miner_npc",       "scene": MINER_SCENE,     "count": 2, "radius": 600.0,  "interval": 120.0},
+		{"type": "coalition_patrol","scene": COALITION_SCENE,  "count": 2, "radius": 700.0,  "interval": 150.0},
+		{"type": "corsair_raider",  "scene": CORSAIR_SCENE,    "count": 2, "radius": 1200.0, "interval": 120.0},
+		{"type": "science_vessel",  "scene": SCIENCE_SCENE,    "count": 1, "radius": 900.0,  "interval": 180.0},
+		{"type": "drifter_shuttle", "scene": DRIFTER_SCENE,    "count": 2, "radius": 800.0,  "interval": 130.0},
+	]
+	for ct in civilian_types:
+		var npc_zone: Dictionary = {
+			"center_x": 0.0, "center_y": 0.0,
+			"enemy_type": str(ct["type"]),
+			"max_count": int(ct["count"]),
+			"timer": 0.0,
+			"interval": float(ct["interval"]),
+			"enemies": []
+		}
+		_respawn_zones.append(npc_zone)
+		# Initial spawn
+		for _i in range(int(ct["count"])):
+			call_deferred("_spawn_zone_enemy", _respawn_zones.size() - 1)
+
 	# Miners: 1-2 per sector
 	var miner_scene: PackedScene = load(MINER_SCENE) as PackedScene
 	if is_instance_valid(miner_scene):

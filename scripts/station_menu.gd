@@ -176,6 +176,62 @@ func _fill_services(vbox: VBoxContainer) -> void:
 		row.add_child(sell_btn)
 		vbox.add_child(row)
 
+	# ── Recipe Shop ──────────────────────────────────────────────
+	vbox.add_child(HSeparator.new())
+	var rec_title := Label.new()
+	rec_title.text = "RECIPE SCROLLS"
+	rec_title.add_theme_font_size_override("font_size", 14)
+	rec_title.add_theme_color_override("font_color", Color(1.0, 0.8, 0.3))
+	vbox.add_child(rec_title)
+
+	var shop_recipes: Array = [
+		{"key": "shop:miners_stew",       "name": "Miner's Stew",          "desc": "Char-grilled snarler haunch, fast food style. Miners love it.", "ingredients": ["snarler_haunch"], "method": "char_grill", "style": "fast_food", "tier": 1, "price": 80},
+		{"key": "shop:ray_platter",        "name": "Skim Ray Platter",      "desc": "Slow-boiled ray fillet, diner plate. Coalition approved.", "ingredients": ["ray_fillet"], "method": "slow_boil", "style": "diner", "tier": 1, "price": 100},
+		{"key": "shop:drifter_soup",       "name": "Drifter Broth",         "desc": "Cold-pressed drifter organ, street cart style. Corsairs respect it.", "ingredients": ["drifter_organ"], "method": "cold_press", "style": "street_cart", "tier": 2, "price": 220},
+		{"key": "shop:crystal_foam",       "name": "Crystal Deconstruction","desc": "Molecular deconstruction of feeder flesh. Scientists will pay anything.", "ingredients": ["feeder_flesh"], "method": "molecular_decon", "style": "high_cuisine", "tier": 2, "price": 350},
+		{"key": "shop:void_medallion",     "name": "Void Medallion",        "desc": "Plasma-roasted leviathan cut, high cuisine. The rumours are true.", "ingredients": ["leviathan_cut"], "method": "plasma_roast", "style": "high_cuisine", "tier": 3, "price": 800},
+		{"key": "shop:grub_streetfood",    "name": "Grub Street Wrap",      "desc": "Cold-pressed grub meat, street cart. Everyone eats it.", "ingredients": ["grub_meat"], "method": "cold_press", "style": "street_cart", "tier": 1, "price": 60},
+	]
+
+	for sr in shop_recipes:
+		var rkey: String = str(sr["key"])
+		var already_owned: bool = GameState.discovered_recipes.has(rkey)
+		var rrow := HBoxContainer.new()
+		rrow.custom_minimum_size.y = 36
+		vbox.add_child(rrow)
+		var rlbl := Label.new()
+		rlbl.text = str(sr["name"]) + "  —  " + str(sr["desc"])
+		rlbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		rlbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		rlbl.add_theme_font_size_override("font_size", 11)
+		rlbl.add_theme_color_override("font_color", Color(0.5, 0.6, 0.5) if already_owned else Color(0.85, 0.85, 0.9))
+		rrow.add_child(rlbl)
+		if already_owned:
+			var owned_lbl := Label.new()
+			owned_lbl.text = "✓"
+			owned_lbl.add_theme_color_override("font_color", Color(0.3, 0.9, 0.3))
+			owned_lbl.add_theme_font_size_override("font_size", 14)
+			rrow.add_child(owned_lbl)
+		else:
+			var rbtn := Button.new()
+			rbtn.text = "%d cr" % int(sr["price"])
+			rbtn.custom_minimum_size = Vector2(70, 34)
+			rbtn.add_theme_font_size_override("font_size", 12)
+			rbtn.disabled = GameState.credits < int(sr["price"])
+			var cap_sr: Dictionary = sr.duplicate()
+			rbtn.pressed.connect(func():
+				if GameState.credits >= int(cap_sr["price"]) and not GameState.discovered_recipes.has(str(cap_sr["key"])):
+					GameState.credits -= int(cap_sr["price"])
+					GameState.credits_changed.emit(GameState.credits)
+					var rec: Dictionary = cap_sr.duplicate()
+					rec["menu_story"] = str(cap_sr["desc"])
+					rec["credits_value"] = 0
+					rec["rep_value"] = 0
+					GameState.discovered_recipes[str(cap_sr["key"])] = rec
+					SaveManager.save_game()
+					call_deferred("_refresh_ui"))
+			rrow.add_child(rbtn)
+
 
 # ── Maps Tab ─────────────────────────────────────────────────────
 
