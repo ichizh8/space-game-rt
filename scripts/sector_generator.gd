@@ -525,7 +525,18 @@ func _spawn_wildlife(player_pos: Vector2, spawn_center: Vector2) -> void:
 		return
 
 	for i in range(to_spawn):
-		var pos := _safe_spawn_pos(spawn_center, SPAWN_RADIUS, 300.0)
+		# Spawn wildlife closer to player (300-500 px), not far ahead like enemies
+		var wildlife_spawn_center := player_pos
+		if active_zone != "":
+			# In a hunting zone: spawn right around player
+			var zone_pos := Vector2.ZERO
+			for z in GameState.hunting_zones_sector1:
+				if z.get("id", "") == active_zone:
+					zone_pos = Vector2(float(z.get("pos_x", 0.0)), float(z.get("pos_y", 0.0)))
+					break
+			# Bias toward zone center so creatures stay in zone
+			wildlife_spawn_center = player_pos.lerp(zone_pos, 0.3)
+		var pos := _safe_spawn_pos(wildlife_spawn_center, 500.0, 200.0)
 
 		# If inside a named hunting zone, spawn that zone's creature type
 		if active_zone != "":
