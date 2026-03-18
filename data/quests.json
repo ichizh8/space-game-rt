@@ -120,6 +120,14 @@
     "source_type": "station"
   },
   {
+    "id": "quest_inherit_restaurant",
+    "type": "story",
+    "title": "Dad's Place",
+    "description": "Your father left you a message, a set of keys, and a food service license with three outstanding violations. The Drifting Spoon — his restaurant — is docked in Helion System. Go take a look. It might be salvageable. Probably isn't.",
+    "reward": {"credits": 0},
+    "source_type": "world"
+  },
+  {
     "id": "story_act1",
     "type": "story",
     "title": "Distress Signal",

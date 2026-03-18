@@ -116,6 +116,7 @@ func save_game() -> void:
 		"story_flags": GameState.story_flags.duplicate(),
 		"current_sector": GameState.current_sector,
 		"restaurant_rep": GameState.restaurant_rep,
+		"restaurant_owned": GameState.restaurant_owned,
 		"restaurant_ingredients": GameState.restaurant_ingredients.duplicate(),
 		"player_pos_x": px,
 		"player_pos_y": py,
@@ -194,6 +195,7 @@ func load_game(slot: int) -> bool:
 			"color_h": float(entry.get("color_h", 0.3))
 		}
 	GameState.restaurant_rep = int(data.get("restaurant_rep", 0))
+	GameState.restaurant_owned = bool(data.get("restaurant_owned", false))
 	GameState.restaurant_ingredients = data.get("restaurant_ingredients", {})
 	# Restore spawn position
 	var ppx: float = float(data.get("player_pos_x", 0.0))

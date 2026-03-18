@@ -40,6 +40,7 @@ func _ready() -> void:
 	GameState.hull_changed.connect(_on_hull_changed)
 	_last_hull = GameState.hull
 	call_deferred("_show_tutorial")
+	call_deferred("_give_inherit_quest")
 
 
 func _show_tutorial() -> void:
@@ -47,6 +48,13 @@ func _show_tutorial() -> void:
 	if is_instance_valid(tut_scene):
 		var tut: Node = tut_scene.instantiate()
 		add_child(tut)
+
+
+func _give_inherit_quest() -> void:
+	if not GameState.restaurant_owned and not GameState.is_quest_active("quest_inherit_restaurant") and not GameState.is_quest_completed("quest_inherit_restaurant"):
+		var q = WorldData.get_quest_by_id("quest_inherit_restaurant")
+		if not q.is_empty():
+			GameState.accept_quest(q, "world")
 
 
 func _process(delta: float) -> void:

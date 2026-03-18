@@ -20,6 +20,9 @@ func is_restaurant_station() -> bool:
 func _ready() -> void:
 	layer = 20
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if is_restaurant_station() and not GameState.restaurant_owned:
+		GameState.restaurant_owned = true
+		GameState.complete_quest("quest_inherit_restaurant")
 	_build_ui()
 	get_tree().paused = true
 	var hud: Node = get_tree().get_first_node_in_group("hud")
@@ -69,6 +72,7 @@ func _build_ui() -> void:
 	_build_quests_tab()
 	if is_restaurant_station():
 		_build_restaurant_tab()
+		# Show ownership cutscene on first visit (tab will reflect owned state already)
 
 
 func _build_services_tab() -> void:
@@ -356,6 +360,24 @@ func _refresh_restaurant_tab() -> void:
 	vbox.custom_minimum_size.x = 330
 	vbox.add_theme_constant_override("separation", 8)
 	_restaurant_tab.add_child(vbox)
+
+	# First visit scene — show inheritance moment
+	if not GameState.get_story_flag("spoon_intro_seen"):
+		GameState.set_story_flag("spoon_intro_seen", true)
+		var intro_lbl := Label.new()
+		intro_lbl.text = "The Drifting Spoon"
+		intro_lbl.add_theme_font_size_override("font_size", 22)
+		intro_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+		intro_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(intro_lbl)
+		var scene_lbl := Label.new()
+		scene_lbl.text = "\nThe airlock hisses open. The smell hits you first.\n\nSomething fried. Something burnt. Something that might have been meat, once.\n\nYour father's handwriting is on a sticky note above the fryer:\n\"Don't turn off the compressor. It knows.\"\n\nThe license on the wall has three violations circled in red. One of them just says 'atmosphere.'\n\nThis is yours now."
+		scene_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		scene_lbl.add_theme_font_size_override("font_size", 14)
+		scene_lbl.add_theme_color_override("font_color", Color(0.85, 0.85, 0.9))
+		vbox.add_child(scene_lbl)
+		var sep := HSeparator.new()
+		vbox.add_child(sep)
 
 	# Header
 	var name_lbl := Label.new()

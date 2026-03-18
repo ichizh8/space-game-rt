@@ -73,6 +73,7 @@ var current_sector: int = 1
 var restaurant_rep: int = 0
 var restaurant_ingredients: Dictionary = {}
 var restaurant_name: String = "The Drifting Spoon"
+var restaurant_owned: bool = false    # unlocked by intro quest, persistent
 
 signal hull_changed(new_value: float)
 signal fuel_changed(new_value: float)
