@@ -511,16 +511,50 @@ func _spawn_wildlife(player_pos: Vector2, spawn_center: Vector2) -> void:
 			continue
 		if obj.is_in_group("wildlife") and not obj.get("is_dead"):
 			wildlife_count += 1
-	if wildlife_count >= MAX_WILDLIFE:
+
+	# Inside a hunting zone: higher cap, spawn zone-specific creatures
+	var active_zone: String = GameState.active_hunting_zone
+	var zone_max: int = MAX_WILDLIFE if active_zone == "" else MAX_WILDLIFE + 3
+	var zone_min: int = MIN_WILDLIFE if active_zone == "" else MIN_WILDLIFE + 2
+	if wildlife_count >= zone_max:
 		return
 
 	var diff := _get_zone_difficulty()
-	var to_spawn: int = MIN_WILDLIFE - wildlife_count
+	var to_spawn: int = zone_min - wildlife_count
 	if to_spawn <= 0:
 		return
 
 	for i in range(to_spawn):
 		var pos := _safe_spawn_pos(spawn_center, SPAWN_RADIUS, 300.0)
+
+		# If inside a named hunting zone, spawn that zone's creature type
+		if active_zone != "":
+			match active_zone:
+				"hunt_void_grubs":
+					call_deferred("_spawn_wildlife_single", void_grub_scene, pos, diff)
+				"hunt_skim_rays":
+					call_deferred("_spawn_wildlife_single", skim_ray_scene, pos, diff)
+				"hunt_snarlers":
+					call_deferred("_spawn_snarler_pack", pos, diff)
+				"hunt_drifters":
+					call_deferred("_spawn_wildlife_single", membrane_drifter_scene, pos, diff)
+				"hunt_feeders":
+					call_deferred("_spawn_wildlife_single", crystal_feeder_scene, pos, diff)
+				"hunt_leviathan":
+					var has_leviathan2 := false
+					for obj2 in _spawned_objects:
+						if is_instance_valid(obj2) and obj2.is_in_group("wildlife") and obj2.name.begins_with("VoidLeviathan"):
+							has_leviathan2 = true
+							break
+					if not has_leviathan2:
+						call_deferred("_spawn_wildlife_single", void_leviathan_scene, pos, diff)
+					else:
+						call_deferred("_spawn_wildlife_single", crystal_feeder_scene, pos, diff)
+				_:
+					call_deferred("_spawn_wildlife_single", void_grub_scene, pos, diff)
+			continue
+
+		# Outside hunting zones: biome-based random spawn
 		match _current_biome:
 			Biome.MIXED:
 				var r := randf()
@@ -549,7 +583,6 @@ func _spawn_wildlife(player_pos: Vector2, spawn_center: Vector2) -> void:
 			Biome.NEBULA:
 				call_deferred("_spawn_wildlife_single", membrane_drifter_scene, pos, diff)
 			Biome.DEEP_SPACE:
-				# Leviathan: max 1 at a time, 10% chance
 				var has_leviathan := false
 				for obj in _spawned_objects:
 					if is_instance_valid(obj) and obj.is_in_group("wildlife") and obj.name.begins_with("VoidLeviathan"):

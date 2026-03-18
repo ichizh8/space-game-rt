@@ -407,18 +407,25 @@ func _discover_nearby_planets() -> void:
 
 func _check_hunting_zone_discovery() -> void:
 	if GameState.current_sector != 1:
+		GameState.active_hunting_zone = ""
 		return
 	var player: Node2D = _get_player()
 	if not is_instance_valid(player):
 		return
 	var zones: Array = GameState.hunting_zones_sector1
+	var inside_zone: String = ""
 	for zone in zones:
 		var zid: String = str(zone.get("id", ""))
-		if zid.is_empty() or GameState.map_discovered_planets.has(zid):
+		if zid.is_empty():
 			continue
 		var zpos: Vector2 = Vector2(float(zone.get("pos_x", 0.0)), float(zone.get("pos_y", 0.0)))
-		var discovery_radius: float = float(zone.get("radius", 400.0)) + 300.0
-		if player.global_position.distance_to(zpos) <= discovery_radius:
+		var zone_radius: float = float(zone.get("radius", 400.0))
+		var dist: float = player.global_position.distance_to(zpos)
+		# Track active zone (player inside radius)
+		if dist <= zone_radius:
+			inside_zone = zid
+		# Auto-discover on proximity (slightly larger radius)
+		if not GameState.map_discovered_planets.has(zid) and dist <= zone_radius + 300.0:
 			GameState.map_discovered_planets[zid] = {
 				"pos_x": zone.get("pos_x", 0.0),
 				"pos_y": zone.get("pos_y", 0.0),
@@ -428,6 +435,18 @@ func _check_hunting_zone_discovery() -> void:
 			var hud: Node = get_tree().get_first_node_in_group("hud")
 			if is_instance_valid(hud) and hud.has_method("show_notification"):
 				hud.show_notification("Hunting zone discovered: " + str(zone.get("label", "")))
+	# Notify on entry
+	if inside_zone != GameState.active_hunting_zone:
+		GameState.active_hunting_zone = inside_zone
+		if inside_zone != "":
+			var zone_label: String = ""
+			for zone in zones:
+				if zone.get("id", "") == inside_zone:
+					zone_label = str(zone.get("label", ""))
+					break
+			var hud2: Node = get_tree().get_first_node_in_group("hud")
+			if is_instance_valid(hud2) and hud2.has_method("show_notification"):
+				hud2.show_notification("Entered: " + zone_label)
 
 
 # --- Story triggers (from sector_generator) ---

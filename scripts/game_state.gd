@@ -99,6 +99,7 @@ var ingredient_tiers: Dictionary = {
 	"feeder_bioluminescence":{"tier": 3, "name": "Bioluminescent Secretion","creature": "crystal_feeder"},
 }
 var zone_depth: int = 1  # 1=shallow, 2=mid, 3=deep
+var active_hunting_zone: String = ""  # id of zone player is currently inside, "" = none
 
 # Zone maps purchased at stations (persistent)
 var purchased_zone_maps: Array = []
