@@ -125,6 +125,7 @@ func save_game() -> void:
 		"restaurant_ingredients": GameState.restaurant_ingredients.duplicate(),
 		"restaurant_unlocked_dishes": GameState.restaurant_unlocked_dishes.duplicate(),
 		"zone_depth": GameState.zone_depth,
+		"prepared_dishes": GameState.prepared_dishes.duplicate(true),
 		"discovered_recipes": GameState.discovered_recipes.duplicate(true),
 		"guest_log": GameState.guest_log.duplicate(true),
 		"special_guests_seen": GameState.special_guests_seen.duplicate(),
@@ -225,6 +226,7 @@ func load_game(slot: int) -> bool:
 	for d in loaded_dishes:
 		GameState.restaurant_unlocked_dishes.append(str(d))
 	GameState.zone_depth = int(data.get("zone_depth", 1))
+	GameState.prepared_dishes = data.get("prepared_dishes", [])
 	GameState.discovered_recipes = data.get("discovered_recipes", {})
 	GameState.guest_log = data.get("guest_log", [])
 	var loaded_specials = data.get("special_guests_seen", [])

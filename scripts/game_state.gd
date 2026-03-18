@@ -132,6 +132,10 @@ var guest_log: Array = []           # past sessions, max 20
 var special_guests_seen: Array = [] # IDs of specials who visited
 var pending_guests: Array = []      # generated on departure, resolved on dock
 
+# Prepared dishes (cooked, waiting to be served)
+var prepared_dishes: Array = []
+# Each entry: {"name": String, "method": String, "style": String, "credits_value": int, "rep_value": int, "tier": int, "menu_story": String}
+
 # Cooksta
 var cooksta_rating: int = 0
 var cooksta_posts: Array = []  # max 10
@@ -147,6 +151,7 @@ signal restaurant_rep_changed(new_value: int)
 signal restaurant_ingredients_changed()
 signal ingredient_dropped(ing_name: String)
 signal guests_generated()
+signal prepared_dishes_changed()
 
 
 func add_resource(type: String, amount: int) -> void:
@@ -562,6 +567,41 @@ func add_restaurant_rep(amount: int) -> void:
 	restaurant_rep_changed.emit(restaurant_rep)
 
 
+func add_prepared_dish(dish: Dictionary) -> void:
+	prepared_dishes.append(dish)
+	prepared_dishes_changed.emit()
+
+
+func remove_prepared_dish(index: int) -> Dictionary:
+	if index < 0 or index >= prepared_dishes.size():
+		return {}
+	var dish: Dictionary = prepared_dishes[index]
+	prepared_dishes.remove_at(index)
+	prepared_dishes_changed.emit()
+	return dish
+
+
+func get_best_dish_for_faction(faction: String) -> int:
+	if prepared_dishes.is_empty():
+		return -1
+	var best_idx: int = 0
+	var best_score: float = -999.0
+	var profile: Dictionary = faction_dietary.get(faction, {})
+	var loves: Array = profile.get("loves", [])
+	var hates: Array = profile.get("hates", [])
+	for i in range(prepared_dishes.size()):
+		var dish: Dictionary = prepared_dishes[i]
+		var score: float = float(dish.get("tier", 1))
+		if dish.get("method", "") in loves or dish.get("style", "") in loves:
+			score += 2.0
+		if dish.get("method", "") in hates or dish.get("style", "") in hates:
+			score -= 3.0
+		if score > best_score:
+			best_score = score
+			best_idx = i
+	return best_idx
+
+
 func get_restaurant_tier() -> String:
 	if restaurant_rep < 20:
 		return "Shithole Fastfood"
@@ -638,9 +678,21 @@ func resolve_experiment(ingredients: Array, method: String, style: String) -> Di
 		var recipe: Dictionary = discovered_recipes[recipe_key]
 		for ing in ingredients:
 			remove_ingredient(ing, 1)
-		add_credits(int(recipe.get("credits", 50)))
-		add_restaurant_rep(int(recipe.get("rep", 1)))
-		return {"result": "known", "recipe": recipe}
+		var known_dish: Dictionary = {
+			"name": str(recipe.get("name", "Unknown Dish")),
+			"method": str(recipe.get("method", method)),
+			"style": str(recipe.get("style", style)),
+			"credits_value": int(recipe.get("credits", 50)),
+			"rep_value": int(recipe.get("rep", 1)),
+			"tier": 1,
+			"menu_story": str(recipe.get("menu_story", "")),
+		}
+		for ing in ingredients:
+			var t: int = ingredient_tiers.get(ing, {}).get("tier", 1)
+			if t > known_dish["tier"]:
+				known_dish["tier"] = t
+		add_prepared_dish(known_dish)
+		return {"result": "known", "recipe": recipe, "dish_added": true}
 	var max_tier: int = 1
 	for ing in ingredients:
 		var t: int = ingredient_tiers.get(ing, {}).get("tier", 1)
@@ -677,11 +729,19 @@ func resolve_experiment(ingredients: Array, method: String, style: String) -> Di
 	discovered_recipes[recipe_key] = recipe
 	for ing in ingredients:
 		remove_ingredient(ing, 1)
-	add_credits(credits_val)
-	add_restaurant_rep(rep_val)
+	var new_dish: Dictionary = {
+		"name": dish_name,
+		"method": method,
+		"style": style,
+		"credits_value": credits_val,
+		"rep_value": rep_val,
+		"tier": max_tier,
+		"menu_story": story,
+	}
+	add_prepared_dish(new_dish)
 	if style == "the_experiment" and roll < 0.2:
-		return {"result": "catastrophe", "recipe": recipe, "message": "Someone is ill. Data logged. Worth it."}
-	return {"result": "discovered", "recipe": recipe}
+		return {"result": "catastrophe", "recipe": recipe, "dish_added": true, "message": "Someone is ill. Data logged. Worth it."}
+	return {"result": "discovered", "recipe": recipe, "dish_added": true}
 
 
 func _generate_dish_name(ingredients: Array, method: String, style: String) -> String:
@@ -814,14 +874,32 @@ func resolve_guest(guest: Dictionary, choice: String) -> Dictionary:
 			if not "velka_orin" in special_guests_seen:
 				special_guests_seen.append("velka_orin")
 			if choice == "serve_leviathan":
-				remove_ingredient("leviathan_cut", 1)
+				# Try to find a tier 3 prepared dish first
+				var t3_idx: int = -1
+				for i in range(prepared_dishes.size()):
+					if prepared_dishes[i].get("tier", 0) >= 3:
+						t3_idx = i
+						break
+				if t3_idx >= 0:
+					var _served_dish: Dictionary = remove_prepared_dish(t3_idx)
+				elif has_ingredient("leviathan_cut", 1):
+					remove_ingredient("leviathan_cut", 1)
 				result["credits"] = 500
 				result["faction_deltas"] = {"corsairs": 5}
 				result["message"] = "Velka Orin eats in silence. Then: 'Adequate.' From her, that's a rave review."
 				cooksta_rating = clampi(cooksta_rating + 3, 0, 100)
 				cooksta_posts.append("Velka Orin writes: 'The Drifting Spoon. Go. Leviathan cut. Don't ask questions.'")
 			elif choice == "overcharge":
-				remove_ingredient("leviathan_cut", 1)
+				# Consume tier 3 dish or raw ingredient
+				var t3o_idx: int = -1
+				for i in range(prepared_dishes.size()):
+					if prepared_dishes[i].get("tier", 0) >= 3:
+						t3o_idx = i
+						break
+				if t3o_idx >= 0:
+					var _dish: Dictionary = remove_prepared_dish(t3o_idx)
+				elif has_ingredient("leviathan_cut", 1):
+					remove_ingredient("leviathan_cut", 1)
 				if randf() < 0.4:
 					result["credits"] = 1500
 					result["faction_deltas"] = {"corsairs": 2}
@@ -861,8 +939,8 @@ func resolve_guest(guest: Dictionary, choice: String) -> Dictionary:
 				result["message"] = "He's vague. Something about 'ingredient provenance standards.' Watch for Coalition patrols."
 				set_story_flag("drath_warned", true)
 	else:
-		# Procedural guest — requires at least one ingredient in storage
-		if restaurant_ingredients.is_empty():
+		# Procedural guest — requires a prepared dish
+		if prepared_dishes.is_empty():
 			result["credits"] = 0
 			result["faction_deltas"] = {faction: -1}
 			result["message"] = "%s (%s) — nothing to serve. They leave hungry." % [guest.get("name", "Guest"), faction.capitalize()]
@@ -871,20 +949,13 @@ func resolve_guest(guest: Dictionary, choice: String) -> Dictionary:
 			for f in result["faction_deltas"]:
 				add_faction_rep(f, result["faction_deltas"][f])
 			return result
-		# Pick the best available ingredient by tier
-		var best_ing: String = ""
-		var best_tier: int = 0
-		for ing_id in restaurant_ingredients:
-			if restaurant_ingredients[ing_id] > 0:
-				var t: int = ingredient_tiers.get(ing_id, {}).get("tier", 1)
-				if t > best_tier:
-					best_tier = t
-					best_ing = ing_id
-		# Consume one ingredient
-		if not best_ing.is_empty():
-			remove_ingredient(best_ing, 1)
-		var base_credits: int = 40 + best_tier * 40 + randi() % 60
-		var satisfaction: float = 1.0
+		# Pick best dish for this faction
+		var dish_idx: int = get_best_dish_for_faction(faction)
+		var dish: Dictionary = remove_prepared_dish(dish_idx)
+		var base_credits: int = dish.get("credits_value", 60)
+		var base_rep: int = dish.get("rep_value", 1)
+		var satisfaction: float = get_satisfaction_modifier(faction, dish.get("method", ""), dish.get("style", ""))
+		# Trait modifiers
 		var trait_val: String = guest.get("trait", "")
 		if trait_val == "generous":
 			satisfaction += 0.3
@@ -893,18 +964,17 @@ func resolve_guest(guest: Dictionary, choice: String) -> Dictionary:
 		elif trait_val == "snobbish":
 			if restaurant_rep < 40:
 				satisfaction -= 0.4
-		# Dietary preference bonus
-		satisfaction *= get_satisfaction_modifier(faction, "char_grill", "diner")
 		var earned: int = int(base_credits * satisfaction)
-		var rep_delta: int = 1 if satisfaction >= 1.0 else (0 if satisfaction >= 0.6 else -1)
+		var rep_delta: int = base_rep if satisfaction >= 1.0 else (0 if satisfaction >= 0.6 else -1)
 		result["credits"] = earned
 		result["faction_deltas"] = {faction: rep_delta}
-		if satisfaction >= 1.2:
-			result["message"] = "%s (%s) — impressed. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), earned]
+		result["dish_served"] = dish.get("name", "Unknown Dish")
+		if satisfaction >= 1.3:
+			result["message"] = "%s (%s) — loved the %s. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), dish.get("name", "dish"), earned]
 		elif satisfaction >= 0.8:
-			result["message"] = "%s (%s) — satisfied. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), earned]
+			result["message"] = "%s (%s) — satisfied with %s. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), dish.get("name", "dish"), earned]
 		else:
-			result["message"] = "%s (%s) — unimpressed. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), earned]
+			result["message"] = "%s (%s) — did not enjoy the %s. +%d cr" % [guest.get("name", "Guest"), faction.capitalize(), dish.get("name", "dish"), earned]
 		add_restaurant_rep(rep_delta)
 		# Corsair retaliation check
 		if faction == "corsairs" and satisfaction < 0.5 and faction_rep.get("corsairs", 0) < 30:

@@ -415,6 +415,35 @@ func _refresh_restaurant_tab() -> void:
 
 	vbox.add_child(HSeparator.new())
 
+	# Kitchen queue
+	var kq_title := Label.new()
+	kq_title.text = "KITCHEN QUEUE  (%d dishes ready)" % GameState.prepared_dishes.size()
+	kq_title.add_theme_font_size_override("font_size", 14)
+	kq_title.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+	vbox.add_child(kq_title)
+
+	if GameState.prepared_dishes.is_empty():
+		var kq_empty := Label.new()
+		kq_empty.text = "No dishes prepared. Cook something first."
+		kq_empty.add_theme_font_size_override("font_size", 12)
+		kq_empty.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
+		vbox.add_child(kq_empty)
+	else:
+		for di in range(GameState.prepared_dishes.size()):
+			var pd: Dictionary = GameState.prepared_dishes[di]
+			var pd_lbl := Label.new()
+			pd_lbl.text = "%s | %s | %s | %d cr" % [
+				str(pd.get("name", "?")),
+				str(pd.get("method", "")).replace("_", " ").capitalize(),
+				str(pd.get("style", "")).replace("_", " ").capitalize(),
+				int(pd.get("credits_value", 0))
+			]
+			pd_lbl.add_theme_font_size_override("font_size", 12)
+			pd_lbl.add_theme_color_override("font_color", Color(0.85, 0.8, 0.5))
+			vbox.add_child(pd_lbl)
+
+	vbox.add_child(HSeparator.new())
+
 	# Ingredient storage
 	var ing_title := Label.new()
 	ing_title.text = "INGREDIENT STORAGE"
@@ -533,11 +562,11 @@ func _build_dish_row(vbox: VBoxContainer, dish: Dictionary) -> void:
 	inner.add_child(info_lbl)
 
 	var cook_btn := Button.new()
-	cook_btn.text = "Cook & Serve"
+	cook_btn.text = "Cook → Kitchen"
 	cook_btn.custom_minimum_size.y = 38
 	cook_btn.add_theme_font_size_override("font_size", 13)
 	cook_btn.disabled = not GameState.has_ingredient(cost_id, cost_amt)
-	cook_btn.pressed.connect(_on_cook.bind(cost_id, cost_amt, earn_cr, earn_rep))
+	cook_btn.pressed.connect(_on_cook.bind(cost_id, cost_amt, earn_cr, earn_rep, str(dish["name"]), str(dish["desc"])))
 	inner.add_child(cook_btn)
 
 
@@ -791,7 +820,7 @@ func _build_discovered_recipe_row(vbox: VBoxContainer, recipe: Dictionary) -> vo
 			can_cook = false
 			break
 	var cook_btn := Button.new()
-	cook_btn.text = "Cook"
+	cook_btn.text = "Cook → Kitchen"
 	cook_btn.custom_minimum_size.y = 36
 	cook_btn.add_theme_font_size_override("font_size", 13)
 	cook_btn.disabled = not can_cook
@@ -800,8 +829,21 @@ func _build_discovered_recipe_row(vbox: VBoxContainer, recipe: Dictionary) -> vo
 		var r_ings: Array = recipe_ref.get("ingredients", [])
 		for rid in r_ings:
 			GameState.remove_ingredient(rid, 1)
-		GameState.add_credits(int(recipe_ref.get("credits", 0)))
-		GameState.add_restaurant_rep(int(recipe_ref.get("rep", 0)))
+		var max_t: int = 1
+		for rid in r_ings:
+			var t: int = GameState.ingredient_tiers.get(rid, {}).get("tier", 1)
+			if t > max_t:
+				max_t = t
+		var cooked_dish: Dictionary = {
+			"name": str(recipe_ref.get("name", "Unknown Dish")),
+			"method": str(recipe_ref.get("method", "")),
+			"style": str(recipe_ref.get("style", "")),
+			"credits_value": int(recipe_ref.get("credits", 0)),
+			"rep_value": int(recipe_ref.get("rep", 0)),
+			"tier": max_t,
+			"menu_story": str(recipe_ref.get("menu_story", "")),
+		}
+		GameState.add_prepared_dish(cooked_dish)
 		_refresh_restaurant_tab())
 	inner.add_child(cook_btn)
 
@@ -1031,10 +1073,17 @@ func _show_experiment_result(result: Dictionary) -> void:
 		name_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
 		name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		vbox.add_child(name_lbl)
+		if result.get("dish_added", false):
+			var added_lbl := Label.new()
+			added_lbl.text = "Dish prepared and added to kitchen!"
+			added_lbl.add_theme_font_size_override("font_size", 14)
+			added_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
+			added_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			vbox.add_child(added_lbl)
 		var cr_lbl := Label.new()
-		cr_lbl.text = "+%d credits, +%d rep" % [int(recipe.get("credits", 0)), int(recipe.get("rep", 0))]
-		cr_lbl.add_theme_font_size_override("font_size", 14)
-		cr_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.4))
+		cr_lbl.text = "Value: %d credits, +%d rep (when served)" % [int(recipe.get("credits", 0)), int(recipe.get("rep", 0))]
+		cr_lbl.add_theme_font_size_override("font_size", 13)
+		cr_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.6))
 		cr_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		vbox.add_child(cr_lbl)
 
@@ -1172,7 +1221,12 @@ func _build_guest_card(vbox: VBoxContainer, guest: Dictionary, idx: int) -> void
 			result_lbl.add_theme_color_override("font_color", Color(0.5, 0.8, 0.5))
 			inner.add_child(result_lbl)
 		elif choice_id == "velka_first_visit":
-			var has_lev: bool = GameState.has_ingredient("leviathan_cut", 1)
+			var has_t3_dish: bool = false
+			for pd in GameState.prepared_dishes:
+				if pd.get("tier", 0) >= 3:
+					has_t3_dish = true
+					break
+			var has_lev: bool = has_t3_dish or GameState.has_ingredient("leviathan_cut", 1)
 			if has_lev:
 				_add_choice_btn(inner, guest, idx, "serve_leviathan", "Serve Leviathan Cut")
 				_add_choice_btn(inner, guest, idx, "overcharge", "Overcharge (risky)")
@@ -1193,10 +1247,19 @@ func _build_guest_card(vbox: VBoxContainer, guest: Dictionary, idx: int) -> void
 			result_lbl.add_theme_color_override("font_color", Color(0.5, 0.8, 0.5))
 			inner.add_child(result_lbl)
 		else:
+			var has_dishes: bool = not GameState.prepared_dishes.is_empty()
+			# Show best dish preview
+			if has_dishes:
+				var best_idx: int = GameState.get_best_dish_for_faction(str(guest.get("faction", "drifters")))
+				if best_idx >= 0 and best_idx < GameState.prepared_dishes.size():
+					var preview_lbl := Label.new()
+					preview_lbl.text = "Will serve: %s" % str(GameState.prepared_dishes[best_idx].get("name", "?"))
+					preview_lbl.add_theme_font_size_override("font_size", 11)
+					preview_lbl.add_theme_color_override("font_color", Color(0.7, 0.8, 0.5))
+					inner.add_child(preview_lbl)
 			var serve_btn := Button.new()
-			var has_food: bool = not GameState.restaurant_ingredients.is_empty()
-			serve_btn.text = "Serve" if has_food else "Serve (no ingredients)"
-			serve_btn.disabled = not has_food
+			serve_btn.text = "Serve" if has_dishes else "No dishes in kitchen"
+			serve_btn.disabled = not has_dishes
 			serve_btn.custom_minimum_size.y = 34
 			serve_btn.add_theme_font_size_override("font_size", 13)
 			var guest_idx: int = idx
@@ -1237,11 +1300,18 @@ func _on_serve_guest(guest_idx: int, choice: String) -> void:
 	_refresh_guests_tab()
 
 
-func _on_cook(cost_id: String, cost_amt: int, earn_cr: int, earn_rep: int) -> void:
+func _on_cook(cost_id: String, cost_amt: int, earn_cr: int, earn_rep: int, dish_name: String, dish_desc: String) -> void:
 	if GameState.remove_ingredient(cost_id, cost_amt):
-		GameState.add_credits(earn_cr)
-		if earn_rep > 0:
-			GameState.add_restaurant_rep(earn_rep)
+		var dish_dict: Dictionary = {
+			"name": dish_name,
+			"method": "char_grill",
+			"style": "diner",
+			"credits_value": earn_cr,
+			"rep_value": earn_rep,
+			"tier": 1,
+			"menu_story": dish_desc,
+		}
+		GameState.add_prepared_dish(dish_dict)
 		_refresh_restaurant_tab()
 
 
