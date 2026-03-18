@@ -99,6 +99,23 @@ class MapControl extends Control:
 			draw_line(Vector2(0, gy), Vector2(w, gy), gc, 1.0)
 			gy -= grid_px
 
+		# Draw stars from scene
+		for star in get_tree().get_nodes_in_group("stars"):
+			if not is_instance_valid(star):
+				continue
+			var world_pos: Vector2 = (star as Node2D).global_position
+			var mp: Vector2 = center + (world_pos - _player_pos) * effective_scale
+			if mp.x < -30.0 or mp.x > w + 30.0 or mp.y < -30.0 or mp.y > h + 30.0:
+				continue
+			var sr: float = max(5.0, float(star.get("star_radius") if star.get("star_radius") != null else 8.0) * effective_scale * 0.4)
+			draw_circle(mp, sr * 1.8, Color(1.0, 0.55, 0.0, 0.12))
+			draw_circle(mp, sr, Color(1.0, 0.92, 0.4, 0.95))
+			draw_circle(mp, sr * 0.55, Color(1.0, 1.0, 0.9, 0.7))
+			var sname2: String = str(star.get("star_name") if star.get("star_name") != null else "")
+			if sname2 != "":
+				draw_string(ThemeDB.fallback_font, mp + Vector2(sr + 4.0, 4.0), sname2,
+					HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1.0, 0.88, 0.5, 0.85))
+
 		# Draw all planets from scene
 		for planet in get_tree().get_nodes_in_group("planets"):
 			if not is_instance_valid(planet):
@@ -1041,7 +1058,7 @@ func _build_map_tab() -> void:
 	vbox.add_child(legend_panel)
 
 	var legend := Label.new()
-	legend.text = "LEGEND\nCyan arrow = You   Blue dots = Planets   Yellow squares = Stations\nCyan rings = Warp Gates   Yellow ! = Quests   Colored diamonds = Zones\nRed dots = Enemies (nearby)   Yellow dots = Loot   Orange X = Waypoint"
+	legend.text = "LEGEND\nCyan arrow = You   Blue dots = Planets   Yellow squares = Stations\nGold circle = Star (⚠ radiation damage nearby!)   Cyan rings = Warp Gates\nYellow ! = Quests   Colored diamonds = Zones\nRed dots = Enemies (nearby)   Yellow dots = Loot   Orange X = Waypoint"
 	legend.add_theme_font_size_override("font_size", 10)
 	legend.add_theme_color_override("font_color", Color(0.45, 0.55, 0.65))
 	legend.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

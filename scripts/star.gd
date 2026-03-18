@@ -10,8 +10,8 @@ const STAR_NAMES: Array[String] = [
 	"Castor Yellow", "Aldebaran", "Betelgeuse Jr", "Tau Ceti", "Epsilon Eridani"
 ]
 var _damage_timer: float = 0.0
-const WARNING_RANGE := 200.0
-const DANGER_RANGE := 110.0
+const WARNING_RANGE := 350.0
+const DANGER_RANGE := 180.0
 const WARNING_DAMAGE := 5.0   # hp per second
 const DANGER_DAMAGE := 18.0   # hp per second
 const DAMAGE_INTERVAL := 0.4
