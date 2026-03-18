@@ -1,6 +1,6 @@
 extends Node
 
-var active_slot: int = 0  # 0 = no slot active; set before starting/loading a game
+var active_slot: int = 1  # defaults to slot 1; overridden when player picks a slot
 
 const SLOT_COUNT := 3
 const SECTOR_NAMES: Dictionary = {
@@ -77,8 +77,6 @@ func get_slot_summary(slot: int) -> Dictionary:
 
 
 func save_game() -> void:
-	if active_slot == 0:
-		return
 	var px: float = 0.0
 	var py: float = 0.0
 	var player := get_tree().get_first_node_in_group("player") as Node2D

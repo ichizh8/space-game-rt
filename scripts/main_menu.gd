@@ -240,8 +240,16 @@ func _rebuild_ui() -> void:
 
 func _on_new_game(slot: int) -> void:
 	SaveManager.active_slot = slot
-	GameState.reset_game()
 	SaveManager.delete_save(slot)
+	GameState.reset_game()
+	# Clear restaurant ownership + quest history so intro triggers fresh
+	GameState.restaurant_owned = false
+	GameState.restaurant_rep = 0
+	GameState.restaurant_ingredients = {}
+	GameState.restaurant_unlocked_dishes = ["dish_mystery_patty"]
+	GameState.completed_quests = []
+	GameState.active_quests = []
+	GameState.story_flags = {}
 	get_tree().change_scene_to_file("res://scenes/space_world.tscn")
 
 
