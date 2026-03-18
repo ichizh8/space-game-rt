@@ -11,6 +11,13 @@ var _hunt_zone_timer: float = 0.0
 const HUNT_ZONE_CHECK_INTERVAL: float = 2.0
 var _pending_initial_spawns: bool = false
 
+# Biome system
+enum Biome { MIXED, ASTEROID_BELT, DEBRIS_FIELD, DEEP_SPACE, NEBULA }
+const BIOME_NAMES: Array[String] = ["Mixed", "Asteroid Belt", "Debris Field", "Deep Space", "Nebula"]
+var _current_biome: Biome = Biome.MIXED
+var _biome_change_timer: float = 0.0
+const BIOME_CHANGE_INTERVAL: float = 45.0
+
 # Scene paths
 const PLANET_SCENE: String = "res://scenes/planet.tscn"
 const STAR_SCENE: String = "res://scenes/star.tscn"
@@ -32,6 +39,7 @@ const DRIFTER_SCENE: String = "res://scenes/drifter_shuttle.tscn"
 
 func _ready() -> void:
 	add_to_group("sector_loader")
+	add_to_group("sector_generator")
 	_sector_id = int(GameState.get("current_sector")) if GameState.get("current_sector") != null else 1
 	call_deferred("_load_sector")
 	call_deferred("_connect_signals_deferred")
@@ -51,6 +59,10 @@ func _process(delta: float) -> void:
 	if _hunt_zone_timer >= HUNT_ZONE_CHECK_INTERVAL:
 		_hunt_zone_timer = 0.0
 		_check_hunting_zone_discovery()
+	_biome_change_timer += delta
+	if _biome_change_timer >= BIOME_CHANGE_INTERVAL:
+		_biome_change_timer = 0.0
+		_pick_biome()
 
 func _do_initial_spawns() -> void:
 	for i in range(_respawn_zones.size()):
@@ -447,6 +459,18 @@ func _check_hunting_zone_discovery() -> void:
 			var hud2: Node = get_tree().get_first_node_in_group("hud")
 			if is_instance_valid(hud2) and hud2.has_method("show_notification"):
 				hud2.show_notification("Entered: " + zone_label)
+
+
+func _pick_biome() -> void:
+	var player: Node2D = _get_player()
+	if not is_instance_valid(player):
+		return
+	var dist_from_origin: float = player.global_position.length()
+	var pool: Array = [Biome.MIXED, Biome.ASTEROID_BELT, Biome.DEBRIS_FIELD]
+	if dist_from_origin > 1200.0:
+		pool.append(Biome.DEEP_SPACE)
+		pool.append(Biome.NEBULA)
+	_current_biome = pool[randi() % pool.size()]
 
 
 # --- Story triggers (from sector_generator) ---
