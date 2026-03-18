@@ -13,6 +13,7 @@ var _despawn_timer: float = -1.0
 var _has_sprite: bool = false
 var _sprite_tex: Texture2D = null
 var _sprite_size: float = 40.0
+var _sprite_rot_offset: float = 3.141593
 var _patrol_timer: float = 0.0
 
 var shoot_timer: float = 0.0
@@ -207,14 +208,21 @@ func _draw() -> void:
 		if is_dead:
 			return
 		var sz: float = _sprite_size
+		if _sprite_rot_offset != 0.0:
+			draw_set_transform(Vector2.ZERO, _sprite_rot_offset)
 		draw_texture_rect(_sprite_tex, Rect2(-sz * 0.5, -sz * 0.5, sz, sz), false)
+		if _sprite_rot_offset != 0.0:
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if hp < max_hp:
 			var bw: float = sz
 			var by: float = -sz * 0.5 - 5.0
 			var pct: float = hp / max_hp
+			# Counter-rotate so HP bar stays screen-aligned
+			draw_set_transform(Vector2.ZERO, -rotation, Vector2.ONE)
 			draw_rect(Rect2(-bw*0.5, by, bw, 3.0), Color(0.2,0.2,0.2,0.8))
 			var fc := Color(0.2,0.9,0.2) if pct>0.5 else (Color(0.9,0.7,0.1) if pct>0.25 else Color(0.9,0.1,0.1))
 			draw_rect(Rect2(-bw*0.5, by, bw*pct, 3.0), fc)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
 	if is_dead:
 		return

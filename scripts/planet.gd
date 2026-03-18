@@ -77,7 +77,12 @@ func land() -> void:
 func _draw() -> void:
 	if _has_sprite and is_instance_valid(_sprite_tex):
 		var sz: float = planet_radius * 2.2
-		draw_texture_rect(_sprite_tex, Rect2(-sz * 0.5, -sz * 0.5, sz, sz), false)
+		# Keep texture aspect ratio to avoid oval distortion
+		var tex_size: Vector2 = _sprite_tex.get_size()
+		var aspect: float = tex_size.x / max(tex_size.y, 1.0)
+		var draw_w: float = sz
+		var draw_h: float = sz / aspect
+		draw_texture_rect(_sprite_tex, Rect2(-draw_w * 0.5, -draw_h * 0.5, draw_w, draw_h), false)
 		var name_width: float = planet_name.length() * 6.0
 		draw_string(ThemeDB.fallback_font, Vector2(-name_width * 0.5, planet_radius + 14.0),
 			planet_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.95, 1.0, 0.9))
