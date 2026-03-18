@@ -417,9 +417,9 @@ func _refresh_bridge() -> void:
 	vbox.add_child(HSeparator.new())
 	var sec3 := _make_section_label("SHIP UPGRADES")
 	vbox.add_child(sec3)
-	_add_stat_row(vbox, "Weapons", "Lv %d" % GameState.weapon_level)
-	_add_stat_row(vbox, "Engines", "Lv %d" % GameState.speed_level)
-	_add_stat_row(vbox, "Hull Plating", "Lv %d" % GameState.shield_level)
+	_add_stat_row(vbox, "Weapons", "T%d/T10" % GameState.weapon_level if GameState.weapon_level > 0 else "T0")
+	_add_stat_row(vbox, "Engines", "T%d/T10" % GameState.speed_level if GameState.speed_level > 0 else "T0")
+	_add_stat_row(vbox, "Hull Plating", "T%d/T10" % GameState.shield_level if GameState.shield_level > 0 else "T0")
 
 	# Faction standing
 	vbox.add_child(HSeparator.new())

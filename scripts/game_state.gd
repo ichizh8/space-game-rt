@@ -60,7 +60,7 @@ var session_artifacts: int = 0
 var story_act: int = 1
 var story_flags: Dictionary = {}
 
-# Ship upgrade levels (0-3 each)
+# Ship upgrade levels (0-10 each)
 var weapon_level: int = 0
 var speed_level: int = 0
 var shield_level: int = 0

@@ -440,25 +440,31 @@ func _refresh_services() -> void:
 	upgrade_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 	vbox.add_child(upgrade_title)
 
-	_add_upgrade_row(vbox, "Weapons",     0, GameState.weapon_level, [80, 200, 500], ["+5 dmg", "+5 dmg", "+10 dmg"])
-	_add_upgrade_row(vbox, "Engines",     1, GameState.speed_level,  [60, 150, 400], ["+20 spd", "+20 spd", "+40 spd"])
-	_add_upgrade_row(vbox, "Hull Plating",2, GameState.shield_level, [100, 250, 600],["+25 max hp", "+25 max hp", "+50 max hp"])
+	var costs_w: Array = [150,350,700,1200,2000,3500,5500,8000,12000,18000]
+	var costs_e: Array = [100,250,500,900,1500,2500,4000,6000,9000,14000]
+	var costs_s: Array = [200,450,900,1600,2800,4500,7000,10000,15000,22000]
+	var labels_w: Array = ["+5 dmg","+5 dmg","+10 dmg","+10 dmg","+15 dmg","+15 dmg","+20 dmg","+20 dmg","+25 dmg","+30 dmg"]
+	var labels_e: Array = ["+20 spd","+20 spd","+30 spd","+30 spd","+40 spd","+40 spd","+50 spd","+50 spd","+60 spd","+70 spd"]
+	var labels_s: Array = ["+25 hp","+25 hp","+50 hp","+50 hp","+75 hp","+75 hp","+100 hp","+100 hp","+125 hp","+150 hp"]
+	_add_upgrade_row(vbox, "Weapons",      0, GameState.weapon_level, costs_w, labels_w)
+	_add_upgrade_row(vbox, "Engines",      1, GameState.speed_level,  costs_e, labels_e)
+	_add_upgrade_row(vbox, "Hull Plating", 2, GameState.shield_level, costs_s, labels_s)
 
 
-func _add_upgrade_row(vbox: VBoxContainer, name: String, kind: int, level: int,
+func _add_upgrade_row(vbox: VBoxContainer, uname: String, kind: int, level: int,
 		costs: Array, labels: Array) -> void:
 	var row := HBoxContainer.new()
 	row.custom_minimum_size.y = 40
 	vbox.add_child(row)
 
 	var name_lbl := Label.new()
-	var level_str := "MAX" if level >= 3 else ("Lv" + str(level))
-	name_lbl.text = name + " [" + level_str + "]"
+	var level_str := "MAX (T10)" if level >= 10 else ("T" + str(level) + "/T10")
+	name_lbl.text = uname + " [" + level_str + "]"
 	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_lbl.add_theme_font_size_override("font_size", 13)
 	row.add_child(name_lbl)
 
-	if level < 3:
+	if level < 10:
 		var btn := Button.new()
 		btn.text = labels[level] + " (" + str(costs[level]) + " cr)"
 		btn.custom_minimum_size = Vector2(140, 36)
@@ -475,31 +481,33 @@ func _add_upgrade_row(vbox: VBoxContainer, name: String, kind: int, level: int,
 
 
 func _on_upgrade_pressed(kind: int) -> void:
-	var costs_w := [80, 200, 500]
-	var costs_e := [60, 150, 400]
-	var costs_s := [100, 250, 600]
+	var costs_w: Array = [150,350,700,1200,2000,3500,5500,8000,12000,18000]
+	var costs_e: Array = [100,250,500,900,1500,2500,4000,6000,9000,14000]
+	var costs_s: Array = [200,450,900,1600,2800,4500,7000,10000,15000,22000]
+	var bonus_w: Array[float] = [5.0,5.0,10.0,10.0,15.0,15.0,20.0,20.0,25.0,30.0]
+	var bonus_e: Array[float] = [20.0,20.0,30.0,30.0,40.0,40.0,50.0,50.0,60.0,70.0]
+	var bonus_s: Array[float] = [25.0,25.0,50.0,50.0,75.0,75.0,100.0,100.0,125.0,150.0]
 	match kind:
 		0: # Weapons
-			var lvl := GameState.weapon_level
-			if lvl >= 3 or GameState.credits < costs_w[lvl]: return
+			var lvl: int = GameState.weapon_level
+			if lvl >= 10 or GameState.credits < costs_w[lvl]: return
 			GameState.credits -= costs_w[lvl]
 			GameState.credits_changed.emit(GameState.credits)
-			GameState.player_damage_bonus += [5.0, 5.0, 10.0][lvl]
+			GameState.player_damage_bonus += bonus_w[lvl]
 			GameState.weapon_level += 1
 		1: # Engines
-			var lvl := GameState.speed_level
-			if lvl >= 3 or GameState.credits < costs_e[lvl]: return
+			var lvl: int = GameState.speed_level
+			if lvl >= 10 or GameState.credits < costs_e[lvl]: return
 			GameState.credits -= costs_e[lvl]
 			GameState.credits_changed.emit(GameState.credits)
-			GameState.player_speed_bonus += [20.0, 20.0, 40.0][lvl]
+			GameState.player_speed_bonus += bonus_e[lvl]
 			GameState.speed_level += 1
 		2: # Hull Plating
-			var lvl := GameState.shield_level
-			if lvl >= 3 or GameState.credits < costs_s[lvl]: return
+			var lvl: int = GameState.shield_level
+			if lvl >= 10 or GameState.credits < costs_s[lvl]: return
 			GameState.credits -= costs_s[lvl]
 			GameState.credits_changed.emit(GameState.credits)
-			var shield_bonus_table: Array[float] = [25.0, 25.0, 50.0]
-			var bonus: float = shield_bonus_table[lvl]
+			var bonus: float = bonus_s[lvl]
 			GameState.max_hull += bonus
 			GameState.hull = min(GameState.hull + bonus, GameState.max_hull)
 			GameState.hull_changed.emit(GameState.hull)
