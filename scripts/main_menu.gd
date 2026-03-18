@@ -46,13 +46,14 @@ func _build_ui() -> void:
 	# Save system debug indicator
 	if OS.get_name() == "Web":
 		var test_result = JavaScriptBridge.eval("(function(){ try { localStorage.setItem('__test','1'); var v=localStorage.getItem('__test'); localStorage.removeItem('__test'); return v==='1'?'OK':'FAIL'; } catch(e){ return 'BLOCKED: '+e.message; } })()", true)
-		if test_result != null and str(test_result) != "OK":
-			var warn := Label.new()
-			warn.text = "⚠ Save unavailable: " + str(test_result)
-			warn.add_theme_font_size_override("font_size", 11)
-			warn.add_theme_color_override("font_color", Color(1.0, 0.5, 0.2))
-			warn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			outer.add_child(warn)
+		var slot1_raw = JavaScriptBridge.eval("localStorage.getItem('save_slot_1') ? 'EXISTS('+localStorage.getItem('save_slot_1').length+')' : 'EMPTY';", true)
+		var dbg := Label.new()
+		dbg.text = "DEBUG: ls=%s slot1=%s has=%s" % [str(test_result), str(slot1_raw), str(SaveManager.has_save(1))]
+		dbg.add_theme_font_size_override("font_size", 10)
+		dbg.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
+		dbg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		dbg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		outer.add_child(dbg)
 
 	outer.add_child(HSeparator.new())
 
