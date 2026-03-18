@@ -194,6 +194,13 @@ func _place_station(s: Dictionary, parent: Node) -> void:
 	# Connect docked signal for station menu
 	if station.has_signal("docked"):
 		station.docked.connect(_on_station_docked)
+	# Always reveal The Drifting Spoon on the map so player can navigate to it
+	if s_id == "drifting_spoon":
+		var sp: Vector2 = Vector2(float(s.get("pos_x", 0.0)), float(s.get("pos_y", 0.0)))
+		GameState.map_discovered_planets["drifting_spoon"] = {
+			"pos_x": sp.x, "pos_y": sp.y,
+			"name": "The Drifting Spoon", "color_h": 0.12
+		}
 	_spawned_objects.append(station)
 
 

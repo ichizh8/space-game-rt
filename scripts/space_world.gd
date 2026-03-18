@@ -55,6 +55,15 @@ func _give_inherit_quest() -> void:
 		var q = WorldData.get_quest_by_id("quest_inherit_restaurant")
 		if not q.is_empty():
 			GameState.accept_quest(q, "world")
+			GameState.tracked_quest_id = "quest_inherit_restaurant"
+			# Show notification after HUD is ready
+			call_deferred("_notify_inherit_quest")
+
+
+func _notify_inherit_quest() -> void:
+	var hud: Node = get_tree().get_first_node_in_group("hud")
+	if is_instance_valid(hud) and hud.has_method("show_notification"):
+		hud.show_notification("📋 NEW QUEST: Dad's Place — Find The Drifting Spoon", 5.0)
 
 
 func _process(delta: float) -> void:
