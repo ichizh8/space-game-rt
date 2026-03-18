@@ -30,18 +30,29 @@ func _build_ui() -> void:
 
 	# Title
 	var title := Label.new()
-	title.text = "SPACE EXPLORER"
+	title.text = "SPACE HUNTER"
 	title.add_theme_font_size_override("font_size", 30)
 	title.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(title)
 
 	var sub := Label.new()
-	sub.text = "Navigate. Mine. Conquer."
+	sub.text = "Hunt. Cook. Conquer the sector."
 	sub.add_theme_font_size_override("font_size", 13)
 	sub.add_theme_color_override("font_color", Color(0.4, 0.6, 0.8))
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(sub)
+
+	# Save system debug indicator
+	if OS.get_name() == "Web":
+		var test_result = JavaScriptBridge.eval("(function(){ try { localStorage.setItem('__test','1'); var v=localStorage.getItem('__test'); localStorage.removeItem('__test'); return v==='1'?'OK':'FAIL'; } catch(e){ return 'BLOCKED: '+e.message; } })()", true)
+		if test_result != null and str(test_result) != "OK":
+			var warn := Label.new()
+			warn.text = "⚠ Save unavailable: " + str(test_result)
+			warn.add_theme_font_size_override("font_size", 11)
+			warn.add_theme_color_override("font_color", Color(1.0, 0.5, 0.2))
+			warn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			outer.add_child(warn)
 
 	outer.add_child(HSeparator.new())
 

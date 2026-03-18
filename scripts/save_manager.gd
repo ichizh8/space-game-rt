@@ -18,17 +18,18 @@ func _get_slot_path(slot: int) -> String:
 # ── Web (localStorage) helpers ──────────────────────────────────
 
 func _web_save(slot: int, json_string: String) -> void:
-	# Store raw JSON directly — avoid base64 since it can contain quotes that break JS string literals
-	# Escape backslashes and single quotes for safe JS embedding
-	var safe: String = json_string.replace("\\", "\\\\").replace("'", "\\'")
-	JavaScriptBridge.eval("try { localStorage.setItem('save_slot_%d', '%s'); } catch(e) { console.error('save failed', e); }" % [slot, safe], true)
+	var bytes: PackedByteArray = json_string.to_utf8_buffer()
+	var b64: String = Marshalls.raw_to_base64(bytes)
+	JavaScriptBridge.eval("localStorage.setItem('save_slot_%d', '%s');" % [slot, b64], true)
 
 
 func _web_load(slot: int) -> String:
 	var result = JavaScriptBridge.eval("localStorage.getItem('save_slot_%d') || '';" % slot, true)
 	if result == null or str(result).is_empty():
 		return ""
-	return str(result)
+	var b64: String = str(result)
+	var bytes: PackedByteArray = Marshalls.base64_to_raw(b64)
+	return bytes.get_string_from_utf8()
 
 
 func _web_has_save(slot: int) -> bool:
