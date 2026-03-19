@@ -19,6 +19,7 @@ var _despawn_timer: float = -1.0
 var _has_sprite: bool = false
 var _sprite_tex: Texture2D = null
 var _sprite_size: float = 40.0
+var _sprite_rot_offset: float = 3.141593
 var _contact_cooldown: float = 0.0
 
 const CIRCLE_RANGE := 300.0
@@ -167,7 +168,9 @@ func _draw() -> void:
 		if is_dead:
 			return
 		var sz: float = _sprite_size
+		draw_set_transform(Vector2.ZERO, _sprite_rot_offset)
 		draw_texture_rect(_sprite_tex, Rect2(-sz * 0.5, -sz * 0.5, sz, sz), false)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if hp < max_hp:
 			var bw: float = sz
 			var by: float = -sz * 0.5 - 5.0

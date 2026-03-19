@@ -13,7 +13,7 @@ var _despawn_timer: float = -1.0
 var _has_sprite: bool = false
 var _sprite_tex: Texture2D = null
 var _sprite_size: float = 40.0
-var _sprite_rot_offset: float = 1.570796
+var _sprite_rot_offset: float = -1.570796
 var _patrol_timer: float = 0.0
 var patrol_direction: Vector2 = Vector2.RIGHT
 

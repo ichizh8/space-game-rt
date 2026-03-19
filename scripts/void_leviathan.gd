@@ -37,7 +37,6 @@ func setup(diff_mult: float) -> void:
 func _ready() -> void:
 	add_to_group("wildlife")
 	add_to_group("enemies")
-	scale = Vector2(2.0, 2.0)
 	hp *= difficulty_mult
 	max_hp = hp
 	bullet_scene = load("res://scenes/bullet.tscn")
