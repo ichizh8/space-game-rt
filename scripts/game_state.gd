@@ -611,6 +611,8 @@ func add_restaurant_rep(amount: int) -> void:
 
 
 func add_prepared_dish(dish: Dictionary) -> void:
+	if prepared_dishes.size() >= 8:
+		prepared_dishes.pop_front()  # drop oldest if queue full
 	prepared_dishes.append(dish)
 	prepared_dishes_changed.emit()
 

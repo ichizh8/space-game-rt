@@ -700,133 +700,17 @@ func _refresh_restaurant_tab() -> void:
 			post_lbl.add_theme_color_override("font_color", Color(0.7, 0.9, 0.7))
 			vbox.add_child(post_lbl)
 
-	vbox.add_child(HSeparator.new())
-
-	# Kitchen queue
-	var kq_title := Label.new()
-	kq_title.text = "KITCHEN QUEUE  (%d dishes ready)" % GameState.prepared_dishes.size()
-	kq_title.add_theme_font_size_override("font_size", 14)
-	kq_title.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
-	vbox.add_child(kq_title)
-
-	if GameState.prepared_dishes.is_empty():
-		var kq_empty := Label.new()
-		kq_empty.text = "No dishes prepared. Cook something first."
-		kq_empty.add_theme_font_size_override("font_size", 12)
-		kq_empty.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
-		vbox.add_child(kq_empty)
-	else:
-		for di in range(GameState.prepared_dishes.size()):
-			var pd: Dictionary = GameState.prepared_dishes[di]
-			var pd_lbl := Label.new()
-			pd_lbl.text = "%s | %s | %s | %d cr" % [
-				str(pd.get("name", "?")),
-				str(pd.get("method", "")).replace("_", " ").capitalize(),
-				str(pd.get("style", "")).replace("_", " ").capitalize(),
-				int(pd.get("credits_value", 0))
-			]
-			pd_lbl.add_theme_font_size_override("font_size", 12)
-			pd_lbl.add_theme_color_override("font_color", Color(0.85, 0.8, 0.5))
-			vbox.add_child(pd_lbl)
-
-	vbox.add_child(HSeparator.new())
-
-	# Ingredient storage
-	var ing_title := Label.new()
-	ing_title.text = "INGREDIENT STORAGE"
-	ing_title.add_theme_font_size_override("font_size", 14)
-	ing_title.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
-	vbox.add_child(ing_title)
-
-	if GameState.restaurant_ingredients.is_empty():
-		var empty_lbl := Label.new()
-		empty_lbl.text = "No ingredients. Hunt creatures to collect."
-		empty_lbl.add_theme_font_size_override("font_size", 12)
-		empty_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
-		vbox.add_child(empty_lbl)
-	else:
-		var _ing_icons: Dictionary = {
-			"grub_meat": "res://assets/2026-03-18-ingredient-grub-meat.png",
-			"ray_fillet": "res://assets/2026-03-18-ingredient-ray-fillet.png",
-			"snarler_haunch": "res://assets/2026-03-18-ingredient-snarler-haunch.png",
-			"drifter_organ": "res://assets/2026-03-18-ingredient-drifter-organ.png",
-			"drifter_gel": "res://assets/2026-03-18-ingredient-drifter-gel.png",
-			"feeder_flesh": "res://assets/2026-03-18-ingredient-feeder-flesh.png",
-			"crystal_extract": "res://assets/2026-03-18-ingredient-crystal-extract.png",
-			"leviathan_cut": "res://assets/2026-03-18-ingredient-leviathan-cut.png",
-		}
-		for ing_id in GameState.restaurant_ingredients:
-			var count: int = GameState.restaurant_ingredients[ing_id]
-			var row := HBoxContainer.new()
-			row.add_theme_constant_override("separation", 6)
-			vbox.add_child(row)
-			var icon_path: String = str(_ing_icons.get(ing_id, ""))
-			if not icon_path.is_empty():
-				var tex := load(icon_path) as Texture2D
-				if is_instance_valid(tex):
-					var trect := TextureRect.new()
-					trect.texture = tex
-					trect.custom_minimum_size = Vector2(24, 24)
-					trect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-					row.add_child(trect)
-			var lbl := Label.new()
-			var info: Dictionary = GameState.ingredient_tiers.get(ing_id, {})
-			lbl.text = "%s: %d" % [info.get("name", ing_id.replace("_", " ").capitalize()), count]
-			lbl.add_theme_font_size_override("font_size", 13)
-			row.add_child(lbl)
-
-	vbox.add_child(HSeparator.new())
-
-	# Restaurant quests section
-	_build_restaurant_quests(vbox)
-
-	vbox.add_child(HSeparator.new())
-
-	# Menu Book — discovered recipes
-	if not GameState.discovered_recipes.is_empty():
-		var book_title := Label.new()
-		book_title.text = "MENU BOOK"
-		book_title.add_theme_font_size_override("font_size", 14)
-		book_title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
-		vbox.add_child(book_title)
-		for rkey in GameState.discovered_recipes:
-			var recipe: Dictionary = GameState.discovered_recipes[rkey]
-			_build_discovered_recipe_row(vbox, recipe)
-		vbox.add_child(HSeparator.new())
-
-	# Menu section
-	var menu_title := Label.new()
-	menu_title.text = "MENU"
-	menu_title.add_theme_font_size_override("font_size", 14)
-	menu_title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
-	vbox.add_child(menu_title)
-
-	var rep: int = GameState.restaurant_rep
-	var dishes: Array[Dictionary] = []
-	# Base dishes (rep-gated)
-	dishes.append({"id": "dish_mystery_patty", "name": "Mystery Meat Patty", "desc": "Dad's recipe. Nobody knows what's in it. Nobody asks.", "cost_id": "scrap_protein", "cost_amt": 2, "credits": 25, "rep": 0, "req_rep": 0})
-	dishes.append({"id": "dish_scrap_bowl", "name": "Scrap Protein Bowl", "desc": "Hearty and questionable.", "cost_id": "scrap_protein", "cost_amt": 3, "credits": 40, "rep": 1, "req_rep": 20})
-	dishes.append({"id": "dish_void_steak", "name": "Void Steak", "desc": "Seared void creature meat.", "cost_id": "void_flesh", "cost_amt": 1, "credits": 120, "rep": 3, "req_rep": 20})
-	dishes.append({"id": "dish_carrier_roast", "name": "Carrier Roast", "desc": "Slow-roasted carrier organ.", "cost_id": "carrier_organ", "cost_amt": 1, "credits": 150, "rep": 4, "req_rep": 40})
-	dishes.append({"id": "dish_sentinel_tartare", "name": "Sentinel Tartare", "desc": "Raw sentinel core, thinly sliced.", "cost_id": "sentinel_core", "cost_amt": 1, "credits": 400, "rep": 10, "req_rep": 60})
-	# Quest-unlocked dishes
-	dishes.append({"id": "dish_grub_fritters", "name": "Grub Fritters", "desc": "Old Marta's suggestion. Embarrassing but people keep ordering it.", "cost_id": "grub_meat", "cost_amt": 2, "credits": 45, "rep": 1, "req_rep": 0})
-	dishes.append({"id": "dish_drifter_soup", "name": "Drifter Soup", "desc": "Gelatinous. Weird. Somehow works. Hunter's recipe.", "cost_id": "drifter_organ", "cost_amt": 1, "credits": 130, "rep": 4, "req_rep": 0})
-	dishes.append({"id": "dish_feeder_tartare", "name": "Feeder Tartare", "desc": "Raw, luminescent, pretentious. Critics approve.", "cost_id": "feeder_flesh", "cost_amt": 1, "credits": 280, "rep": 8, "req_rep": 0})
-	# Additional rep-gated wildlife dishes
-	dishes.append({"id": "dish_ray_sashimi", "name": "Raw Ray Sashimi", "desc": "Technically just raw fish. The presentation saves it.", "cost_id": "ray_fillet", "cost_amt": 1, "credits": 60, "rep": 2, "req_rep": 10})
-	dishes.append({"id": "dish_snarler_stew", "name": "Snarler Stew", "desc": "Slow cooked. Regulars start coming back for it.", "cost_id": "snarler_haunch", "cost_amt": 1, "credits": 100, "rep": 3, "req_rep": 20})
-	dishes.append({"id": "dish_leviathan_cut", "name": "Leviathan Medallion", "desc": "One medallion per Leviathan. Guests book weeks in advance.", "cost_id": "leviathan_cut", "cost_amt": 1, "credits": 500, "rep": 15, "req_rep": 65})
-
-	for dish in dishes:
-		var dish_id: String = str(dish["id"])
-		var dish_req_rep: int = int(dish["req_rep"])
-		# Show if: unlocked via quest OR meets rep threshold
-		var is_unlocked: bool = dish_id in GameState.restaurant_unlocked_dishes
-		var meets_rep: bool = rep >= dish_req_rep
-		if not is_unlocked and not meets_rep:
-			continue
-		_build_dish_row(vbox, dish)
+	# Status summary — full kitchen in Open Kitchen GUI
+	var status_lbl := Label.new()
+	var n_dishes: int = GameState.prepared_dishes.size()
+	var n_ings: int = 0
+	for v in GameState.restaurant_ingredients.values():
+		n_ings += int(v)
+	var n_guests: int = GameState.pending_guests.size()
+	status_lbl.text = "%d dishes ready  |  %d ingredients  |  %d guests waiting" % [n_dishes, n_ings, n_guests]
+	status_lbl.add_theme_font_size_override("font_size", 12)
+	status_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.6))
+	vbox.add_child(status_lbl)
 
 
 func _build_dish_row(vbox: VBoxContainer, dish: Dictionary) -> void:
