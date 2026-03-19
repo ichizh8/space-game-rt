@@ -7,6 +7,9 @@ var is_dead := false
 var _target_pos: Vector2 = Vector2.ZERO
 var _flash_timer: float = 0.0
 var _despawn_timer: float = -1.0
+var _has_sprite: bool = false
+var _sprite_tex: Texture2D = null
+var _sprite_size: float = 56.0
 
 const AGGRO_PIRATE_RANGE := 300.0
 
@@ -16,7 +19,15 @@ func _ready() -> void:
 	add_to_group("npc_ships")
 	speed = randf_range(55.0, 70.0)
 	_pick_station_target()
+	_setup_sprite()
 	queue_redraw()
+
+func _setup_sprite() -> void:
+	var tex := load("res://assets/2026-03-18-cargo-freighter-npc.png") as Texture2D
+	if not is_instance_valid(tex):
+		return
+	_sprite_tex = tex
+	_has_sprite = true
 
 
 func _process(delta: float) -> void:
@@ -104,16 +115,26 @@ func _pick_station_target() -> void:
 func _draw() -> void:
 	if is_dead:
 		return
-	# Rectangular freighter shape
+	if _has_sprite and is_instance_valid(_sprite_tex):
+		var sz: float = _sprite_size
+		draw_texture_rect(_sprite_tex, Rect2(-sz * 0.5, -sz * 0.5, sz, sz), false)
+		if hp < max_hp:
+			var bw: float = sz
+			var by: float = -sz * 0.5 - 5.0
+			var pct: float = hp / max_hp
+			draw_set_transform(Vector2.ZERO, -rotation, Vector2.ONE)
+			draw_rect(Rect2(-bw*0.5, by, bw, 3.0), Color(0.2, 0.2, 0.2, 0.8))
+			var fc := Color(0.2, 0.9, 0.2) if pct > 0.5 else (Color(0.9, 0.7, 0.1) if pct > 0.25 else Color(0.9, 0.1, 0.1))
+			draw_rect(Rect2(-bw*0.5, by, bw*pct, 3.0), fc)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		return
+	# Procedural fallback
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-8, -14), Vector2(8, -14), Vector2(10, 14), Vector2(-10, 14)
 	]), Color(0.55, 0.6, 0.65, 0.9))
-	# Cargo bay stripe
 	draw_rect(Rect2(-6, -4, 12, 8), Color(0.4, 0.45, 0.5, 0.8))
-	# Label
 	draw_string(ThemeDB.fallback_font, Vector2(-18, -18), "FREIGHTER",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.7, 0.8, 0.9, 0.6))
-	# HP bar when damaged
 	if hp < max_hp:
 		var bw := 30.0
 		var pct: float = hp / max_hp
