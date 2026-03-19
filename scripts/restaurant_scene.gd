@@ -135,6 +135,13 @@ func _build_ui() -> void:
 	_result_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
 	main_vbox.add_child(_result_label)
 
+	var hint_lbl := Label.new()
+	hint_lbl.text = "① Drag ingredient from PANTRY → Bench slot  ② Pick method + style  ③ COOK  ④ Drag dish → guest table"
+	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint_lbl.add_theme_font_size_override("font_size", 10)
+	hint_lbl.add_theme_color_override("font_color", Color(0.5, 0.6, 0.5))
+	main_vbox.add_child(hint_lbl)
+
 	# ── Section: Pantry + Bench side by side ──
 	var top_row := HBoxContainer.new()
 	top_row.add_theme_constant_override("separation", 6)
@@ -153,9 +160,14 @@ func _build_ui() -> void:
 	pantry_title.add_theme_font_size_override("font_size", 13)
 	pantry_title.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
 	pantry_inner.add_child(pantry_title)
+	var pantry_scroll := ScrollContainer.new()
+	pantry_scroll.custom_minimum_size = Vector2(0, 180)
+	pantry_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	pantry_inner.add_child(pantry_scroll)
 	_pantry_vbox = VBoxContainer.new()
+	_pantry_vbox.custom_minimum_size.x = 140
 	_pantry_vbox.add_theme_constant_override("separation", 2)
-	pantry_inner.add_child(_pantry_vbox)
+	pantry_scroll.add_child(_pantry_vbox)
 
 	# Bench panel
 	var bench_panel := _make_section_panel(Color(0.08, 0.06, 0.14))
@@ -525,7 +537,9 @@ class _IngredientDragSource extends HBoxContainer:
 				var trect := TextureRect.new()
 				trect.texture = tex
 				trect.custom_minimum_size = Vector2(22, 22)
+				trect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				trect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				trect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				add_child(trect)
 
 		var info: Dictionary = GameState.ingredient_tiers.get(ing_id, {})
