@@ -370,17 +370,27 @@ func _build_guests() -> void:
 		var dish_flow := HBoxContainer.new()
 		dish_flow.add_theme_constant_override("separation", 4)
 		_content.add_child(dish_flow)
+		# Show unique dish types with count
+		var dish_counts: Dictionary = {}
+		var dish_first_idx: Dictionary = {}
 		for di in range(GameState.prepared_dishes.size()):
+			var dname: String = str(GameState.prepared_dishes[di].get("name", "?"))
+			dish_counts[dname] = dish_counts.get(dname, 0) + 1
+			if not dish_first_idx.has(dname):
+				dish_first_idx[dname] = di
+		for dname in dish_counts:
+			var di: int = int(dish_first_idx[dname])
 			var pd: Dictionary = GameState.prepared_dishes[di]
 			var tier: int = int(pd.get("tier", 1))
+			var count: int = int(dish_counts[dname])
 			var db := Button.new()
-			db.text = str(pd.get("name", "?")) + "\nT%d" % tier
-			db.custom_minimum_size = Vector2(80, 50)
+			db.text = str(dname) + "\nT%d" % tier + ("  x%d" % count if count > 1 else "")
+			db.custom_minimum_size = Vector2(90, 50)
 			db.add_theme_font_size_override("font_size", 11)
 			if di == _selected_dish:
 				db.modulate = Color(1.0, 0.9, 0.3)
 			else:
-				db.modulate = Color(0.7, 0.7, 0.7)
+				db.modulate = Color(0.85, 0.85, 0.85)
 			var cap_di: int = di
 			db.pressed.connect(func():
 				_selected_dish = cap_di
@@ -469,12 +479,12 @@ func _build_guest_card(idx: int, guest: Dictionary) -> void:
 			var ns: Array = []
 			for k in loves:
 				ns.append(str(pref_name_map.get(k, k)))
-			parts.append("★ " + ", ".join(ns))
+			parts.append("LOVES: " + ", ".join(ns))
 		if not hates.is_empty():
 			var ns: Array = []
 			for k in hates:
 				ns.append(str(pref_name_map.get(k, k)))
-			parts.append("✗ " + ", ".join(ns))
+			parts.append("HATES: " + ", ".join(ns))
 		var pref_lbl := Label.new()
 		pref_lbl.text = "  ".join(parts)
 		pref_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -539,13 +549,14 @@ func _build_guest_card(idx: int, guest: Dictionary) -> void:
 			shown[dname] = true
 			var loved: bool = pd.get("method", "") in loves or pd.get("style", "") in loves
 			var hated: bool = pd.get("method", "") in hates or pd.get("style", "") in hates
-			var tag: String = "  ★" if loved else ("  ✗" if hated else "")
+			var tag: String = " [+]" if loved else (" [-]" if hated else "")
 			var col: Color = Color(0.4, 1.0, 0.5) if loved else (Color(1.0, 0.4, 0.4) if hated else Color(0.85, 0.85, 0.85))
 			var srv_btn := Button.new()
 			srv_btn.text = "Serve: %s%s" % [dname, tag]
 			srv_btn.custom_minimum_size.y = 40
 			srv_btn.add_theme_font_size_override("font_size", 13)
-			srv_btn.add_theme_color_override("font_color", col)
+			# Use modulate for color — font_color override unreliable on all themes
+			srv_btn.modulate = col
 			var cap_gi: int = idx
 			var cap_name: String = dname
 			srv_btn.pressed.connect(func(): _serve_guest_named(cap_gi, cap_name))
