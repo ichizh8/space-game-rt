@@ -13,7 +13,7 @@ var _despawn_timer: float = -1.0
 var _has_sprite: bool = false
 var _sprite_tex: Texture2D = null
 var _sprite_size: float = 40.0
-var _sprite_rot_offset: float = -1.570796
+var _sprite_rot_offset: float = 0.0
 var _patrol_timer: float = 0.0
 var patrol_direction: Vector2 = Vector2.RIGHT
 
@@ -222,6 +222,11 @@ func _draw() -> void:
 			var fc := Color(0.2,0.9,0.2) if pct>0.5 else (Color(0.9,0.7,0.1) if pct>0.25 else Color(0.9,0.1,0.1))
 			draw_rect(Rect2(-bw*0.5, by, bw*pct, 3.0), fc)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		# Debug label
+		draw_set_transform(Vector2.ZERO, -rotation, Vector2.ONE)
+		draw_string(ThemeDB.fallback_font, Vector2(-20, _sprite_size * 0.5 + 10), "CORSAIR",
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1.0, 0.4, 0.3))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
 	if is_dead:
 		return
