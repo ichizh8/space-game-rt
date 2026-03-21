@@ -5,7 +5,7 @@ ENEMY_PIPELINE.md::TextFile/TextFile::-1::1773621627::0::1::::<><><>0<>0<><>::
 export_presets.cfg::TextFile/TextFile::-1::1773542401::0::1::::<><><>0<>0<><>::
 PIPELINE.md::TextFile/TextFile::-1::1773866187::0::1::::<><><>0<>0<><>::
 PROJECT.md::TextFile/TextFile::-1::1773610574::0::1::::<><><>0<>0<><>::
-::res://assets/::1774128705
+::res://assets/::1774133703
 2026-03-15-battleship.png::CompressedTexture2D/CompressedTexture2D::3074163106204803711::1773591686::1773591738::1::::<><><>0<>0<>8268b6678082a63d6f3aceaed2621e53<>res://.godot/imported/2026-03-15-battleship.png-46230231893e359b173e45385da17787.ctex::
 2026-03-15-carrier.png::CompressedTexture2D/CompressedTexture2D::5719281961507076306::1773627985::1773630596::1::::<><><>0<>0<>5ab7f0ae61b9a2ca821c1728a277df16<>res://.godot/imported/2026-03-15-carrier.png-abc7ee32711ee12b135db36248a7729a.ctex::
 2026-03-15-drone.png::CompressedTexture2D/CompressedTexture2D::8983543101859615864::1773591686::1773591738::1::::<><><>0<>0<>3bd6e5f3924f6781780f0129a37e6dfc<>res://.godot/imported/2026-03-15-drone.png-cb68e6c971c9ec8f18fa4264a8329822.ctex::
@@ -60,28 +60,28 @@ PROJECT.md::TextFile/TextFile::-1::1773610574::0::1::::<><><>0<>0<><>::
 2026-03-18-wildlife-skim-ray.png::CompressedTexture2D/CompressedTexture2D::2166945240815735868::1773872762::1773872793::1::::<><><>0<>0<>6502af1fd06eb598b9bb8eb35f70aa72<>res://.godot/imported/2026-03-18-wildlife-skim-ray.png-225990ca133d67bbbc6edabca0fed344.ctex::
 2026-03-18-wildlife-void-grub.png::CompressedTexture2D/CompressedTexture2D::7496134989490797405::1773872762::1773872793::1::::<><><>0<>0<>0e3905d62f378d7e56861593afc97453<>res://.godot/imported/2026-03-18-wildlife-void-grub.png-005a0b9233efb9a5ea21ad2c3b272884.ctex::
 2026-03-18-wildlife-void-leviathan.png::CompressedTexture2D/CompressedTexture2D::4378086687338968198::1773872762::1773872793::1::::<><><>0<>0<>f071c7fae3115857bd813d61f9ebb562<>res://.godot/imported/2026-03-18-wildlife-void-leviathan.png-ef797dd39d73164056bf647156b44ba5.ctex::
-restaurant-cook-npc.png::CompressedTexture2D/CompressedTexture2D::6806142596363484436::1774133669::1774133703::1::::<><><>0<>0<>3ce7243d14bb6ac5190b1c230cbe0d73<>res://.godot/imported/restaurant-cook-npc.png-55fde20d40f43aed25fb16d52f219e64.ctex::
+restaurant-cook-npc.png::CompressedTexture2D/CompressedTexture2D::6806142596363484436::1774133754::1774133767::1::::<><><>0<>0<>3ce7243d14bb6ac5190b1c230cbe0d73<>res://.godot/imported/restaurant-cook-npc.png-55fde20d40f43aed25fb16d52f219e64.ctex::
 restaurant-dining-bg.png::CompressedTexture2D/CompressedTexture2D::8060191833475541784::1774128054::1774128705::1::::<><><>0<>0<>81badcf6a18d5fcdf2899bc4183616dd<>res://.godot/imported/restaurant-dining-bg.png-03cc3a28c52668c2880a46a67b93d068.ctex::
 restaurant-kitchen-bg.png::CompressedTexture2D/CompressedTexture2D::4874398694926565633::1774128054::1774128705::1::::<><><>0<>0<>d61dc831da460dee8b2a79aee8b5a7b0<>res://.godot/imported/restaurant-kitchen-bg.png-dcbb603d2d8749d8eeb8bbb7f7bdef4b.ctex::
 restaurant-stations.png::CompressedTexture2D/CompressedTexture2D::4224779330547833566::1774128054::1774128705::1::::<><><>0<>0<>802757e9b309acb8814beea00ce30449<>res://.godot/imported/restaurant-stations.png-9989fe843ea3423d8795a5e2dbcefb74.ctex::
-::res://balance/::1774133254
-creatures.Burst Max.translation::OptimizedTranslation::5646452222512466058::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Credit Reward.translation::OptimizedTranslation::7989228639896158065::1774133703::0::1::::<><><>0<>0<><>::
-creatures.csv::Translation/Translation::3035612307165329511::1773791095::1774133703::1::::<><><>0<>0<>13e3c0883cc9f3b6c186a2e857425695<>res://balance/creatures.Name.translation<*>res://balance/creatures.HP (base).translation<*>res://balance/creatures.Damage (base).translation<*>res://balance/creatures.Speed.translation<*>res://balance/creatures.Shoot Cooldown.translation<*>res://balance/creatures.Burst Max.translation<*>res://balance/creatures.Credit Reward.translation<*>res://balance/creatures.XP Reward.translation<*>res://balance/creatures.Drop Types.translation<*>res://balance/creatures.Drop Min.translation<*>res://balance/creatures.Drop Max.translation<*>res://balance/creatures.AI / Behavior.translation<*>res://balance/creatures.Notes.translation::
-creatures.Damage (base).translation::OptimizedTranslation::7957005456688068084::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Drop Max.translation::OptimizedTranslation::6314370565681631650::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Drop Min.translation::OptimizedTranslation::1262911121411852904::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Drop Types.translation::OptimizedTranslation::3676777653648914776::1774133703::0::1::::<><><>0<>0<><>::
-creatures.HP (base).translation::OptimizedTranslation::8414715128317967867::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Name.translation::OptimizedTranslation::4281291015505658120::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Notes.translation::OptimizedTranslation::527856715868147742::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Shoot Cooldown.translation::OptimizedTranslation::7918376909528729041::1774133703::0::1::::<><><>0<>0<><>::
-creatures.Speed.translation::OptimizedTranslation::1383640706536927179::1774133703::0::1::::<><><>0<>0<><>::
-creatures.XP Reward.translation::OptimizedTranslation::7474682774158260429::1774133703::0::1::::<><><>0<>0<><>::
-economy.csv::Translation/Translation::6257831477358962753::1773790946::1774133703::1::::<><><>0<>0<>29be9c8dd0e6dc41c6bafd060e85e677<>res://balance/economy.Item.translation<*>res://balance/economy.Cost / Price.translation<*>res://balance/economy.Currency.translation<*>res://balance/economy.Notes.translation::
-economy.Currency.translation::OptimizedTranslation::7902625016498846012::1774133703::0::1::::<><><>0<>0<><>::
-economy.Item.translation::OptimizedTranslation::8985549652654812260::1774133703::0::1::::<><><>0<>0<><>::
-economy.Notes.translation::OptimizedTranslation::608716043895137605::1774133703::0::1::::<><><>0<>0<><>::
+::res://balance/::1774133703
+creatures.Burst Max.translation::OptimizedTranslation::5646452222512466058::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Credit Reward.translation::OptimizedTranslation::7989228639896158065::1774133767::0::1::::<><><>0<>0<><>::
+creatures.csv::Translation/Translation::3035612307165329511::1773791095::1774133767::1::::<><><>0<>0<>13e3c0883cc9f3b6c186a2e857425695<>res://balance/creatures.Name.translation<*>res://balance/creatures.HP (base).translation<*>res://balance/creatures.Damage (base).translation<*>res://balance/creatures.Speed.translation<*>res://balance/creatures.Shoot Cooldown.translation<*>res://balance/creatures.Burst Max.translation<*>res://balance/creatures.Credit Reward.translation<*>res://balance/creatures.XP Reward.translation<*>res://balance/creatures.Drop Types.translation<*>res://balance/creatures.Drop Min.translation<*>res://balance/creatures.Drop Max.translation<*>res://balance/creatures.AI / Behavior.translation<*>res://balance/creatures.Notes.translation::
+creatures.Damage (base).translation::OptimizedTranslation::7957005456688068084::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Drop Max.translation::OptimizedTranslation::6314370565681631650::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Drop Min.translation::OptimizedTranslation::1262911121411852904::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Drop Types.translation::OptimizedTranslation::3676777653648914776::1774133767::0::1::::<><><>0<>0<><>::
+creatures.HP (base).translation::OptimizedTranslation::8414715128317967867::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Name.translation::OptimizedTranslation::4281291015505658120::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Notes.translation::OptimizedTranslation::527856715868147742::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Shoot Cooldown.translation::OptimizedTranslation::7918376909528729041::1774133767::0::1::::<><><>0<>0<><>::
+creatures.Speed.translation::OptimizedTranslation::1383640706536927179::1774133767::0::1::::<><><>0<>0<><>::
+creatures.XP Reward.translation::OptimizedTranslation::7474682774158260429::1774133767::0::1::::<><><>0<>0<><>::
+economy.csv::Translation/Translation::6257831477358962753::1773790946::1774133767::1::::<><><>0<>0<>29be9c8dd0e6dc41c6bafd060e85e677<>res://balance/economy.Item.translation<*>res://balance/economy.Cost / Price.translation<*>res://balance/economy.Currency.translation<*>res://balance/economy.Notes.translation::
+economy.Currency.translation::OptimizedTranslation::7902625016498846012::1774133767::0::1::::<><><>0<>0<><>::
+economy.Item.translation::OptimizedTranslation::8985549652654812260::1774133767::0::1::::<><><>0<>0<><>::
+economy.Notes.translation::OptimizedTranslation::608716043895137605::1774133767::0::1::::<><><>0<>0<><>::
 README.md::TextFile/TextFile::-1::1773807565::0::1::::<><><>0<>0<><>::
 restaurant.Cost.translation::OptimizedTranslation/OptimizedTranslation::7191544676967036230::1773799722::0::1::::<><><>0<>0<><>::
 restaurant.csv::Translation/Translation::48213467728463872::1773798556::1773799722::1::::<><><>0<>0<>957eb2cf7ae30bb28b3701733f25077f<>res://balance/restaurant.ID.translation<*>res://balance/restaurant.Name.translation<*>res://balance/restaurant.Ingredient.translation<*>res://balance/restaurant.Cost.translation<*>res://balance/restaurant.Dish Revenue (cr).translation<*>res://balance/restaurant.Reputation Gain.translation<*>res://balance/restaurant.Unlock Condition.translation<*>res://balance/restaurant.Notes.translation::
@@ -192,7 +192,7 @@ nebula_background.gd::GDScript/GDScript::709179530439261648::1773872001::0::1:::
 pack_snarler.gd::GDScript/GDScript::7632879022676648683::1773875573::0::1::::<>Node2D<><>0<>0<><>::
 planet.gd::GDScript/GDScript::4693907266427328966::1773875520::0::1::::<>Node2D<><>0<>0<><>::
 planet_menu.gd::GDScript/GDScript::5271842473902023664::1773871896::0::1::::<>CanvasLayer<><>0<>0<><>::
-restaurant_canvas.gd::GDScript::385067598911777499::1774133687::0::1::::<>Control<><>0<>0<><>::
+restaurant_canvas.gd::GDScript/GDScript::385067598911777499::1774133687::0::1::::<>Control<><>0<>0<><>::
 restaurant_room.gd::GDScript/GDScript::7098181840116133023::1774133122::0::1::::<>CanvasLayer<><>0<>0<><>::
 restaurant_scene.gd::GDScript/GDScript::5544691651849288374::1773895395::0::1::::<>CanvasLayer<><>0<>0<><>::
 save_manager.gd::GDScript/GDScript::7650306163663500790::1773864852::0::1::::<>Node<><>0<>0<><>::
@@ -217,7 +217,7 @@ void_leviathan.gd::GDScript/GDScript::2779435897859189924::1773890778::0::1::::<
 void_sentinel.gd::GDScript/GDScript::2147939099636406732::1773871673::0::1::::<>Node2D<><>0<>0<><>::
 warp_gate.gd::GDScript/GDScript::7217366560798320789::1773871673::0::1::::<>Node2D<><>0<>0<><>::
 world_data.gd::GDScript/GDScript::3340492155267611818::1773717796::0::1::::<>Node<><>0<>0<><>::
-::res://web-export/::1774133254
-index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1774133254::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
-index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1774133254::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
-index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1774133254::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::
+::res://web-export/::1774133703
+index.apple-touch-icon.png::CompressedTexture2D/CompressedTexture2D::4274804907602949808::1774133703::1773544153::1::::<><><>0<>0<>b1e043461df9f275c762ae309fbc01f9<>res://.godot/imported/index.apple-touch-icon.png-8fdf2783b1f1d62d3cb81cb3547275e6.ctex::
+index.icon.png::CompressedTexture2D/CompressedTexture2D::492882739847869597::1774133703::1773544153::1::::<><><>0<>0<>a98d1f088d4a73866cdc6f44d3d80610<>res://.godot/imported/index.icon.png-37b0ec287dc921e61cd72f8d7ae90a77.ctex::
+index.png::CompressedTexture2D/CompressedTexture2D::495992259378846216::1774133703::1773544636::0::::<><><>0<>0<>ac7168e0ffda36faf6273b64bc8103f1<>::
