@@ -20,7 +20,7 @@ const TIER_COLORS: Dictionary = {
 	3: Color(1.0, 0.7, 0.2),
 }
 
-const STATION_NAMES: Array = ["Grill", "Cold Press", "Prep Bench"]
+const STATION_NAMES: Array = ["Grill", "Cold Press", "Ferment Pod", "Prep Bench"]
 
 enum Room { KITCHEN, DINING }
 
@@ -38,7 +38,7 @@ var _cook_timer: float = 0.0
 var _cook_station_idx: int = -1
 
 # NPC
-var _npc_home: Vector2 = Vector2(195, 160)
+var _npc_home: Vector2 = Vector2(200, 200)
 var _npc_tween: Tween = null
 
 # Message
@@ -264,7 +264,7 @@ func _build_station_buttons() -> void:
 	if _current_room != Room.KITCHEN:
 		return
 
-	var rects: Array = [[30, 60, 105, 80], [145, 60, 105, 80], [260, 60, 105, 80]]
+	var rects: Array = [[50, 140, 120, 120], [230, 100, 120, 120], [50, 220, 120, 120], [170, 180, 120, 120]]
 	for i in range(rects.size()):
 		var r: Array = rects[i]
 		var btn := Button.new()
@@ -340,13 +340,28 @@ func _build_table_buttons() -> void:
 # ── SCROLL AREA (interaction panel) ──────────────────────────────
 
 func _build_scroll_area() -> void:
+	# Dark panel behind scroll with top border to separate from art
+	var scroll_bg := PanelContainer.new()
+	scroll_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scroll_bg.offset_top = SCROLL_TOP
+	scroll_bg.offset_left = 0
+	scroll_bg.offset_right = 0
+	scroll_bg.offset_bottom = -MSG_H
+	var sbg_style := StyleBoxFlat.new()
+	sbg_style.bg_color = Color(0.031, 0.051, 0.102, 1.0)
+	sbg_style.border_color = Color(0.2, 0.5, 0.9, 0.5)
+	sbg_style.set_border_width_all(0)
+	sbg_style.border_width_top = 2
+	sbg_style.content_margin_left = 6
+	sbg_style.content_margin_right = 6
+	sbg_style.content_margin_top = 6
+	sbg_style.content_margin_bottom = 0
+	scroll_bg.add_theme_stylebox_override("panel", sbg_style)
+	_root.add_child(scroll_bg)
+
 	_scroll = ScrollContainer.new()
 	_scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_scroll.offset_top = SCROLL_TOP
-	_scroll.offset_left = 6
-	_scroll.offset_right = -6
-	_scroll.offset_bottom = -MSG_H
-	_root.add_child(_scroll)
+	scroll_bg.add_child(_scroll)
 
 	_content = VBoxContainer.new()
 	_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -824,7 +839,7 @@ func _on_cook() -> void:
 	# Start cooking animation
 	_cooking = true
 	_cook_timer = 1.5
-	_cook_station_idx = _active_station if _active_station >= 0 else 2  # default to prep bench
+	_cook_station_idx = _active_station if _active_station >= 0 else 3  # default to prep bench
 
 	# Move NPC to station
 	_move_npc_to_station(_cook_station_idx)
@@ -936,7 +951,7 @@ func _add_choice_btn(parent: VBoxContainer, guest_idx: int, choice: String, labe
 func _move_npc_to_station(station_idx: int) -> void:
 	if not is_instance_valid(_canvas):
 		return
-	var targets: Array = [Vector2(80, 100), Vector2(195, 100), Vector2(310, 100)]
+	var targets: Array = [Vector2(110, 200), Vector2(290, 160), Vector2(110, 280), Vector2(230, 240)]
 	if station_idx < 0 or station_idx >= targets.size():
 		return
 	if _npc_tween != null and _npc_tween.is_valid():
