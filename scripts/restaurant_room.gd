@@ -264,7 +264,7 @@ func _build_station_buttons() -> void:
 	if _current_room != Room.KITCHEN:
 		return
 
-	var rects: Array = [[50, 140, 120, 120], [230, 100, 120, 120], [50, 220, 120, 120], [170, 180, 120, 120]]
+	var rects: Array = [[15, 30, 90, 70], [285, 20, 80, 70], [20, 120, 80, 65], [155, 90, 90, 70]]
 	for i in range(rects.size()):
 		var r: Array = rects[i]
 		var btn := Button.new()

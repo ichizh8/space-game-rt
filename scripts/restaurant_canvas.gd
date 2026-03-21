@@ -21,12 +21,13 @@ var glow_alpha: float = 0.0
 # Active station highlight (-1 = none)
 var active_station: int = -1
 
-# Station rects (relative to this control) — positioned over the bg art
+# Station rects — x/y relative to art strip (art_top is added at draw time)
+# Art displays at ~219px tall (390px wide, 16:9). Keep all y+h within 200px.
 const STATION_RECTS: Array = [
-	[50, 140, 120, 120],   # grill (top-left quadrant)
-	[230, 100, 120, 120],  # cold press (top-right quadrant)
-	[50, 220, 120, 120],   # fermentation pod (bottom-left quadrant)
-	[170, 180, 120, 120],  # prep bench (bottom-right quadrant)
+	[15,  30,  90, 70],   # Grill — upper left
+	[285, 20,  80, 70],   # Cold Press — upper right
+	[20,  120, 80, 65],   # Ferment Pod — lower left
+	[155, 90,  90, 70],   # Prep Bench — center
 ]
 
 const STATION_NAMES: Array = ["Grill", "Cold Press", "Ferment Pod", "Prep Bench"]
@@ -87,16 +88,22 @@ func _draw() -> void:
 			var label_text: String = STATION_NAMES[i]
 			draw_string(ThemeDB.fallback_font, label_pos - Vector2(label_text.length() * 3.0, 0.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.85, 1.0, 0.9))
 
-		# Cook NPC — simple drawn character (no texture)
+		# Cook NPC — drawn geometric figure, larger and more visible
 		draw_set_transform(npc_pos, 0.0, Vector2(npc_scale, npc_scale))
-		var body_color: Color = Color(0.9, 0.9, 1.0)
-		var visor_color: Color = Color(0.2, 0.5, 1.0)
-		# Body rectangle (10x16)
-		draw_rect(Rect2(Vector2(-5.0, -2.0), Vector2(10.0, 16.0)), body_color)
-		# Head circle (radius 10)
-		draw_circle(Vector2(0.0, -12.0), 10.0, body_color)
-		# Blue visor stripe
-		draw_rect(Rect2(Vector2(-7.0, -14.0), Vector2(14.0, 4.0)), visor_color)
+		var body_color: Color = Color(0.95, 0.95, 1.0)
+		var suit_color: Color = Color(0.15, 0.4, 0.85)
+		var visor_color: Color = Color(0.3, 0.8, 1.0, 0.9)
+		# Body (suit) — wider rectangle
+		draw_rect(Rect2(Vector2(-10.0, 0.0), Vector2(20.0, 26.0)), suit_color)
+		# Head
+		draw_circle(Vector2(0.0, -14.0), 13.0, body_color)
+		# Visor
+		draw_rect(Rect2(Vector2(-9.0, -20.0), Vector2(18.0, 8.0)), visor_color)
+		# Arms
+		draw_rect(Rect2(Vector2(-18.0, 2.0), Vector2(8.0, 16.0)), suit_color)
+		draw_rect(Rect2(Vector2(10.0, 2.0), Vector2(8.0, 16.0)), suit_color)
+		# Outline glow
+		draw_arc(Vector2(0.0, -14.0), 14.0, 0.0, TAU, 16, Color(0.4, 0.7, 1.0, 0.5), 1.5)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	else:
 		# Dining room — draw table slot indicators for empty tables
