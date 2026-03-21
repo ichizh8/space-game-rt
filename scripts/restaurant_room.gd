@@ -59,6 +59,14 @@ var _result_timer: float = 0.0
 var _needs_rebuild: bool = false
 var _needs_table_rebuild: bool = false
 
+# Drag-and-drop state (WASM safe — tracked in _input)
+var _drag_ing: String = ""
+var _drag_preview: Control = null
+var _drag_active: bool = false
+var _drag_start_pos: Vector2 = Vector2.ZERO
+var _drag_hold_time: float = 0.0
+var _drag_pending: bool = false
+
 # ── Textures ──
 var _kitchen_bg_tex: Texture2D = null
 var _dining_bg_tex: Texture2D = null
@@ -525,9 +533,17 @@ func _build_kitchen_panel() -> void:
 
 
 func _build_kitchen_step0() -> void:
-	# Step 0: station selection — minimal bottom panel
-	# Kitchen queue (always visible)
-	_build_kitchen_queue()
+	# Step 0: station selection — clean, show only hint + queue if dishes ready
+	var hint := Label.new()
+	hint.text = "Tap a station above to begin cooking"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 13)
+	hint.add_theme_color_override("font_color", Color(0.5, 0.6, 0.7))
+	_content.add_child(hint)
+
+	# Show queue only if there are prepared dishes
+	if not GameState.prepared_dishes.is_empty():
+		_build_kitchen_queue()
 
 
 func _build_kitchen_step1() -> void:
@@ -560,6 +576,81 @@ func _build_kitchen_step1() -> void:
 	hint.add_theme_font_size_override("font_size", 11)
 	hint.add_theme_color_override("font_color", Color(0.5, 0.6, 0.7))
 	_content.add_child(hint)
+
+	# Saved Recipes (above pantry)
+	if not GameState.discovered_recipes.is_empty():
+		_section_label("Saved Recipes", true)
+		for rkey in GameState.discovered_recipes:
+			var recipe: Dictionary = GameState.discovered_recipes[rkey]
+			var rname: String = str(recipe.get("name", "?"))
+			var r_ings: Array = recipe.get("ingredients", [])
+			var r_method: String = str(recipe.get("method", ""))
+			var r_style: String = str(recipe.get("style", ""))
+			# Determine tier from ingredients
+			var r_tier: int = 1
+			for ri in r_ings:
+				var rt: int = int(GameState.ingredient_tiers.get(ri, {}).get("tier", 1))
+				if rt > r_tier:
+					r_tier = rt
+			# Check if all ingredients available
+			var can_make: bool = true
+			var missing: Array = []
+			var temp_counts: Dictionary = {}
+			for ri in r_ings:
+				temp_counts[ri] = int(temp_counts.get(ri, 0)) + 1
+			for ri in temp_counts:
+				var have: int = int(GameState.restaurant_ingredients.get(ri, 0))
+				if have < int(temp_counts[ri]):
+					can_make = false
+					var iname: String = str(GameState.ingredient_tiers.get(ri, {}).get("name", ri))
+					missing.append(iname)
+
+			var rbtn := Button.new()
+			rbtn.text = "%s (T%d)" % [rname, r_tier]
+			rbtn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			rbtn.custom_minimum_size.y = 44
+			rbtn.add_theme_font_size_override("font_size", 13)
+			rbtn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5) if can_make else Color(0.5, 0.5, 0.6))
+			var rstyle := StyleBoxFlat.new()
+			rstyle.bg_color = Color(0.06, 0.08, 0.14, 1.0)
+			rstyle.set_corner_radius_all(8)
+			rstyle.set_border_width_all(1)
+			rstyle.border_color = Color(0.8, 0.6, 0.2, 0.7) if can_make else Color(0.3, 0.3, 0.4, 0.4)
+			rstyle.content_margin_left = 10
+			rstyle.content_margin_right = 10
+			rstyle.content_margin_top = 4
+			rstyle.content_margin_bottom = 4
+			rbtn.add_theme_stylebox_override("normal", rstyle)
+			var rhover: StyleBoxFlat = rstyle.duplicate()
+			rhover.bg_color = Color(0.1, 0.14, 0.22, 1.0)
+			rbtn.add_theme_stylebox_override("hover", rhover)
+			var rpressed: StyleBoxFlat = rstyle.duplicate()
+			rpressed.bg_color = Color(0.14, 0.18, 0.28, 1.0)
+			rbtn.add_theme_stylebox_override("pressed", rpressed)
+
+			var cap_ings: Array = r_ings.duplicate()
+			var cap_method: String = r_method
+			var cap_style: String = r_style
+			var cap_can: bool = can_make
+			var cap_missing: Array = missing.duplicate()
+			rbtn.pressed.connect(func():
+				if not cap_can:
+					_show_msg("Need: " + ", ".join(cap_missing), 3.0)
+					return
+				_bench_ings = cap_ings.duplicate()
+				# Find method index
+				for mi in range(GameState.cooking_methods.size()):
+					if str(GameState.cooking_methods[mi].get("id", "")) == cap_method:
+						_bench_method = mi
+						break
+				# Find style index
+				for si in range(GameState.serving_styles.size()):
+					if str(GameState.serving_styles[si].get("id", "")) == cap_style:
+						_bench_style = si
+						break
+				_step = 2
+				_needs_rebuild = true)
+			_content.add_child(rbtn)
 
 	# Pantry
 	_section_label("Pantry", true)
@@ -622,6 +713,32 @@ func _build_kitchen_step1() -> void:
 				if _bench_ings.size() >= 1 and _step < 2:
 					_step = 2
 				_needs_rebuild = true)
+		# Drag support — connect gui_input for hold-to-drag
+		var cap_drag_id: String = ing_id
+		btn.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				if not btn.disabled:
+					_drag_pending = true
+					_drag_ing = cap_drag_id
+					_drag_start_pos = ev.global_position
+			elif ev is InputEventMouseMotion and _drag_pending and _drag_ing == cap_drag_id:
+				if ev.global_position.distance_to(_drag_start_pos) > 15.0:
+					_drag_pending = false
+					_start_drag(cap_drag_id, ev.global_position)
+			elif ev is InputEventMouseButton and not ev.pressed:
+				_drag_pending = false
+			# Touch equivalents
+			elif ev is InputEventScreenTouch and ev.pressed:
+				if not btn.disabled:
+					_drag_pending = true
+					_drag_ing = cap_drag_id
+					_drag_start_pos = ev.position
+			elif ev is InputEventScreenDrag and _drag_pending and _drag_ing == cap_drag_id:
+				if ev.position.distance_to(_drag_start_pos) > 15.0:
+					_drag_pending = false
+					_start_drag(cap_drag_id, ev.position)
+			elif ev is InputEventScreenTouch and not ev.pressed:
+				_drag_pending = false)
 		pantry.add_child(btn)
 
 	if not has_any:
@@ -1106,6 +1223,65 @@ func _build_guest_card(idx: int, guest: Dictionary) -> void:
 			var cap_name: String = dname
 			srv.pressed.connect(func(): _serve_guest_named(cap_gi, cap_name))
 			vbox.add_child(srv)
+
+
+# ── DRAG AND DROP ────────────────────────────────────────────────
+
+func _input(event: InputEvent) -> void:
+	if _current_room != Room.KITCHEN or _step < 1:
+		return
+
+	# Track drag motion
+	if _drag_active and _drag_preview != null and is_instance_valid(_drag_preview):
+		if event is InputEventMouseMotion:
+			_drag_preview.position = event.position - Vector2(40.0, 20.0)
+		elif event is InputEventScreenDrag:
+			_drag_preview.position = event.position - Vector2(40.0, 20.0)
+		if event is InputEventMouseButton and not event.pressed:
+			_finish_drag(event.position)
+		elif event is InputEventScreenTouch and not event.pressed:
+			_finish_drag(event.position)
+
+
+func _start_drag(ing_id: String, start_pos: Vector2) -> void:
+	if _drag_active:
+		return
+	_drag_active = true
+	_drag_ing = ing_id
+
+	var info: Dictionary = GameState.ingredient_tiers.get(ing_id, {})
+	var name_str: String = str(info.get("name", ing_id.replace("_", " ").capitalize()))
+
+	_drag_preview = Label.new()
+	_drag_preview.text = name_str
+	_drag_preview.add_theme_font_size_override("font_size", 14)
+	_drag_preview.add_theme_color_override("font_color", Color(1.0, 0.9, 0.4))
+	_drag_preview.position = start_pos - Vector2(40.0, 20.0)
+	_drag_preview.z_index = 100
+	_root.add_child(_drag_preview)
+
+
+func _finish_drag(pos: Vector2) -> void:
+	_drag_active = false
+	if _drag_preview != null and is_instance_valid(_drag_preview):
+		_drag_preview.call_deferred("queue_free")
+		_drag_preview = null
+
+	if _drag_ing.is_empty():
+		return
+
+	# Check if dropped in bench slot area (below SCROLL_TOP, roughly in middle area)
+	var max_slots: int = GameState.get_bench_slots()
+	if pos.y > float(SCROLL_TOP) and _bench_ings.size() < max_slots:
+		var count: int = int(GameState.restaurant_ingredients.get(_drag_ing, 0))
+		var already: int = _bench_ings.count(_drag_ing)
+		if already < count:
+			_bench_ings.append(_drag_ing)
+			if _bench_ings.size() >= 1 and _step < 2:
+				_step = 2
+			_needs_rebuild = true
+
+	_drag_ing = ""
 
 
 # ── ACTIONS ──────────────────────────────────────────────────────
