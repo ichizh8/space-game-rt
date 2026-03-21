@@ -1,10 +1,11 @@
 extends Control
 
-# Draws restaurant art (backgrounds, stations, NPC) via _draw()
+# Draws restaurant art (backgrounds, station indicators, NPC) via _draw()
 # Used by restaurant_room.gd — no Sprite2D nodes (WASM safe)
 
 var kitchen_bg: Texture2D = null
 var dining_bg: Texture2D = null
+# Keep vars for compatibility but they are no longer drawn
 var stations_tex: Texture2D = null
 var cook_npc_tex: Texture2D = null
 
@@ -16,6 +17,9 @@ var npc_scale: float = 1.0
 var glow_station: int = -1
 var glow_alpha: float = 0.0
 
+# Active station highlight (-1 = none)
+var active_station: int = -1
+
 # Station rects (relative to this control) — positioned over the bg art
 const STATION_RECTS: Array = [
 	[50, 140, 120, 120],   # grill (top-left quadrant)
@@ -23,6 +27,8 @@ const STATION_RECTS: Array = [
 	[50, 220, 120, 120],   # fermentation pod (bottom-left quadrant)
 	[170, 180, 120, 120],  # prep bench (bottom-right quadrant)
 ]
+
+const STATION_NAMES: Array = ["Grill", "Cold Press", "Ferment Pod", "Prep Bench"]
 
 # Table rects for dining room
 const TABLE_RECTS: Array = [
@@ -46,34 +52,48 @@ func _draw() -> void:
 		draw_texture_rect(bg, Rect2(Vector2(0.0, y_off), Vector2(size.x, draw_h)), false)
 
 	if show_kitchen:
-		if stations_tex != null:
-			# stations_tex is a 2x2 sprite sheet — draw each quadrant separately
-			var tex_w: float = stations_tex.get_width() * 0.5
-			var tex_h: float = stations_tex.get_height() * 0.5
-			var quad_size: Vector2 = Vector2(120.0, 120.0)
-			# Top-left quadrant → Grill
-			draw_texture_rect_region(stations_tex, Rect2(Vector2(50.0, 140.0), quad_size), Rect2(0.0, 0.0, tex_w, tex_h))
-			# Top-right quadrant → Cold Press
-			draw_texture_rect_region(stations_tex, Rect2(Vector2(230.0, 100.0), quad_size), Rect2(tex_w, 0.0, tex_w, tex_h))
-			# Bottom-left quadrant → Fermentation Pod
-			draw_texture_rect_region(stations_tex, Rect2(Vector2(50.0, 220.0), quad_size), Rect2(0.0, tex_h, tex_w, tex_h))
-			# Bottom-right quadrant → Prep Bench
-			draw_texture_rect_region(stations_tex, Rect2(Vector2(170.0, 180.0), quad_size), Rect2(tex_w, tex_h, tex_w, tex_h))
+		# Draw station tap target indicators (no sprite overlays)
+		for i in range(STATION_RECTS.size()):
+			var r: Array = STATION_RECTS[i]
+			var rect: Rect2 = Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3]))
 
-		# Station glow effect
-		if glow_station >= 0 and glow_station < STATION_RECTS.size() and glow_alpha > 0.0:
-			var r: Array = STATION_RECTS[glow_station]
-			draw_rect(
-				Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3])),
-				Color(0.3, 0.85, 1.0, glow_alpha * 0.4)
-			)
+			var is_cooking: bool = (i == glow_station and glow_alpha > 0.0)
+			var is_active: bool = (i == active_station)
 
-		# Cook NPC
-		if cook_npc_tex != null:
-			var npc_sz := Vector2(80, 80)
-			draw_set_transform(npc_pos, 0.0, Vector2(npc_scale, npc_scale))
-			draw_texture_rect(cook_npc_tex, Rect2(-npc_sz * 0.5, npc_sz), false)
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			# Background fill
+			var fill_color: Color
+			var border_color: Color
+			if is_cooking:
+				fill_color = Color(1.0, 0.6, 0.1, 0.4)
+				border_color = Color(1.0, 0.6, 0.1, 0.7 + 0.3 * glow_alpha)
+			elif is_active:
+				fill_color = Color(0.2, 0.8, 0.4, 0.25)
+				border_color = Color(0.2, 0.8, 0.4, 0.7)
+			else:
+				fill_color = Color(0.2, 0.6, 1.0, 0.25)
+				border_color = Color(0.2, 0.6, 1.0, 0.7)
+
+			# Rounded rect fill (draw as regular rect — _draw has no rounded rect)
+			draw_rect(rect, fill_color)
+			# Border — 2px outline
+			draw_rect(rect, border_color, false, 2.0)
+
+			# Station name label below hitbox
+			var label_pos: Vector2 = Vector2(rect.position.x + rect.size.x * 0.5, rect.position.y + rect.size.y + 14.0)
+			var label_text: String = STATION_NAMES[i]
+			draw_string(ThemeDB.fallback_font, label_pos - Vector2(label_text.length() * 3.0, 0.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.85, 1.0, 0.9))
+
+		# Cook NPC — simple drawn character (no texture)
+		draw_set_transform(npc_pos, 0.0, Vector2(npc_scale, npc_scale))
+		var body_color: Color = Color(0.9, 0.9, 1.0)
+		var visor_color: Color = Color(0.2, 0.5, 1.0)
+		# Body rectangle (10x16)
+		draw_rect(Rect2(Vector2(-5.0, -2.0), Vector2(10.0, 16.0)), body_color)
+		# Head circle (radius 10)
+		draw_circle(Vector2(0.0, -12.0), 10.0, body_color)
+		# Blue visor stripe
+		draw_rect(Rect2(Vector2(-7.0, -14.0), Vector2(14.0, 4.0)), visor_color)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	else:
 		# Dining room — draw table slot indicators for empty tables
 		for i in range(TABLE_RECTS.size()):

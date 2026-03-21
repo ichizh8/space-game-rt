@@ -250,6 +250,7 @@ func _build_art_canvas() -> void:
 	_canvas.stations_tex = _stations_tex
 	_canvas.cook_npc_tex = _cook_npc_tex
 	_canvas.npc_pos = _npc_home
+	_canvas.active_station = _active_station
 
 	_root.add_child(_canvas)
 
@@ -419,6 +420,7 @@ func _switch_room(room: int) -> void:
 		_canvas.show_kitchen = (room == Room.KITCHEN)
 		_canvas.glow_station = -1
 		_canvas.glow_alpha = 0.0
+		_canvas.active_station = _active_station
 		_canvas.queue_redraw()
 
 	# Rebuild interactive elements
@@ -449,13 +451,13 @@ func _build_kitchen_panel() -> void:
 	else:
 		_section_label("Tap a station above to start cooking")
 
-	# Pantry
-	_section_label("INGREDIENTS  (tap to add)")
+	# ── Pantry ──
+	_section_label("Pantry", true)
 
 	var pantry := GridContainer.new()
 	pantry.columns = 2
-	pantry.add_theme_constant_override("h_separation", 4)
-	pantry.add_theme_constant_override("v_separation", 4)
+	pantry.add_theme_constant_override("h_separation", 6)
+	pantry.add_theme_constant_override("v_separation", 6)
 	_content.add_child(pantry)
 
 	var max_slots: int = GameState.get_bench_slots()
@@ -469,14 +471,39 @@ func _build_kitchen_panel() -> void:
 		var info: Dictionary = GameState.ingredient_tiers.get(ing_id, {})
 		var tier: int = int(info.get("tier", 1))
 		var name_str: String = str(info.get("name", ing_id.replace("_", " ").capitalize()))
+		var on_bench: bool = already > 0
 
 		var btn := Button.new()
-		btn.text = "%s x%d" % [name_str, count - already]
+		btn.text = "  %s x%d" % [name_str, count - already]
 		btn.disabled = (already >= count) or (_bench_ings.size() >= max_slots)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size.y = 38
+		btn.custom_minimum_size.y = 44
 		btn.add_theme_font_size_override("font_size", 12)
-		btn.add_theme_color_override("font_color", TIER_COLORS.get(tier, Color.WHITE))
+		btn.add_theme_color_override("font_color", Color.WHITE)
+		# Styled card
+		var card_style := StyleBoxFlat.new()
+		card_style.bg_color = Color(0.08, 0.12, 0.2, 1.0)
+		card_style.set_corner_radius_all(8)
+		card_style.set_border_width_all(1)
+		if on_bench:
+			card_style.border_color = Color(0.3, 0.8, 0.4, 1.0)
+		else:
+			card_style.border_color = Color(0.2, 0.4, 0.8, 0.5)
+		card_style.content_margin_left = 10
+		card_style.content_margin_right = 8
+		card_style.content_margin_top = 4
+		card_style.content_margin_bottom = 4
+		btn.add_theme_stylebox_override("normal", card_style)
+		var hover_style: StyleBoxFlat = card_style.duplicate()
+		hover_style.bg_color = Color(0.12, 0.18, 0.28, 1.0)
+		btn.add_theme_stylebox_override("hover", hover_style)
+		var pressed_style: StyleBoxFlat = card_style.duplicate()
+		pressed_style.bg_color = Color(0.15, 0.22, 0.35, 1.0)
+		btn.add_theme_stylebox_override("pressed", pressed_style)
+		var disabled_style: StyleBoxFlat = card_style.duplicate()
+		disabled_style.bg_color = Color(0.06, 0.08, 0.14, 0.7)
+		disabled_style.border_color = Color(0.15, 0.2, 0.3, 0.3)
+		btn.add_theme_stylebox_override("disabled", disabled_style)
 		var cap_id: String = ing_id
 		btn.pressed.connect(func():
 			if _bench_ings.size() < max_slots and int(GameState.restaurant_ingredients.get(cap_id, 0)) > _bench_ings.count(cap_id):
@@ -491,87 +518,163 @@ func _build_kitchen_panel() -> void:
 		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
 		_content.add_child(lbl)
 
-	# Bench
-	_section_label("ON THE BENCH  (tap to remove)")
-	if _bench_ings.is_empty():
-		var lbl := Label.new()
-		lbl.text = "Nothing yet — tap an ingredient above"
-		lbl.add_theme_font_size_override("font_size", 12)
-		lbl.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
-		_content.add_child(lbl)
-	else:
-		var bench_row := HBoxContainer.new()
-		bench_row.add_theme_constant_override("separation", 6)
-		_content.add_child(bench_row)
-		for i in range(_bench_ings.size()):
+	# ── Bench ──
+	_section_label("Bench", true)
+	var bench_row := HBoxContainer.new()
+	bench_row.add_theme_constant_override("separation", 6)
+	_content.add_child(bench_row)
+	var slot_w: float = (390.0 - 32.0) / 3.0
+	for i in range(max_slots):
+		var slot := Button.new()
+		slot.custom_minimum_size = Vector2(slot_w, 40)
+		var slot_style := StyleBoxFlat.new()
+		slot_style.set_corner_radius_all(8)
+		slot_style.content_margin_left = 6
+		slot_style.content_margin_right = 6
+		slot_style.content_margin_top = 4
+		slot_style.content_margin_bottom = 4
+		if i < _bench_ings.size():
 			var ing: String = _bench_ings[i]
-			var info: Dictionary = GameState.ingredient_tiers.get(ing, {})
-			var slot := Button.new()
-			slot.text = str(info.get("name", ing)).substr(0, 10) + "\nx"
-			slot.custom_minimum_size = Vector2(68, 46)
+			var binfo: Dictionary = GameState.ingredient_tiers.get(ing, {})
+			var display_name: String = str(binfo.get("name", ing))
+			if display_name.length() > 12:
+				display_name = display_name.substr(0, 12)
+			slot.text = display_name
 			slot.add_theme_font_size_override("font_size", 11)
+			slot.add_theme_color_override("font_color", Color.WHITE)
+			slot_style.bg_color = Color(0.08, 0.14, 0.22, 1.0)
+			slot_style.set_border_width_all(1)
+			slot_style.border_color = Color(0.3, 0.8, 0.4, 0.8)
 			var cap_i: int = i
 			slot.pressed.connect(func():
 				_bench_ings.remove_at(cap_i)
 				_needs_rebuild = true)
-			bench_row.add_child(slot)
+		else:
+			slot.text = "+"
+			slot.add_theme_font_size_override("font_size", 16)
+			slot.add_theme_color_override("font_color", Color(0.4, 0.4, 0.6))
+			slot_style.bg_color = Color(0.05, 0.07, 0.12, 0.6)
+			slot_style.set_border_width_all(1)
+			slot_style.border_color = Color(0.3, 0.3, 0.5, 0.5)
+			slot.disabled = true
+		slot.add_theme_stylebox_override("normal", slot_style)
+		var slot_disabled: StyleBoxFlat = slot_style.duplicate()
+		slot_disabled.bg_color = Color(0.05, 0.07, 0.12, 0.4)
+		slot.add_theme_stylebox_override("disabled", slot_disabled)
+		bench_row.add_child(slot)
 
-	# Method
-	_section_label("COOKING METHOD")
+	# ── Method ──
+	_section_label("Method", true)
 	var methods: Array = GameState.cooking_methods
+	var mscroll := ScrollContainer.new()
+	mscroll.custom_minimum_size.y = 40
+	mscroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_content.add_child(mscroll)
 	var mflow := HBoxContainer.new()
-	mflow.add_theme_constant_override("separation", 3)
-	_content.add_child(mflow)
+	mflow.add_theme_constant_override("separation", 6)
+	mscroll.add_child(mflow)
 	for mi in range(methods.size()):
 		var m: Dictionary = methods[mi]
 		var mb := Button.new()
 		mb.text = str(m.get("name", "?"))
-		mb.custom_minimum_size.y = 34
-		mb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		mb.add_theme_font_size_override("font_size", 10)
+		mb.custom_minimum_size.y = 36
+		mb.add_theme_font_size_override("font_size", 12)
+		var pill_style := StyleBoxFlat.new()
+		pill_style.set_corner_radius_all(18)
+		pill_style.content_margin_left = 14
+		pill_style.content_margin_right = 14
+		pill_style.content_margin_top = 4
+		pill_style.content_margin_bottom = 4
+		pill_style.set_border_width_all(1)
 		if mi == _bench_method:
-			mb.modulate = Color(1.0, 0.9, 0.3)
+			pill_style.bg_color = Color(0.15, 0.35, 0.7, 1.0)
+			pill_style.border_color = Color(0.3, 0.6, 1.0, 1.0)
+			mb.add_theme_color_override("font_color", Color.WHITE)
+		else:
+			pill_style.bg_color = Color(0.06, 0.1, 0.18, 1.0)
+			pill_style.border_color = Color(0.2, 0.3, 0.5, 0.6)
+			mb.add_theme_color_override("font_color", Color(0.7, 0.7, 0.9))
+		mb.add_theme_stylebox_override("normal", pill_style)
+		var hover_p: StyleBoxFlat = pill_style.duplicate()
+		hover_p.bg_color = pill_style.bg_color.lightened(0.1)
+		mb.add_theme_stylebox_override("hover", hover_p)
+		var pressed_p: StyleBoxFlat = pill_style.duplicate()
+		pressed_p.bg_color = pill_style.bg_color.lightened(0.15)
+		mb.add_theme_stylebox_override("pressed", pressed_p)
 		var cap_mi: int = mi
 		mb.pressed.connect(func():
 			_bench_method = cap_mi
 			_needs_rebuild = true)
 		mflow.add_child(mb)
 
-	# Style
-	_section_label("SERVING STYLE")
+	# ── Style ──
+	_section_label("Style", true)
 	var styles: Array = GameState.serving_styles
+	var sscroll := ScrollContainer.new()
+	sscroll.custom_minimum_size.y = 40
+	sscroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_content.add_child(sscroll)
 	var sflow := HBoxContainer.new()
-	sflow.add_theme_constant_override("separation", 3)
-	_content.add_child(sflow)
+	sflow.add_theme_constant_override("separation", 6)
+	sscroll.add_child(sflow)
 	for si in range(styles.size()):
 		var s: Dictionary = styles[si]
 		var sb := Button.new()
 		sb.text = str(s.get("name", "?"))
-		sb.custom_minimum_size.y = 34
-		sb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		sb.add_theme_font_size_override("font_size", 10)
+		sb.custom_minimum_size.y = 36
+		sb.add_theme_font_size_override("font_size", 12)
+		var spill := StyleBoxFlat.new()
+		spill.set_corner_radius_all(18)
+		spill.content_margin_left = 14
+		spill.content_margin_right = 14
+		spill.content_margin_top = 4
+		spill.content_margin_bottom = 4
+		spill.set_border_width_all(1)
 		if si == _bench_style:
-			sb.modulate = Color(1.0, 0.9, 0.3)
+			spill.bg_color = Color(0.15, 0.35, 0.7, 1.0)
+			spill.border_color = Color(0.3, 0.6, 1.0, 1.0)
+			sb.add_theme_color_override("font_color", Color.WHITE)
+		else:
+			spill.bg_color = Color(0.06, 0.1, 0.18, 1.0)
+			spill.border_color = Color(0.2, 0.3, 0.5, 0.6)
+			sb.add_theme_color_override("font_color", Color(0.7, 0.7, 0.9))
+		sb.add_theme_stylebox_override("normal", spill)
+		var shover: StyleBoxFlat = spill.duplicate()
+		shover.bg_color = spill.bg_color.lightened(0.1)
+		sb.add_theme_stylebox_override("hover", shover)
+		var spressed: StyleBoxFlat = spill.duplicate()
+		spressed.bg_color = spill.bg_color.lightened(0.15)
+		sb.add_theme_stylebox_override("pressed", spressed)
 		var cap_si: int = si
 		sb.pressed.connect(func():
 			_bench_style = cap_si
 			_needs_rebuild = true)
 		sflow.add_child(sb)
 
-	# Cook button
-	_content.add_child(HSeparator.new())
+	# ── Cook button ──
 	var cook_btn := Button.new()
-	cook_btn.text = "COOK" if not _bench_ings.is_empty() else "Add ingredients to cook"
-	cook_btn.disabled = _bench_ings.is_empty() or _cooking
-	cook_btn.custom_minimum_size.y = 50
-	cook_btn.add_theme_font_size_override("font_size", 18)
-	cook_btn.add_theme_color_override("font_color", Color(0.2, 1.0, 0.5))
+	var can_cook: bool = not _bench_ings.is_empty() and not _cooking
+	cook_btn.text = "Cook" if can_cook else "Add ingredients"
+	cook_btn.disabled = not can_cook
+	cook_btn.custom_minimum_size.y = 52
+	cook_btn.add_theme_font_size_override("font_size", 16)
+	cook_btn.add_theme_color_override("font_color", Color.WHITE)
 	var cook_style := StyleBoxFlat.new()
-	cook_style.bg_color = Color(0.08, 0.2, 0.12)
-	cook_style.set_corner_radius_all(10)
-	cook_style.set_border_width_all(1)
-	cook_style.border_color = Color(0.2, 0.7, 0.3, 0.6)
+	cook_style.set_corner_radius_all(12)
+	if can_cook:
+		cook_style.bg_color = Color(0.1, 0.4, 0.15, 1.0)
+		cook_style.set_border_width_all(1)
+		cook_style.border_color = Color(0.2, 0.7, 0.3, 0.6)
+	else:
+		cook_style.bg_color = Color(0.15, 0.15, 0.2, 1.0)
+		cook_style.set_border_width_all(0)
+	cook_style.content_margin_top = 6
+	cook_style.content_margin_bottom = 6
 	cook_btn.add_theme_stylebox_override("normal", cook_style)
+	cook_btn.add_theme_stylebox_override("disabled", cook_style)
+	var cook_hover: StyleBoxFlat = cook_style.duplicate()
+	cook_hover.bg_color = cook_style.bg_color.lightened(0.08)
+	cook_btn.add_theme_stylebox_override("hover", cook_hover)
 	cook_btn.pressed.connect(_on_cook)
 	_content.add_child(cook_btn)
 
@@ -814,6 +917,9 @@ func _build_guest_card(idx: int, guest: Dictionary) -> void:
 
 func _on_station_tap(idx: int) -> void:
 	_active_station = idx
+	if is_instance_valid(_canvas):
+		_canvas.active_station = idx
+		_canvas.queue_redraw()
 	_needs_table_rebuild = true
 	_needs_rebuild = true
 
@@ -973,11 +1079,16 @@ func _move_npc_home() -> void:
 
 # ── HELPERS ──────────────────────────────────────────────────────
 
-func _section_label(text: String) -> void:
+func _section_label(text: String, is_header: bool = false) -> void:
 	var lbl := Label.new()
-	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", 12)
-	lbl.add_theme_color_override("font_color", Color(0.5, 0.7, 0.9))
+	if is_header:
+		lbl.text = text.to_upper()
+		lbl.add_theme_font_size_override("font_size", 11)
+		lbl.add_theme_color_override("font_color", Color(0.4, 0.6, 0.9, 0.8))
+	else:
+		lbl.text = text
+		lbl.add_theme_font_size_override("font_size", 12)
+		lbl.add_theme_color_override("font_color", Color(0.5, 0.7, 0.9))
 	_content.add_child(lbl)
 
 
