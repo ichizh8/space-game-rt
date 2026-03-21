@@ -5,8 +5,7 @@ extends Control
 
 var kitchen_bg: Texture2D = null
 var dining_bg: Texture2D = null
-# Keep vars for compatibility but they are no longer drawn
-var stations_tex: Texture2D = null
+# No longer used — kept for reference compatibility
 var cook_npc_tex: Texture2D = null
 
 var show_kitchen: bool = true
@@ -67,8 +66,8 @@ func _draw() -> void:
 				fill_color = Color(1.0, 0.6, 0.1, 0.4)
 				border_color = Color(1.0, 0.6, 0.1, 0.7 + 0.3 * glow_alpha)
 			elif is_active:
-				fill_color = Color(0.2, 0.8, 0.4, 0.25)
-				border_color = Color(0.2, 0.8, 0.4, 0.7)
+				fill_color = Color(1.0, 0.6, 0.2, 0.25)
+				border_color = Color(0.3, 0.7, 1.0, 0.9)
 			else:
 				fill_color = Color(0.2, 0.6, 1.0, 0.25)
 				border_color = Color(0.2, 0.6, 1.0, 0.7)

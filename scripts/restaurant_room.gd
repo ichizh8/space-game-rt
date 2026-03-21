@@ -57,7 +57,6 @@ var _needs_table_rebuild: bool = false
 # ── Textures ──
 var _kitchen_bg_tex: Texture2D = null
 var _dining_bg_tex: Texture2D = null
-var _stations_tex: Texture2D = null
 var _cook_npc_tex: Texture2D = null
 
 # ── Canvas script ──
@@ -91,7 +90,6 @@ func _ready() -> void:
 	# Load textures — safe in _ready
 	_kitchen_bg_tex = load("res://assets/restaurant-kitchen-bg.png")
 	_dining_bg_tex = load("res://assets/restaurant-dining-bg.png")
-	_stations_tex = load("res://assets/restaurant-stations.png")
 	_cook_npc_tex = load("res://assets/restaurant-cook-npc.png")
 	_canvas_script = load("res://scripts/restaurant_canvas.gd")
 
@@ -247,7 +245,6 @@ func _build_art_canvas() -> void:
 	# Set texture refs
 	_canvas.kitchen_bg = _kitchen_bg_tex
 	_canvas.dining_bg = _dining_bg_tex
-	_canvas.stations_tex = _stations_tex
 	_canvas.cook_npc_tex = _cook_npc_tex
 	_canvas.npc_pos = _npc_home
 	_canvas.active_station = _active_station
@@ -269,28 +266,15 @@ func _build_station_buttons() -> void:
 	for i in range(rects.size()):
 		var r: Array = rects[i]
 		var btn := Button.new()
-		btn.text = STATION_NAMES[i]
+		btn.text = ""
 		btn.position = Vector2(float(r[0]), ART_TOP + float(r[1]))
 		btn.size = Vector2(float(r[2]), float(r[3]))
-		btn.add_theme_font_size_override("font_size", 11)
-		btn.add_theme_color_override("font_color", Color(0.6, 0.85, 1.0))
-		# Semi-transparent style
-		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.1, 0.2, 0.35, 0.4)
-		style.set_border_width_all(1)
-		style.border_color = Color(0.3, 0.6, 0.9, 0.5)
-		style.set_corner_radius_all(6)
-		btn.add_theme_stylebox_override("normal", style)
-		var hover := style.duplicate()
-		hover.bg_color = Color(0.15, 0.3, 0.5, 0.6)
-		hover.border_color = Color(0.4, 0.7, 1.0, 0.8)
-		btn.add_theme_stylebox_override("hover", hover)
-		var pressed_s := style.duplicate()
-		pressed_s.bg_color = Color(0.2, 0.4, 0.6, 0.7)
-		btn.add_theme_stylebox_override("pressed", pressed_s)
-		# Highlight active
-		if i == _active_station:
-			btn.modulate = Color(1.0, 0.9, 0.3)
+		# Invisible tap target — canvas _draw() handles all visuals
+		var empty_style := StyleBoxEmpty.new()
+		btn.add_theme_stylebox_override("normal", empty_style)
+		btn.add_theme_stylebox_override("hover", empty_style)
+		btn.add_theme_stylebox_override("pressed", empty_style)
+		btn.add_theme_stylebox_override("focus", empty_style)
 		var cap_i: int = i
 		btn.pressed.connect(func(): _on_station_tap(cap_i))
 		_root.add_child(btn)
