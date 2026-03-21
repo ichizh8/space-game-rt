@@ -11,6 +11,8 @@ var cook_npc_tex: Texture2D = null
 var show_kitchen: bool = true
 var npc_pos: Vector2 = Vector2(200, 200)
 var npc_scale: float = 1.0
+var art_top: float = 88.0
+var art_height: float = 240.0
 
 # Station glow during cooking (-1 = none)
 var glow_station: int = -1
@@ -38,23 +40,26 @@ const TABLE_RECTS: Array = [
 
 
 func _draw() -> void:
-	# Solid dark fill — prevents checkerboard transparency
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.031, 0.051, 0.102))
+	# Art strip area
+	var art_rect: Rect2 = Rect2(0.0, art_top, size.x, art_height)
+
+	# Fill art strip with solid dark bg — no checkerboard
+	draw_rect(art_rect, Color(0.031, 0.051, 0.102))
 
 	var bg: Texture2D = kitchen_bg if show_kitchen else dining_bg
 	if bg != null:
-		# Scale bg to fill width, maintain aspect, center vertically
+		# Scale bg to fill art strip width, maintain aspect, clip to strip
 		var tex_size: Vector2 = bg.get_size()
 		var scale_f: float = size.x / tex_size.x
 		var draw_h: float = tex_size.y * scale_f
-		var y_off: float = (size.y - draw_h) * 0.5
+		var y_off: float = art_top + (art_height - draw_h) * 0.5
 		draw_texture_rect(bg, Rect2(Vector2(0.0, y_off), Vector2(size.x, draw_h)), false)
 
 	if show_kitchen:
 		# Draw station tap target indicators (no sprite overlays)
 		for i in range(STATION_RECTS.size()):
 			var r: Array = STATION_RECTS[i]
-			var rect: Rect2 = Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3]))
+			var rect: Rect2 = Rect2(float(r[0]), art_top + float(r[1]), float(r[2]), float(r[3]))
 
 			var is_cooking: bool = (i == glow_station and glow_alpha > 0.0)
 			var is_active: bool = (i == active_station)
@@ -78,7 +83,7 @@ func _draw() -> void:
 			draw_rect(rect, border_color, false, 2.0)
 
 			# Station name label below hitbox
-			var label_pos: Vector2 = Vector2(rect.position.x + rect.size.x * 0.5, rect.position.y + rect.size.y + 14.0)
+			var label_pos: Vector2 = Vector2(rect.position.x + rect.size.x * 0.5, rect.position.y + rect.size.y + 10.0)
 			var label_text: String = STATION_NAMES[i]
 			draw_string(ThemeDB.fallback_font, label_pos - Vector2(label_text.length() * 3.0, 0.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.85, 1.0, 0.9))
 

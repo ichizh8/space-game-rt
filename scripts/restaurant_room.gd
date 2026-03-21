@@ -38,7 +38,7 @@ var _cook_timer: float = 0.0
 var _cook_station_idx: int = -1
 
 # NPC
-var _npc_home: Vector2 = Vector2(200, 200)
+var _npc_home: Vector2 = Vector2(200, 248)  # ART_TOP(88) + 160
 var _npc_tween: Tween = null
 
 # Message
@@ -235,18 +235,20 @@ func _build_art_canvas() -> void:
 	_canvas = Control.new()
 	if _canvas_script != null:
 		_canvas.set_script(_canvas_script)
-	_canvas.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_canvas.offset_top = ART_TOP
+	_canvas.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_canvas.offset_top = 0
 	_canvas.offset_left = 0
 	_canvas.offset_right = 0
-	_canvas.offset_bottom = ART_TOP + ART_H
+	_canvas.offset_bottom = 0
 	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	# Set texture refs
 	_canvas.kitchen_bg = _kitchen_bg_tex
 	_canvas.dining_bg = _dining_bg_tex
 	_canvas.cook_npc_tex = _cook_npc_tex
-	_canvas.npc_pos = _npc_home
+	_canvas.art_top = float(ART_TOP)
+	_canvas.art_height = float(ART_H)
+	_canvas.npc_pos = Vector2(200.0, float(ART_TOP) + 160.0)
 	_canvas.active_station = _active_station
 
 	_root.add_child(_canvas)
