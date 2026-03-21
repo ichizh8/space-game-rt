@@ -80,20 +80,15 @@ func _draw() -> void:
 				# Default state — invisible fill, very subtle border
 				draw_rect(rect, Color(0.3, 0.5, 0.8, 0.25), false, 1.0)
 
-			# Station name label below hitbox
-			var label_text: String = STATION_NAMES[i]
-			var label_col: Color
-			var font_sz: int
-			if is_active or is_cooking:
-				font_sz = 12
-				label_col = Color(1.0, 0.9, 0.5, 1.0)
-			else:
-				font_sz = 10
-				label_col = Color(0.5, 0.7, 0.9, 0.5)
-			var label_w: float = label_text.length() * (7.0 if font_sz >= 12 else 5.5)
-			var label_x: float = rect.position.x + (rect.size.x - label_w) * 0.5
-			var label_y: float = rect.position.y + rect.size.y + 13.0
-			draw_string(ThemeDB.fallback_font, Vector2(label_x, label_y), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_sz, label_col)
+			# Station name label — only show for active station
+			if is_active:
+				var label_text: String = STATION_NAMES[i]
+				var font_sz: int = 11
+				var label_col: Color = Color(1.0, 0.9, 0.4, 1.0)
+				var label_w: float = label_text.length() * 6.5
+				var label_x: float = rect.position.x + (rect.size.x - label_w) * 0.5
+				var label_y: float = rect.position.y + rect.size.y + 13.0
+				draw_string(ThemeDB.fallback_font, Vector2(label_x, label_y), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_sz, label_col)
 
 		# Hint overlay text
 		if show_hint and active_station < 0:
@@ -106,23 +101,14 @@ func _draw() -> void:
 			draw_rect(bg_rect, Color(0.0, 0.0, 0.0, 0.5))
 			draw_string(ThemeDB.fallback_font, Vector2(hint_x, hint_y), hint_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1.0, 1.0, 1.0, 0.9))
 
-		# Cook NPC — drawn geometric figure, larger and more visible
-		draw_set_transform(npc_pos, 0.0, Vector2(npc_scale, npc_scale))
-		var body_color: Color = Color(0.95, 0.95, 1.0)
-		var suit_color: Color = Color(0.15, 0.4, 0.85)
-		var visor_color: Color = Color(0.3, 0.8, 1.0, 0.9)
-		# Body (suit) — wider rectangle
-		draw_rect(Rect2(Vector2(-14.0, 0.0), Vector2(28.0, 32.0)), suit_color)
-		# Head
-		draw_circle(Vector2(0.0, -16.0), 16.0, body_color)
-		# Visor
-		draw_rect(Rect2(Vector2(-11.0, -22.0), Vector2(22.0, 9.0)), visor_color)
-		# Arms
-		draw_rect(Rect2(Vector2(-24.0, 2.0), Vector2(10.0, 20.0)), suit_color)
-		draw_rect(Rect2(Vector2(14.0, 2.0), Vector2(10.0, 20.0)), suit_color)
-		# Outline glow
-		draw_arc(Vector2(0.0, -16.0), 17.0, 0.0, TAU, 16, Color(0.4, 0.7, 1.0, 0.5), 1.5)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		# Cook NPC — draw sprite texture at prep bench
+		if cook_npc_tex != null:
+			var npc_size: Vector2 = Vector2(72.0, 72.0) * npc_scale
+			var npc_rect: Rect2 = Rect2(npc_pos - npc_size * 0.5, npc_size)
+			draw_texture_rect(cook_npc_tex, npc_rect, false)
+			# Cooking indicator — small orange glow dot next to NPC
+			if glow_station >= 0 and glow_alpha > 0.0:
+				draw_circle(npc_pos + Vector2(38.0, 0.0), 5.0, Color(1.0, 0.5, 0.1, 0.8))
 	else:
 		# Dining room — draw table slot indicators for empty tables
 		for i in range(TABLE_RECTS.size()):
