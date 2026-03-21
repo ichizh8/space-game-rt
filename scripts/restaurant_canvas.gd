@@ -21,16 +21,19 @@ var glow_alpha: float = 0.0
 # Active station highlight (-1 = none)
 var active_station: int = -1
 
+# Show hint overlay text when no station selected
+var show_hint: bool = true
+
 # Station rects — x/y relative to art strip (art_top is added at draw time)
 # Art displays at ~219px tall (390px wide, 16:9). Keep all y+h within 200px.
 const STATION_RECTS: Array = [
-	[15,  30,  90, 70],   # Grill — upper left
-	[285, 20,  80, 70],   # Cold Press — upper right
-	[20,  120, 80, 65],   # Ferment Pod — lower left
-	[155, 90,  90, 70],   # Prep Bench — center
+	[10,  20, 100, 90],   # Grill — left side, covers the orange oven area
+	[250, 30, 120, 100],  # Cold Press — right side, covers the cyan machine
+	[120, 60, 130, 100],  # Prep Bench — center table
+	[10, 130,  80,  70],  # Ferment Pod — lower left (small)
 ]
 
-const STATION_NAMES: Array = ["Grill", "Cold Press", "Ferment Pod", "Prep Bench"]
+const STATION_NAMES: Array = ["Grill", "Cold Press", "Prep Bench", "Ferment Pod"]
 
 # Table rects for dining room
 const TABLE_RECTS: Array = [
@@ -57,6 +60,8 @@ func _draw() -> void:
 		draw_texture_rect(bg, Rect2(Vector2(0.0, y_off), Vector2(size.x, draw_h)), false)
 
 	if show_kitchen:
+		var has_active: bool = (active_station >= 0)
+
 		# Draw station tap target indicators (no sprite overlays)
 		for i in range(STATION_RECTS.size()):
 			var r: Array = STATION_RECTS[i]
@@ -65,30 +70,50 @@ func _draw() -> void:
 			var is_cooking: bool = (i == glow_station and glow_alpha > 0.0)
 			var is_active: bool = (i == active_station)
 
-			# Background fill
+			# Background fill and border
 			var fill_color: Color
 			var border_color: Color
+			var draw_border: bool = true
 			if is_cooking:
 				fill_color = Color(1.0, 0.6, 0.1, 0.4)
 				border_color = Color(1.0, 0.6, 0.1, 0.7 + 0.3 * glow_alpha)
 			elif is_active:
-				fill_color = Color(1.0, 0.6, 0.2, 0.25)
-				border_color = Color(0.3, 0.7, 1.0, 0.9)
+				# Active station: bright orange
+				fill_color = Color(1.0, 0.5, 0.1, 0.35)
+				border_color = Color(1.0, 0.5, 0.1, 0.9)
+			elif has_active:
+				# Other stations dimmed when one is active
+				fill_color = Color(0.1, 0.1, 0.2, 0.3)
+				draw_border = false
 			else:
+				# No station selected — default blue
 				fill_color = Color(0.2, 0.6, 1.0, 0.25)
 				border_color = Color(0.2, 0.6, 1.0, 0.7)
 
-			# Rounded rect fill (draw as regular rect — _draw has no rounded rect)
 			draw_rect(rect, fill_color)
-			# Border — 2px outline
-			draw_rect(rect, border_color, false, 2.0)
+			if draw_border:
+				draw_rect(rect, border_color, false, 2.5 if is_active else 2.0)
 
 			# Station name label below hitbox
-			var label_text: String = STATION_NAMES[i]
-			var label_w: float = label_text.length() * 6.0
-			var label_x: float = rect.position.x + (rect.size.x - label_w) * 0.5
-			var label_y: float = rect.position.y + rect.size.y + 13.0
-			draw_string(ThemeDB.fallback_font, Vector2(label_x, label_y), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.85, 1.0, 0.9))
+			if not has_active or is_active:
+				var label_text: String = STATION_NAMES[i]
+				var font_sz: int = 13 if is_active else 11
+				var label_w: float = label_text.length() * (7.0 if is_active else 6.0)
+				var label_x: float = rect.position.x + (rect.size.x - label_w) * 0.5
+				var label_y: float = rect.position.y + rect.size.y + 13.0
+				var label_col: Color = Color(1.0, 1.0, 1.0, 0.95) if is_active else Color(0.7, 0.85, 1.0, 0.9)
+				draw_string(ThemeDB.fallback_font, Vector2(label_x, label_y), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_sz, label_col)
+
+		# Hint overlay text
+		if show_hint and not has_active:
+			var hint_text: String = "Tap a station to begin"
+			var hint_w: float = hint_text.length() * 8.5
+			var hint_x: float = (size.x - hint_w) * 0.5
+			var hint_y: float = art_top + art_height * 0.5
+			# Semi-transparent background
+			var bg_rect: Rect2 = Rect2(hint_x - 12.0, hint_y - 18.0, hint_w + 24.0, 28.0)
+			draw_rect(bg_rect, Color(0.0, 0.0, 0.0, 0.5))
+			draw_string(ThemeDB.fallback_font, Vector2(hint_x, hint_y), hint_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1.0, 1.0, 1.0, 0.9))
 
 		# Cook NPC — drawn geometric figure, larger and more visible
 		draw_set_transform(npc_pos, 0.0, Vector2(npc_scale, npc_scale))

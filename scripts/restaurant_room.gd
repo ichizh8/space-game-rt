@@ -20,7 +20,8 @@ const TIER_COLORS: Dictionary = {
 	3: Color(1.0, 0.7, 0.2),
 }
 
-const STATION_NAMES: Array = ["Grill", "Cold Press", "Ferment Pod", "Prep Bench"]
+const STATION_NAMES: Array = ["Grill", "Cold Press", "Prep Bench", "Ferment Pod"]
+const STATION_DESCS: Array = ["Char-Heat cooking", "Cryo extraction", "Prep & combine", "Slow ferment"]
 
 enum Room { KITCHEN, DINING }
 
@@ -31,6 +32,7 @@ var _bench_method: int = 0
 var _bench_style: int = 0
 var _selected_dish: int = -1
 var _active_station: int = -1
+var _step: int = 0  # 0=select station, 1=ingredients, 2=cook
 
 # Cooking animation
 var _cooking: bool = false
@@ -49,6 +51,9 @@ var _idle_time: float = 0.0
 
 # Guest pulse for empty tables
 var _pulse_time: float = 0.0
+
+# Result auto-reset timer
+var _result_timer: float = 0.0
 
 # Deferred rebuild flag (WASM safe — never add_child/queue_free from signal callbacks)
 var _needs_rebuild: bool = false
@@ -72,14 +77,18 @@ var _content: VBoxContainer
 var _kitchen_pill: Button
 var _dining_pill: Button
 var _station_btns: Array = []
+var _step_bar_container: HBoxContainer
+var _step_labels: Array = []
 
 # Layout constants (390x844 viewport)
 const TOP_BAR_H: int = 48
 const PILL_H: int = 40
 const ART_H: int = 240
 const MSG_H: int = 36
+const STEP_BAR_H: int = 36
 const ART_TOP: int = 88  # TOP_BAR_H + PILL_H
-const SCROLL_TOP: int = 328  # ART_TOP + ART_H
+const STEP_BAR_TOP: int = 328  # ART_TOP + ART_H
+const SCROLL_TOP: int = 364  # STEP_BAR_TOP + STEP_BAR_H
 const MSG_TOP: int = 808
 
 
@@ -115,6 +124,19 @@ func _process(delta: float) -> void:
 		if _msg_timer <= 0.0 and is_instance_valid(_msg_lbl):
 			_msg_lbl.text = ""
 
+	# Result auto-reset timer
+	if _result_timer > 0.0:
+		_result_timer -= delta
+		if _result_timer <= 0.0:
+			_step = 0
+			_active_station = -1
+			if is_instance_valid(_canvas):
+				_canvas.active_station = -1
+				_canvas.show_hint = true
+				_canvas.queue_redraw()
+			_needs_rebuild = true
+			_needs_table_rebuild = true
+
 	# Cooking timer
 	if _cooking:
 		_cook_timer -= delta
@@ -148,6 +170,7 @@ func _build_ui() -> void:
 	_build_top_bar()
 	_build_room_pills()
 	_build_art_canvas()
+	_build_step_bar()
 	_build_scroll_area()
 	_build_msg_bar()
 	_switch_room(Room.KITCHEN)
@@ -250,6 +273,7 @@ func _build_art_canvas() -> void:
 	_canvas.art_height = float(ART_H)
 	_canvas.npc_pos = Vector2(200.0, float(ART_TOP) + 160.0)
 	_canvas.active_station = _active_station
+	_canvas.show_hint = true
 
 	_root.add_child(_canvas)
 
@@ -264,7 +288,7 @@ func _build_station_buttons() -> void:
 	if _current_room != Room.KITCHEN:
 		return
 
-	var rects: Array = [[15, 30, 90, 70], [285, 20, 80, 70], [20, 120, 80, 65], [155, 90, 90, 70]]
+	var rects: Array = [[10, 20, 100, 90], [250, 30, 120, 100], [120, 60, 130, 100], [10, 130, 80, 70]]
 	for i in range(rects.size()):
 		var r: Array = rects[i]
 		var btn := Button.new()
@@ -324,6 +348,56 @@ func _build_table_buttons() -> void:
 		_station_btns.append(btn)
 
 
+# ── STEP BAR ─────────────────────────────────────────────────────
+
+func _build_step_bar() -> void:
+	_step_bar_container = HBoxContainer.new()
+	_step_bar_container.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_step_bar_container.offset_top = STEP_BAR_TOP
+	_step_bar_container.offset_left = 10
+	_step_bar_container.offset_right = -10
+	_step_bar_container.offset_bottom = STEP_BAR_TOP + STEP_BAR_H
+	_step_bar_container.add_theme_constant_override("separation", 4)
+	_root.add_child(_step_bar_container)
+
+	_step_labels.clear()
+	var step_texts: Array = ["1 Station", "2 Ingredients", "3 Cook"]
+	for i in range(step_texts.size()):
+		var lbl := Label.new()
+		lbl.text = step_texts[i]
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 12)
+		lbl.custom_minimum_size.y = STEP_BAR_H
+		_step_bar_container.add_child(lbl)
+		_step_labels.append(lbl)
+
+	_update_step_bar()
+
+
+func _update_step_bar() -> void:
+	if _step_labels.size() < 3:
+		return
+	var step_texts: Array = ["1 Station", "2 Ingredients", "3 Cook"]
+	for i in range(3):
+		var lbl: Label = _step_labels[i]
+		if i < _step:
+			# Completed
+			lbl.text = "✓ " + step_texts[i].substr(2)
+			lbl.add_theme_color_override("font_color", Color(0.3, 0.9, 0.4, 0.9))
+		elif i == _step:
+			# Current
+			lbl.text = step_texts[i]
+			lbl.add_theme_color_override("font_color", Color(0.4, 0.7, 1.0, 1.0))
+		else:
+			# Future
+			lbl.text = step_texts[i]
+			lbl.add_theme_color_override("font_color", Color(0.35, 0.35, 0.45, 0.6))
+
+	# Show/hide step bar based on room
+	_step_bar_container.visible = (_current_room == Room.KITCHEN)
+
+
 # ── SCROLL AREA (interaction panel) ──────────────────────────────
 
 func _build_scroll_area() -> void:
@@ -377,6 +451,7 @@ func _switch_room(room: int) -> void:
 	_current_room = room
 	_active_station = -1
 	_selected_dish = -1
+	_step = 0
 
 	# Update pills
 	var active_style := StyleBoxFlat.new()
@@ -407,7 +482,11 @@ func _switch_room(room: int) -> void:
 		_canvas.glow_station = -1
 		_canvas.glow_alpha = 0.0
 		_canvas.active_station = _active_station
+		_canvas.show_hint = (room == Room.KITCHEN)
 		_canvas.queue_redraw()
+
+	# Update step bar
+	_update_step_bar()
 
 	# Rebuild interactive elements
 	if room == Room.KITCHEN:
@@ -422,6 +501,7 @@ func _rebuild_content() -> void:
 		c.queue_free()
 	if is_instance_valid(_credits_lbl):
 		_credits_lbl.text = "%d cr" % GameState.credits
+	_update_step_bar()
 	match _current_room:
 		Room.KITCHEN:
 			_build_kitchen_panel()
@@ -429,15 +509,56 @@ func _rebuild_content() -> void:
 			_build_dining_panel()
 
 
-# ── KITCHEN PANEL ────────────────────────────────────────────────
+# ── KITCHEN PANEL (step-based) ──────────────────────────────────
 
 func _build_kitchen_panel() -> void:
-	if _active_station >= 0:
-		_section_label("Station: " + STATION_NAMES[_active_station])
-	else:
-		_section_label("Tap a station above to start cooking")
+	match _step:
+		0:
+			_build_kitchen_step0()
+		1:
+			_build_kitchen_step1()
+		2:
+			_build_kitchen_step2()
 
-	# ── Pantry ──
+
+func _build_kitchen_step0() -> void:
+	# Step 0: station selection — minimal bottom panel
+	# Kitchen queue (always visible)
+	_build_kitchen_queue()
+
+
+func _build_kitchen_step1() -> void:
+	# Step 1: ingredients — station name + pantry + bench
+
+	# Station header + back button
+	var header_row := HBoxContainer.new()
+	header_row.add_theme_constant_override("separation", 6)
+	_content.add_child(header_row)
+
+	var back_btn := Button.new()
+	back_btn.text = "< Back"
+	back_btn.custom_minimum_size = Vector2(70, 32)
+	back_btn.add_theme_font_size_override("font_size", 12)
+	back_btn.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
+	back_btn.pressed.connect(func(): _go_to_step(0))
+	header_row.add_child(back_btn)
+
+	var station_lbl := Label.new()
+	var desc: String = STATION_DESCS[_active_station] if _active_station >= 0 and _active_station < STATION_DESCS.size() else ""
+	station_lbl.text = "%s — %s" % [STATION_NAMES[_active_station] if _active_station >= 0 else "?", desc]
+	station_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	station_lbl.add_theme_font_size_override("font_size", 14)
+	station_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	header_row.add_child(station_lbl)
+
+	# Hint
+	var hint := Label.new()
+	hint.text = "Add up to %d ingredients" % GameState.get_bench_slots()
+	hint.add_theme_font_size_override("font_size", 11)
+	hint.add_theme_color_override("font_color", Color(0.5, 0.6, 0.7))
+	_content.add_child(hint)
+
+	# Pantry
 	_section_label("Pantry", true)
 
 	var pantry := GridContainer.new()
@@ -494,6 +615,9 @@ func _build_kitchen_panel() -> void:
 		btn.pressed.connect(func():
 			if _bench_ings.size() < max_slots and int(GameState.restaurant_ingredients.get(cap_id, 0)) > _bench_ings.count(cap_id):
 				_bench_ings.append(cap_id)
+				# Auto-advance to step 2 when first ingredient added
+				if _bench_ings.size() >= 1 and _step < 2:
+					_step = 2
 				_needs_rebuild = true)
 		pantry.add_child(btn)
 
@@ -504,7 +628,7 @@ func _build_kitchen_panel() -> void:
 		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
 		_content.add_child(lbl)
 
-	# ── Bench ──
+	# Bench slots
 	_section_label("Bench", true)
 	var bench_row := HBoxContainer.new()
 	bench_row.add_theme_constant_override("separation", 6)
@@ -534,6 +658,9 @@ func _build_kitchen_panel() -> void:
 			var cap_i: int = i
 			slot.pressed.connect(func():
 				_bench_ings.remove_at(cap_i)
+				# If bench becomes empty, go back to step 1
+				if _bench_ings.is_empty() and _step == 2:
+					_step = 1
 				_needs_rebuild = true)
 		else:
 			slot.text = "+"
@@ -549,7 +676,70 @@ func _build_kitchen_panel() -> void:
 		slot.add_theme_stylebox_override("disabled", slot_disabled)
 		bench_row.add_child(slot)
 
-	# ── Method ──
+
+func _build_kitchen_step2() -> void:
+	# Step 2: method + style + cook
+
+	# Back button
+	var header_row := HBoxContainer.new()
+	header_row.add_theme_constant_override("separation", 6)
+	_content.add_child(header_row)
+
+	var back_btn := Button.new()
+	back_btn.text = "< Back"
+	back_btn.custom_minimum_size = Vector2(70, 32)
+	back_btn.add_theme_font_size_override("font_size", 12)
+	back_btn.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
+	back_btn.pressed.connect(func(): _go_to_step(1))
+	header_row.add_child(back_btn)
+
+	var station_lbl := Label.new()
+	station_lbl.text = STATION_NAMES[_active_station] if _active_station >= 0 else "?"
+	station_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	station_lbl.add_theme_font_size_override("font_size", 14)
+	station_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	header_row.add_child(station_lbl)
+
+	# Bench chips — horizontal small chips
+	var bench_label := Label.new()
+	bench_label.text = "On the bench:"
+	bench_label.add_theme_font_size_override("font_size", 11)
+	bench_label.add_theme_color_override("font_color", Color(0.5, 0.6, 0.7))
+	_content.add_child(bench_label)
+
+	var chip_row := HBoxContainer.new()
+	chip_row.add_theme_constant_override("separation", 4)
+	_content.add_child(chip_row)
+	for i in range(_bench_ings.size()):
+		var ing: String = _bench_ings[i]
+		var binfo: Dictionary = GameState.ingredient_tiers.get(ing, {})
+		var display_name: String = str(binfo.get("name", ing))
+		if display_name.length() > 14:
+			display_name = display_name.substr(0, 14)
+		var chip := Button.new()
+		chip.text = display_name
+		chip.custom_minimum_size.y = 28
+		chip.add_theme_font_size_override("font_size", 11)
+		chip.add_theme_color_override("font_color", Color.WHITE)
+		var chip_style := StyleBoxFlat.new()
+		chip_style.bg_color = Color(0.1, 0.2, 0.3, 0.9)
+		chip_style.set_corner_radius_all(14)
+		chip_style.set_border_width_all(1)
+		chip_style.border_color = Color(0.3, 0.8, 0.4, 0.7)
+		chip_style.content_margin_left = 10
+		chip_style.content_margin_right = 10
+		chip_style.content_margin_top = 2
+		chip_style.content_margin_bottom = 2
+		chip.add_theme_stylebox_override("normal", chip_style)
+		var cap_i: int = i
+		chip.pressed.connect(func():
+			_bench_ings.remove_at(cap_i)
+			if _bench_ings.is_empty():
+				_step = 1
+			_needs_rebuild = true)
+		chip_row.add_child(chip)
+
+	# Method
 	_section_label("Method", true)
 	var methods: Array = GameState.cooking_methods
 	var mscroll := ScrollContainer.new()
@@ -593,7 +783,7 @@ func _build_kitchen_panel() -> void:
 			_needs_rebuild = true)
 		mflow.add_child(mb)
 
-	# ── Style ──
+	# Style
 	_section_label("Style", true)
 	var styles: Array = GameState.serving_styles
 	var sscroll := ScrollContainer.new()
@@ -637,25 +827,25 @@ func _build_kitchen_panel() -> void:
 			_needs_rebuild = true)
 		sflow.add_child(sb)
 
-	# ── Cook button ──
+	# Cook button — full width, green, 56px, font 18
 	var cook_btn := Button.new()
 	var can_cook: bool = not _bench_ings.is_empty() and not _cooking
-	cook_btn.text = "Cook" if can_cook else "Add ingredients"
+	cook_btn.text = "COOK" if can_cook else "Add ingredients first"
 	cook_btn.disabled = not can_cook
-	cook_btn.custom_minimum_size.y = 52
-	cook_btn.add_theme_font_size_override("font_size", 16)
+	cook_btn.custom_minimum_size.y = 56
+	cook_btn.add_theme_font_size_override("font_size", 18)
 	cook_btn.add_theme_color_override("font_color", Color.WHITE)
 	var cook_style := StyleBoxFlat.new()
 	cook_style.set_corner_radius_all(12)
 	if can_cook:
-		cook_style.bg_color = Color(0.1, 0.4, 0.15, 1.0)
+		cook_style.bg_color = Color(0.1, 0.45, 0.15, 1.0)
 		cook_style.set_border_width_all(1)
 		cook_style.border_color = Color(0.2, 0.7, 0.3, 0.6)
 	else:
 		cook_style.bg_color = Color(0.15, 0.15, 0.2, 1.0)
 		cook_style.set_border_width_all(0)
-	cook_style.content_margin_top = 6
-	cook_style.content_margin_bottom = 6
+	cook_style.content_margin_top = 8
+	cook_style.content_margin_bottom = 8
 	cook_btn.add_theme_stylebox_override("normal", cook_style)
 	cook_btn.add_theme_stylebox_override("disabled", cook_style)
 	var cook_hover: StyleBoxFlat = cook_style.duplicate()
@@ -665,6 +855,10 @@ func _build_kitchen_panel() -> void:
 	_content.add_child(cook_btn)
 
 	# Kitchen queue
+	_build_kitchen_queue()
+
+
+func _build_kitchen_queue() -> void:
 	if not GameState.prepared_dishes.is_empty():
 		_section_label("READY TO SERVE (%d dishes)" % GameState.prepared_dishes.size())
 		for pd in GameState.prepared_dishes:
@@ -681,6 +875,18 @@ func _build_kitchen_panel() -> void:
 		go_btn.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0))
 		go_btn.pressed.connect(func(): call_deferred("_switch_room", Room.DINING))
 		_content.add_child(go_btn)
+
+
+func _go_to_step(step: int) -> void:
+	if step == 0:
+		_active_station = -1
+		_bench_ings.clear()
+		if is_instance_valid(_canvas):
+			_canvas.active_station = -1
+			_canvas.show_hint = true
+			_canvas.queue_redraw()
+	_step = step
+	_needs_rebuild = true
 
 
 # ── DINING PANEL ─────────────────────────────────────────────────
@@ -903,8 +1109,10 @@ func _build_guest_card(idx: int, guest: Dictionary) -> void:
 
 func _on_station_tap(idx: int) -> void:
 	_active_station = idx
+	_step = 1
 	if is_instance_valid(_canvas):
 		_canvas.active_station = idx
+		_canvas.show_hint = false
 		_canvas.queue_redraw()
 	_needs_table_rebuild = true
 	_needs_rebuild = true
@@ -931,7 +1139,7 @@ func _on_cook() -> void:
 	# Start cooking animation
 	_cooking = true
 	_cook_timer = 1.5
-	_cook_station_idx = _active_station if _active_station >= 0 else 3  # default to prep bench
+	_cook_station_idx = _active_station if _active_station >= 0 else 2  # default to prep bench (index 2)
 
 	# Move NPC to station
 	_move_npc_to_station(_cook_station_idx)
@@ -982,11 +1190,14 @@ func _finish_cook() -> void:
 		var recipe: Dictionary = result.get("recipe", {})
 		var dish_name: String = str(recipe.get("name", "Mystery Dish"))
 		if result_type == "known":
-			_show_msg("Cooked: %s — go serve!" % dish_name, 4.0)
+			_show_msg("%s — added to queue!" % dish_name, 3.0)
 		else:
-			_show_msg("New dish discovered: %s!" % dish_name, 4.0)
+			_show_msg("New: %s — added to queue!" % dish_name, 3.0)
 
 	SaveManager.save_game()
+
+	# Auto-reset to step 0 after 2 seconds
+	_result_timer = 2.0
 	_needs_rebuild = true
 
 
@@ -1043,7 +1254,8 @@ func _add_choice_btn(parent: VBoxContainer, guest_idx: int, choice: String, labe
 func _move_npc_to_station(station_idx: int) -> void:
 	if not is_instance_valid(_canvas):
 		return
-	var targets: Array = [Vector2(110, 200), Vector2(290, 160), Vector2(110, 280), Vector2(230, 240)]
+	# Updated targets matching new station rect positions
+	var targets: Array = [Vector2(60, 200), Vector2(310, 180), Vector2(185, 240), Vector2(50, 280)]
 	if station_idx < 0 or station_idx >= targets.size():
 		return
 	if _npc_tween != null and _npc_tween.is_valid():
