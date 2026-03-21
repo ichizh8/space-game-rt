@@ -497,7 +497,10 @@ func _switch_room(room: int) -> void:
 
 
 func _rebuild_content() -> void:
+	# Remove all children synchronously — safe here since _rebuild_content
+	# is only called from _process() (never from a signal callback directly)
 	for c in _content.get_children():
+		_content.remove_child(c)
 		c.queue_free()
 	if is_instance_valid(_credits_lbl):
 		_credits_lbl.text = "%d cr" % GameState.credits
