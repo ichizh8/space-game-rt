@@ -1638,12 +1638,10 @@ func _refresh_ui() -> void:
 	_fill_services(vbox as VBoxContainer)
 
 func _on_open_kitchen() -> void:
-	var scene_script = load("res://scripts/restaurant_scene.gd")
-	if scene_script == null:
+	var scene_res = load("res://scenes/restaurant_room.tscn")
+	if scene_res == null:
 		return
-	var kitchen := CanvasLayer.new()
-	kitchen.set_script(scene_script)
-	# Add synchronously — script _ready fires after add_child completes
+	var kitchen: Node = scene_res.instantiate()
 	get_tree().root.add_child(kitchen)
 
 
