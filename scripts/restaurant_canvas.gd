@@ -84,9 +84,11 @@ func _draw() -> void:
 			draw_rect(rect, border_color, false, 2.0)
 
 			# Station name label below hitbox
-			var label_pos: Vector2 = Vector2(rect.position.x + rect.size.x * 0.5, rect.position.y + rect.size.y + 10.0)
 			var label_text: String = STATION_NAMES[i]
-			draw_string(ThemeDB.fallback_font, label_pos - Vector2(label_text.length() * 3.0, 0.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.85, 1.0, 0.9))
+			var label_w: float = label_text.length() * 6.0
+			var label_x: float = rect.position.x + (rect.size.x - label_w) * 0.5
+			var label_y: float = rect.position.y + rect.size.y + 13.0
+			draw_string(ThemeDB.fallback_font, Vector2(label_x, label_y), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.7, 0.85, 1.0, 0.9))
 
 		# Cook NPC — drawn geometric figure, larger and more visible
 		draw_set_transform(npc_pos, 0.0, Vector2(npc_scale, npc_scale))
