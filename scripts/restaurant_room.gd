@@ -111,6 +111,7 @@ var _bottom_strip: PanelContainer
 var _sheet_panel: PanelContainer
 var _sheet_scroll: ScrollContainer
 var _sheet_content: VBoxContainer
+var _station_layer: Control
 var _station_btns: Array = []
 
 
@@ -201,6 +202,12 @@ func _build_canvas() -> void:
 	_canvas.show_kitchen = true
 	_canvas.show_hint = true
 	_root.add_child(_canvas)
+
+	# Dedicated passthrough layer for station buttons — fixed pixel coords work correctly here
+	_station_layer = Control.new()
+	_station_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_station_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_station_layer)
 
 
 func _build_top_bar() -> void:
@@ -325,7 +332,7 @@ func _rebuild() -> void:
 	# Clear station buttons
 	for btn in _station_btns:
 		if is_instance_valid(btn):
-			btn.get_parent().remove_child(btn)
+			_station_layer.remove_child(btn)
 			btn.queue_free()
 	_station_btns.clear()
 
@@ -341,6 +348,10 @@ func _rebuild() -> void:
 		_canvas.active_station = _active_station if is_kitchen else -1
 		_canvas.show_hint = (_view == View.KITCHEN_IDLE and _active_station < 0)
 		_canvas.queue_redraw()
+
+	# Station layer only active in idle view
+	if is_instance_valid(_station_layer):
+		_station_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE if _view != View.KITCHEN_IDLE else Control.MOUSE_FILTER_IGNORE
 
 	match _view:
 		View.KITCHEN_IDLE:
@@ -407,7 +418,7 @@ func _build_station_buttons() -> void:
 		btn.add_theme_stylebox_override("focus", empty_style)
 		var cap_i: int = i
 		btn.pressed.connect(func(): _on_station_tap(cap_i))
-		_root.add_child(btn)
+		_station_layer.add_child(btn)
 		_station_btns.append(btn)
 
 
