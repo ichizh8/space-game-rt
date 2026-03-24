@@ -111,8 +111,8 @@ var _bottom_strip: PanelContainer
 var _sheet_panel: PanelContainer
 var _sheet_scroll: ScrollContainer
 var _sheet_content: VBoxContainer
-var _station_layer: Control
-var _station_btns: Array = []
+var _station_layer: Control  # passthrough layer for dismiss btn
+var _station_btns: Array = []  # holds dismiss btn for cleanup
 
 
 func _ready() -> void:
@@ -329,7 +329,7 @@ func _rebuild() -> void:
 		_bottom_strip.remove_child(c)
 		c.queue_free()
 
-	# Clear station buttons
+	# Clear dismiss button (if any)
 	for btn in _station_btns:
 		if is_instance_valid(btn):
 			_station_layer.remove_child(btn)
@@ -349,10 +349,6 @@ func _rebuild() -> void:
 		_canvas.show_hint = (_view == View.KITCHEN_IDLE and _active_station < 0)
 		_canvas.queue_redraw()
 
-	# Station layer only active in idle view
-	if is_instance_valid(_station_layer):
-		_station_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE if _view != View.KITCHEN_IDLE else Control.MOUSE_FILTER_IGNORE
-
 	match _view:
 		View.KITCHEN_IDLE:
 			_build_kitchen_idle()
@@ -371,8 +367,7 @@ func _rebuild() -> void:
 func _build_kitchen_idle() -> void:
 	_sheet_panel.visible = false
 
-	# Station tap zones (invisible buttons over art)
-	_build_station_buttons()
+	# Station taps handled via _input() hit-testing — no buttons needed
 
 	# Bottom strip: dishes ready + dining room button
 	var hbox := HBoxContainer.new()
@@ -404,22 +399,7 @@ func _build_kitchen_idle() -> void:
 	_bottom_strip.visible = true
 
 
-func _build_station_buttons() -> void:
-	for i in range(STATION_RECTS.size()):
-		var r: Array = STATION_RECTS[i]
-		var btn := Button.new()
-		btn.text = ""
-		btn.position = Vector2(float(r[0]), float(r[1]))
-		btn.size = Vector2(float(r[2]), float(r[3]))
-		var empty_style := StyleBoxEmpty.new()
-		btn.add_theme_stylebox_override("normal", empty_style)
-		btn.add_theme_stylebox_override("hover", empty_style)
-		btn.add_theme_stylebox_override("pressed", empty_style)
-		btn.add_theme_stylebox_override("focus", empty_style)
-		var cap_i: int = i
-		btn.pressed.connect(func(): _on_station_tap(cap_i))
-		_station_layer.add_child(btn)
-		_station_btns.append(btn)
+
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -431,24 +411,7 @@ func _build_kitchen_sheet() -> void:
 	_sheet_panel.offset_top = SHEET_Y_HALF
 	_sheet_panel.offset_bottom = BOTTOM_STRIP_Y
 
-	# Tap-above-sheet dismiss zone
-	var dismiss_btn := Button.new()
-	dismiss_btn.text = ""
-	dismiss_btn.position = Vector2(0, TOP_BAR_H)
-	dismiss_btn.size = Vector2(390, SHEET_Y_HALF - TOP_BAR_H)
-	var empty := StyleBoxEmpty.new()
-	dismiss_btn.add_theme_stylebox_override("normal", empty)
-	dismiss_btn.add_theme_stylebox_override("hover", empty)
-	dismiss_btn.add_theme_stylebox_override("pressed", empty)
-	dismiss_btn.add_theme_stylebox_override("focus", empty)
-	dismiss_btn.pressed.connect(func():
-		_active_station = -1
-		_bench_ings.clear()
-		_bench_method = 0
-		_bench_style = 0
-		_set_view(View.KITCHEN_IDLE))
-	_root.add_child(dismiss_btn)
-	_station_btns.append(dismiss_btn)  # cleaned up on next rebuild
+	# Dismiss handled via _input() hit-test (tapping above sheet area)
 
 	# Header: station name + close button
 	var header := HBoxContainer.new()
@@ -1045,6 +1008,49 @@ func _build_guest_card(idx: int, guest: Dictionary) -> void:
 # ═══════════════════════════════════════════════════════════════════
 
 func _input(event: InputEvent) -> void:
+	# --- Station tap hit-test (KITCHEN_IDLE only) ---
+	# Use _input instead of invisible buttons — reliable across all screen sizes
+	if _view == View.KITCHEN_IDLE:
+		var tap_pos: Vector2 = Vector2.ZERO
+		var did_tap: bool = false
+		if event is InputEventScreenTouch and event.pressed:
+			tap_pos = event.position
+			did_tap = true
+		elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			tap_pos = event.position
+			did_tap = true
+		if did_tap:
+			# Ignore taps in top bar and bottom strip
+			if tap_pos.y < float(TOP_BAR_H) or tap_pos.y > float(BOTTOM_STRIP_Y):
+				return
+			for i in range(STATION_RECTS.size()):
+				var r: Array = STATION_RECTS[i]
+				var rect := Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3]))
+				if rect.has_point(tap_pos):
+					_on_station_tap(i)
+					get_viewport().set_input_as_handled()
+					return
+
+	# --- Tap above sheet to dismiss (KITCHEN_SHEET only) ---
+	if _view == View.KITCHEN_SHEET:
+		var tap_pos: Vector2 = Vector2.ZERO
+		var did_tap: bool = false
+		if event is InputEventScreenTouch and event.pressed:
+			tap_pos = event.position
+			did_tap = true
+		elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			tap_pos = event.position
+			did_tap = true
+		if did_tap and tap_pos.y >= float(TOP_BAR_H) and tap_pos.y < float(SHEET_Y_HALF):
+			_active_station = -1
+			_bench_ings.clear()
+			_bench_method = 0
+			_bench_style = 0
+			_set_view(View.KITCHEN_IDLE)
+			get_viewport().set_input_as_handled()
+			return
+
+	# --- Drag and drop (KITCHEN_PICKER only) ---
 	if _view != View.KITCHEN_PICKER:
 		return
 
